@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Maximumonical Switch (TMS) 2.0</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    display: flex;
+}
+#main {
+    flex: 1;
+    max-width: 700px;
+}
+#right {
+    width: 320px;
+    margin-left: 20px;
+}
+input, button {
+    font-size: 14px;
+    margin: 4px 0;
+}
+#steps {
+    margin-top: 10px;
+    font-size: 12px;
+    max-height: 500px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 6px;
+}
+table {
+    width: 100%;
+    font-size: 12px;
+}
+td {
+    padding: 2px 4px;
+}
+</style>
+</head>
+<body>
+
+<div id="main">
+<h1>Maximumonical Switch (TMS) 2.0</h1>
+
+<input id="inputNumber" type="number" placeholder="Start Number">
+<input id="seedInput" type="number" placeholder="Seed (optional)">
+<button onclick="startTMS()">Run TMS</button>
+
+<p id="result"></p>
+<p id="recursions"></p>
+<p id="seedDisplay"></p>
+
+<div id="steps"></div>
+</div>
+
+<div id="right">
+<h3>Recursion Chances</h3>
+<table>
+<tr><td>1</td><td>50%</td></tr>
+<tr><td>2</td><td>25%</td></tr>
+<tr><td>3</td><td>12%</td></tr>
+<tr><td>4</td><td>6%</td></tr>
+<tr><td>5</td><td>3%</td></tr>
+<tr><td>6</td><td>1.5%</td></tr>
+<tr><td>7</td><td>0.75%</td></tr>
+<tr><td>8</td><td>0.4%</td></tr>
+<tr><td>9</td><td>0.2%</td></tr>
+<tr><td>10</td><td>0.1%</td></tr>
+<tr><td>16</td><td>0.002%</td></tr>
+<tr><td>32+</td><td>&lt;0.001%</td></tr>
+</table>
+
+<h3>Target Finder</h3>
+<input id="targetRec" type="number" placeholder="Target Recursion">
+<input id="targetStart" type="number" placeholder="Start Number">
+<button onclick="startTarget()">Start</button>
+<p id="targetStatus"></p>
+</div>
+
+<script>
+/* ================= RNG ================= */
+function seededRandom(seed) {
+    seed = (seed * 1664525 + 1013904223) >>> 0;
+    return seed / 4294967296;
+}
+
+/* ============ CORE HELPERS ============ */
+function firstTwoNonZeroDigits(x) {
+    let s = x.toString().split('.')[1] || "";
+    let digits = "";
+    for (let c of s) {
+        if (c !== '0') digits += c;
+        if (digits.length === 2) break;
+    }
+    return digits.length ? Number("0." + digits) : 0;
+}
+
+/* ============ TMS ENGINE ============ */
+let steps = [];
+let recursionCount = 0;
+let currentNumber = 0;
+let rngSeed = 0;
+let rngCounter = 0;
+let running = false;
+
+function rng() {
+    rngCounter++;
+    return seededRandom(rngSeed + rngCounter);
+}
+
+function startTMS() {
+    if (running) return;
+    steps = [];
+    recursionCount = 0;
+    currentNumber = Number(inputNumber.value);
+    rngSeed = seedInput.value ? Number(seedInput.value) : Math.floor(Math.random() * 1e9);
+    rngCounter = 0;
+    running = true;
+
+    steps.push(`Seed: ${rngSeed}`);
+    processChunk();
+}
+
+function processChunk() {
+    let iterations = 0;
+    while (iterations < 50 && running) {
+        iterations++;
+
+        let divided = currentNumber / 100000000;
+        steps.push(`Divide by 100,000,000 → ${divided}`);
+
+        let processed = firstTwoNonZeroDigits(divided);
+        steps.push(`First two non-zero digits → ${processed}`);
+
+        let result = (processed * 4) / 3;
+        steps.push(`×4 ÷3 → ${result.toFixed(2)}`);
+
+        if (result.toFixed(2) !== "0.00") {
+            finishTMS(result);
+            return;
+        }
+
+        recursionCount++;
+
+        let add = Math.floor(rng() * 100) + 1;
+        let mul = Math.floor(rng() * 3);
+        steps.push(`0 detected → boost +${add}, ×${mul}`);
+
+        currentNumber = add * mul + currentNumber;
+        currentNumber = Number(currentNumber.toString().slice(-7));
+        steps.push(`New number → ${currentNumber}`);
+    }
+
+    setTimeout(processChunk, 0);
+}
+
+function finishTMS(finalResult) {
+    running = false;
+    result.textContent = `Result: ${finalResult.toFixed(2)}`;
+    recursions.textContent = `Recursions: ${recursionCount}`;
+    seedDisplay.textContent = `Seed: ${rngSeed}`;
+    stepsDiv();
+}
+
+function stepsDiv() {
+    stepsDivRef = document.getElementById("steps");
+    stepsDivRef.innerHTML = steps.join("<br>");
+}
+
+/* ============ TARGET FINDER ============ */
+function startTarget() {
+    let target = Number(targetRec.value);
+    let start = Number(targetStart.value);
+    if (!target || !start) return;
+
+    targetStatus.textContent = "Searching...";
+    let found = false;
+
+    function searchChunk() {
+        for (let i = 0; i < 1000; i++) {
+            let seed = Math.floor(Math.random() * 1e9);
+            let rc = quickRun(start, seed);
+            if (rc === target) {
+                targetStatus.textContent =
+                    `FOUND! Start ${start}, Recursions ${target}, Seed ${seed}`;
+                found = true;
+                return;
+            }
+        }
+        if (!found) setTimeout(searchChunk, 0);
+    }
+
+    searchChunk();
+}
+
+function quickRun(num, seed) {
+    let rc = 0;
+    let n = num;
+    let c = 0;
+    function r() {
+        c++;
+        return seededRandom(seed + c);
+    }
+    while (rc < 1000) {
+        let p = firstTwoNonZeroDigits(n / 100000000);
+        let res = (p * 4) / 3;
+        if (res.toFixed(2) !== "0.00") return rc;
+        rc++;
+        n = (Math.floor(r() * 100) + 1) * Math.floor(r() * 3) + n;
+        n = Number(n.toString().slice(-7));
+    }
+    return rc;
+}
+</script>
+
+</body>
+</html>

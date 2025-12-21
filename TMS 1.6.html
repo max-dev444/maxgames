@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maximumonical Switch (TMS) 1.6</title>
+<style>
+    body { font-family: Arial, sans-serif; display: flex; margin-top: 20px; }
+    #left { flex: 1; padding-left: 50px; }
+    #right { width: 360px; position: fixed; right: 20px; top: 20px; text-align: left; }
+    input { font-size: 1em; padding: 3px; width: 100px; margin-bottom: 5px; }
+    button { font-size: 1em; padding: 3px 6px; margin-left: 5px; margin-top: 5px; }
+    p { font-size: 1em; margin-top: 10px; }
+    #steps { font-size: 0.9em; margin-top: 10px; max-width: 600px; word-wrap: break-word; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    td { padding: 2px 5px; }
+    .highlight { background-color: yellow; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<div id="left">
+    <h1>Maximumonical Switch (TMS) 1.6</h1>
+    <div>
+        <input type="number" id="inputNumber" placeholder="Enter number">
+        <input type="number" id="seedInput" placeholder="Seed (optional)">
+        <button onclick="runTMS()">Run TMS</button>
+    </div>
+    <p id="result">Result: </p>
+    <p id="recursions">Recursions: </p>
+    <p id="seedDisplay">Seed: </p>
+    <div id="steps"></div>
+</div>
+
+<div id="right">
+    <h3>Recursion Table</h3>
+    <table id="recursionTable">
+        <tbody></tbody>
+    </table>
+    <h3>Target Recursion Finder</h3>
+    <div>
+        Target Recursion: <input type="number" id="targetRec" placeholder="e.g. 6"><br>
+        Start Number: <input type="number" id="startNumber" placeholder="e.g. 1"><br>
+        Max Attempts: <input type="number" id="maxAttempts" placeholder="1000000"><br>
+        <button onclick="startTargetFinder()">Start</button>
+        <p id="foundResult"></p>
+    </div>
+</div>
+
+<script>
+// ------------------------ Deterministic RNG ------------------------
+function seededRandom(seed) {
+    seed = (seed * 9301 + 49297) % 233280;
+    return seed / 233280;
+}
+
+// ------------------------ TMS Core ------------------------
+let steps = [];
+let recursionCount = 0;
+let lastSeed = 0;
+
+const recursionChances = {
+    1: "50%", 2: "25%", 3: "12%", 4: "6%", 5: "3%", 6: "1.5%", 7: "0.75%",
+    8: "0.4%", 9: "0.2%", 10: "0.1%", 11: "0.05%", 12: "0.03%", 13: "0.02%", 
+    14: "0.01%", 15: "0.005%", 16: "0.002%", 32: "<0.001%", 64: "<0.001%", 
+    128: "<0.001%", 256: "<0.001%"
+};
+
+// ------------------------ Process TMS with Steps ------------------------
+function processTMS(number) {
+    let temp = number / 100000000;
+    steps.push(`Divide by 100,000,000 → ${temp}`);
+
+    let tempStr = temp.toString().split('.')[1] || "0";
+    let nonZeroDigits = tempStr.match(/[1-9]/g) || ["0"];
+    let firstTwo = nonZeroDigits.slice(0,2).join('');
+    let processed = Number("0." + firstTwo);
+    steps.push(`Take first two non-zero digits → 0.${firstTwo} → processed: ${processed}`);
+
+    let result = (processed * 4) / 3;
+    steps.push(`Multiply by 4 and divide by 3 → ${result.toFixed(2)}`);
+    return result;
+}
+
+// Recursive TMS run (deterministic)
+function runTMSRecursive(original, rng) {
+    let result = processTMS(original);
+
+    if (result.toFixed(2) === "0.00") {
+        recursionCount++;
+        let addRandom = Math.floor(rng()*100)+1;
+        let mulRandom = Math.floor(rng()*3);
+        steps.push(`Result is 0 → apply random boost: +${addRandom}, ×${mulRandom}`);
+
+        let modified = (addRandom * mulRandom) + original;
+        let modStr = modified.toString();
+        if (modStr.length > 7) modStr = modStr.slice(modStr.length - 7);
+        let newNumber = Number(modStr);
+        steps.push(`Add original → new number: ${newNumber}`);
+
+        return runTMSRecursive(newNumber, rng);
+    }
+
+    return result;
+}
+
+// ------------------------ Run TMS (Main) ------------------------
+function runTMS() {
+    steps = [];
+    recursionCount = 0;
+    let original = Number(document.getElementById("inputNumber").value);
+    let seed = Number(document.getElementById("seedInput").value) || Math.floor(Math.random()*1000000);
+    lastSeed = seed;
+    let rngCounter = 0;
+    let rng = () => { rngCounter++; return seededRandom(seed + rngCounter); };
+    if (isNaN(original)) return;
+
+    let result = runTMSRecursive(original, rng);
+
+    document.getElementById("result").innerText = "Result: " + result.toFixed(2);
+    document.getElementById("recursions").innerText = `Recursions: ${recursionCount}`;
+    document.getElementById("seedDisplay").innerText = `Seed: ${lastSeed}`;
+    document.getElementById("steps").innerHTML = "<strong>Steps:</strong><br>" + steps.join("<br>");
+    updateRecursionTable(recursionCount);
+}
+
+// ------------------------ Recursion Table ------------------------
+function updateRecursionTable(highlight = 0) {
+    let tbody = document.querySelector("#recursionTable tbody");
+    tbody.innerHTML = "";
+    for (let key of [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,32,64,128,256]) {
+        let tr = document.createElement("tr");
+        tr.innerHTML = `<td>${key} recursions</td><td style="text-align:right">${recursionChances[key]}</td>`;
+        if (key===highlight) tr.classList.add("highlight");
+        tbody.appendChild(tr);
+    }
+}
+
+// ------------------------ Minimal TMS for target finder ------------------------
+function singleRunTMS(num, rng) {
+    let rc = 0;
+    let result = num;
+    while(true) {
+        let temp = result / 100000000;
+        let tempStr = temp.toString().split('.')[1] || "0";
+        let nonZeroDigits = tempStr.match(/[1-9]/g) || ["0"];
+        let firstTwo = nonZeroDigits.slice(0,2).join('');
+        let processed = Number("0." + firstTwo);
+        let r = (processed*4)/3;
+        if (r.toFixed(2)==="0.00") {
+            rc++;
+            let addRandom = Math.floor(rng()*100)+1;
+            let mulRandom = Math.floor(rng()*3);
+            let modified = (addRandom*mulRandom)+result;
+            let modStr = modified.toString();
+            if(modStr.length>7) modStr = modStr.slice(modStr.length-7);
+            result = Number(modStr);
+        } else break;
+    }
+    return {recursions: rc, finalResult: result.toFixed(2)};
+}
+
+// ------------------------ Target Finder (Async, Non-Laggy) ------------------------
+function startTargetFinder() {
+    let target = Number(document.getElementById("targetRec").value);
+    let startNum = Number(document.getElementById("startNumber").value);
+    let maxAttempts = Number(document.getElementById("maxAttempts").value) || 1000000;
+
+    if (isNaN(target) || isNaN(startNum)) return;
+
+    let attempts = 0;
+    let found = false;
+
+    function batch() {
+        for (let i=0; i<1000; i++) {
+            if (found || attempts>=maxAttempts) break;
+            let seed = Math.floor(Math.random()*1000000);
+            let rngCounter = 0;
+            let rng = () => { rngCounter++; return seededRandom(seed + rngCounter); };
+            let run = singleRunTMS(startNum, rng);
+            attempts++;
+            if (run.recursions === target) {
+                found = true;
+                document.getElementById("foundResult").innerText =
+                    `Found number ${startNum} → ${target} recursions after ${attempts} attempts.\nFinal TMS result: ${run.finalResult}, Seed: ${seed}`;
+                return; // done
+            }
+        }
+        if (!found && attempts<maxAttempts) setTimeout(batch, 0);
+        if (!found && attempts>=maxAttempts) {
+            document.getElementById("foundResult").innerText = `Target not reached after ${maxAttempts} attempts.`;
+        }
+    }
+
+    batch(); // start first batch
+}
+
+// Initialize table
+updateRecursionTable();
+</script>
+
+</body>
+</html>

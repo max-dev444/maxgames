@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maximumonical Switch (TMS)</title>
+<style>
+    body { font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; margin-top: 50px; }
+    input { font-size: 1.2em; padding: 5px; width: 200px; }
+    button { font-size: 1.2em; padding: 5px 10px; margin-left: 10px; }
+    p { font-size: 1.5em; margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<h1>Maximumonical Switch (TMS)</h1>
+<div>
+    <input type="number" id="inputNumber" placeholder="Enter a number">
+    <button onclick="runTMS()">Run TMS</button>
+</div>
+<p id="result">Result: </p>
+
+<script>
+// Original TMS process
+function processTMS(number) {
+    // divide by 100,000,000
+    let temp = number / 100000000;
+
+    // keep only first non-zero digit after decimal
+    let tempStr = temp.toString().split('.')[1] || "0";
+    let firstNonZero = tempStr.match(/[1-9]/);
+    if (!firstNonZero) firstNonZero = "0";
+    else firstNonZero = firstNonZero[0];
+
+    let processed = 0 + "." + firstNonZero;
+
+    // multiply by 4, divide by 3
+    let result = (Number(processed) * 4) / 3;
+
+    return result;
+}
+
+// Recursive TMS
+function runTMSRecursive(original) {
+    let result = processTMS(original);
+
+    if (result.toFixed(2) === "0.00") {
+        // random +1-100, × random 1-100
+        let addRandom = Math.floor(Math.random() * 100) + 1;
+        let mulRandom = Math.floor(Math.random() * 100) + 1;
+
+        let modified = (addRandom * mulRandom) + original;
+
+        // keep only 7 digits (remove highest first if needed)
+        let modStr = modified.toString();
+        if (modStr.length > 7) {
+            modStr = modStr.slice(modStr.length - 7);
+        }
+        let newNumber = Number(modStr);
+
+        // recursive call
+        return runTMSRecursive(newNumber);
+    }
+
+    return result;
+}
+
+// Run button
+function runTMS() {
+    let original = Number(document.getElementById("inputNumber").value);
+    if (isNaN(original)) {
+        document.getElementById("result").innerText = "Result: Invalid number!";
+        return;
+    }
+
+    let result = runTMSRecursive(original);
+    document.getElementById("result").innerText = "Result: " + result.toFixed(2);
+}
+</script>
+
+</body>
+</html>
