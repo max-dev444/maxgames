@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Polonium — Randomizer Hub</title>
+<style>
+  body{
+    margin:0;
+    background:#0b1020;
+    color:#eef3ff;
+    font-family:Arial, Helvetica, sans-serif;
+    text-align:center;
+    padding:24px;
+  }
+  h1{margin-top:0;color:#ffb703}
+  .card{
+    max-width:720px;
+    margin:18px auto;
+    background:#121a33;
+    border-radius:14px;
+    padding:18px;
+    box-shadow:0 10px 30px rgba(0,0,0,.4);
+  }
+  .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+  button{
+    padding:12px 16px;
+    border:none;
+    border-radius:10px;
+    background:#ffb703;
+    color:#1b1400;
+    font-weight:700;
+    cursor:pointer;
+  }
+  button:hover{opacity:.9}
+  input, textarea{
+    width:90%;
+    max-width:520px;
+    padding:10px;
+    border-radius:10px;
+    border:1px solid #2a3560;
+    background:#0a1130;
+    color:#eef3ff;
+    margin-top:8px;
+  }
+  textarea{height:90px;resize:vertical}
+  .out{
+    margin-top:12px;
+    font-size:18px;
+    min-height:28px;
+    word-break:break-word;
+  }
+  .color-box{
+    width:80px;height:80px;border-radius:12px;margin:10px auto;
+    border:2px solid #2a3560;
+  }
+  .muted{color:#9aa4ff;font-size:13px}
+</style>
+</head>
+<body>
+
+<h1>Polonium — Randomizer Hub</h1>
+
+<div class="card">
+  <h3>Random Number</h3>
+  <div class="row">
+    <input id="min" type="number" placeholder="Min (default 1)">
+    <input id="max" type="number" placeholder="Max (default 100)">
+  </div>
+  <button onclick="randNumber()">Generate</button>
+  <div class="out" id="numOut"></div>
+</div>
+
+<div class="card">
+  <h3>Yes / No</h3>
+  <button onclick="yesNo()">Decide</button>
+  <div class="out" id="ynOut"></div>
+</div>
+
+<div class="card">
+  <h3>Random Color</h3>
+  <button onclick="randColor()">Generate Color</button>
+  <div class="color-box" id="colorBox"></div>
+  <div class="out" id="colorOut"></div>
+</div>
+
+<div class="card">
+  <h3>Pick Random Item</h3>
+  <textarea id="list" placeholder="Enter items, one per line"></textarea>
+  <button onclick="pickItem()">Pick One</button>
+  <div class="out" id="pickOut"></div>
+</div>
+
+<p class="muted">Polonium v1 — fast, simple, offline</p>
+
+<script>
+function randNumber(){
+  let min = parseInt(document.getElementById('min').value);
+  let max = parseInt(document.getElementById('max').value);
+  if(isNaN(min)) min = 1;
+  if(isNaN(max)) max = 100;
+  if(max < min){ const t = min; min = max; max = t; }
+  const n = Math.floor(Math.random()*(max-min+1))+min;
+  document.getElementById('numOut').textContent = n;
+}
+
+function yesNo(){
+  document.getElementById('ynOut').textContent =
+    Math.random() < 0.5 ? 'YES' : 'NO';
+}
+
+function randColor(){
+  const c = '#'+Math.floor(Math.random()*16777215).toString(16).padStart(6,'0');
+  document.getElementById('colorBox').style.background = c;
+  document.getElementById('colorOut').textContent = c;
+}
+
+function pickItem(){
+  const lines = document.getElementById('list').value
+    .split('\n').map(x=>x.trim()).filter(Boolean);
+  document.getElementById('pickOut').textContent =
+    lines.length ? lines[Math.floor(Math.random()*lines.length)] : 'No items';
+}
+</script>
+
+</body>
+</html>

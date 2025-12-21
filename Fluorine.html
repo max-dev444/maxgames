@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fluorine — Password Generator</title>
+<style>
+  body{
+    background:#0c1526;
+    color:#e5ecf5;
+    font-family:Arial,Helvetica,sans-serif;
+    padding:40px;
+    margin:0;
+  }
+  h1{text-align:center;margin:0 0 20px;font-size:32px}
+  .box{
+    max-width:500px;margin:0 auto;background:#101b31;padding:20px;border-radius:10px;
+    box-shadow:0 6px 20px rgba(0,0,0,0.4);
+  }
+  input[type="range"]{width:100%}
+  label{display:block;margin-top:12px;font-size:14px;color:#9aa4b2}
+  button{
+    margin-top:18px;width:100%;padding:12px;font-size:16px;
+    font-weight:bold;border:none;border-radius:8px;cursor:pointer;
+    background:#60a5fa;color:#041022;
+  }
+  button:hover{background:#4a8edc}
+  .out{
+    margin-top:20px;background:#16223a;padding:14px;border-radius:8px;
+    font-size:20px;text-align:center;word-break:break-all;
+  }
+</style>
+</head>
+<body>
+
+<h1>Fluorine — Password Generator</h1>
+
+<div class="box">
+  <label>Length: <span id="lenV">12</span></label>
+  <input type="range" id="len" min="6" max="40" value="12">
+
+  <label><input type="checkbox" id="upper" checked> Include UPPERCASE</label>
+  <label><input type="checkbox" id="lower" checked> Include lowercase</label>
+  <label><input type="checkbox" id="num" checked> Include numbers</label>
+  <label><input type="checkbox" id="sym" checked> Include symbols</label>
+
+  <button onclick="gen()">Generate</button>
+
+  <div class="out" id="out">Your password will appear here.</div>
+</div>
+
+<script>
+document.getElementById("len").oninput = e => {
+  document.getElementById("lenV").textContent = e.target.value;
+};
+
+function gen(){
+  const len = +document.getElementById("len").value;
+  const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const lower = "abcdefghijklmnopqrstuvwxyz";
+  const nums = "0123456789";
+  const syms = "!@#$%^&*()_+-=[]{};:,.<>/?";
+
+  let pool = "";
+  if(document.getElementById("upper").checked) pool += upper;
+  if(document.getElementById("lower").checked) pool += lower;
+  if(document.getElementById("num").checked) pool += nums;
+  if(document.getElementById("sym").checked) pool += syms;
+
+  if(pool === ""){
+    document.getElementById("out").textContent = "Select at least one option.";
+    return;
+  }
+
+  let pass = "";
+  for(let i=0;i<len;i++){
+    pass += pool[Math.floor(Math.random()*pool.length)];
+  }
+
+  document.getElementById("out").textContent = pass;
+}
+</script>
+
+</body>
+</html>

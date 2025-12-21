@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Xenon — Weather</title>
+<style>
+    body {
+        background: #0e0f16;
+        color: #fff;
+        font-family: Arial;
+        text-align: center;
+        padding-top: 80px;
+    }
+    h1 { font-size: 42px; margin-bottom: 25px; }
+    input {
+        padding: 10px 16px;
+        font-size: 18px;
+        width: 240px;
+        border-radius: 6px;
+        border: none;
+    }
+    .btn {
+        padding: 10px 18px;
+        margin-left: 10px;
+        font-size: 18px;
+        background: #1e90ff;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        color: white;
+    }
+    #result {
+        margin-top: 40px;
+        font-size: 22px;
+    }
+</style>
+</head>
+<body>
+
+<h1>Xenon</h1>
+
+<input id="city" placeholder="Enter city...">
+<button class="btn" onclick="getWeather()">Search</button>
+
+<div id="result"></div>
+
+<script>
+async function getCoords(name) {
+    const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(name)}`;
+    const r = await fetch(url);
+    const data = await r.json();
+    if (!data.results) return null;
+    return data.results[0];
+}
+
+async function getWeather() {
+    const result = document.getElementById("result");
+    const city = document.getElementById("city").value;
+
+    result.innerHTML = "Loading...";
+
+    const c = await getCoords(city);
+    if (!c) {
+        result.innerHTML = "City not found.";
+        return;
+    }
+
+    const weatherURL =
+      `https://api.open-meteo.com/v1/forecast?latitude=${c.latitude}&longitude=${c.longitude}&current_weather=true`;
+
+    const r = await fetch(weatherURL);
+    const w = await r.json();
+
+    const temp = w.current_weather.temperature;
+    const wind = w.current_weather.windspeed;
+    const code = w.current_weather.weathercode;
+
+    result.innerHTML = `
+        <strong>${c.name}, ${c.country}</strong><br><br>
+        Temperature: ${temp}°C<br>
+        Wind Speed: ${wind} km/h<br>
+        Code: ${code}
+    `;
+}
+</script>
+
+</body>
+</html>

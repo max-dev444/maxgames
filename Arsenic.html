@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arsenic — Error Scanner</title>
+<style>
+    body {
+        background: #0b0b0b;
+        color: #fff;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        text-align: center;
+    }
+    h1 {
+        color: #7dff9e;
+    }
+    textarea {
+        width: 90%;
+        height: 250px;
+        background: #111;
+        color: #fff;
+        border: 2px solid #333;
+        border-radius: 10px;
+        padding: 10px;
+        font-size: 16px;
+    }
+    button {
+        margin-top: 20px;
+        padding: 12px 20px;
+        font-size: 16px;
+        border: none;
+        border-radius: 8px;
+        background: #7dff9e;
+        color: #000;
+        cursor: pointer;
+    }
+    button:hover {
+        background: #5be07f;
+    }
+    #results {
+        margin-top: 25px;
+        width: 90%;
+        max-width: 800px;
+        background: #111;
+        border: 2px solid #333;
+        border-radius: 10px;
+        padding: 15px;
+        margin-left: auto;
+        margin-right: auto;
+        white-space: pre-wrap;
+        text-align: left;
+    }
+</style>
+</head>
+<body>
+
+<h1>Arsenic — Error Scanner</h1>
+
+<textarea id="codeInput" placeholder="Paste code here..."></textarea>
+
+<br>
+
+<button onclick="scan()">Scan for Errors</button>
+
+<div id="results">Results will appear here...</div>
+
+<script>
+function scan() {
+    const text = document.getElementById("codeInput").value;
+    const results = [];
+
+    const stack = [];
+    const pairs = {
+        "(": ")",
+        "{": "}",
+        "[": "]",
+        "\"": "\"",
+        "'": "'"
+    };
+
+    for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+
+        if (pairs[c]) {
+            // If quote and top is same quote, it's closing
+            if ((c === "'" || c === "\"") && stack[stack.length - 1] === c) {
+                stack.pop();
+            } else {
+                stack.push(c);
+            }
+        } else {
+            const last = stack[stack.length - 1];
+            if ((c === ")" || c === "}" || c === "]") && pairs[last] === c) {
+                stack.pop();
+            } else if (c === ")" || c === "}" || c === "]") {
+                results.push("Unmatched closing '" + c + "' at position " + i);
+            }
+        }
+    }
+
+    // Any leftover opens
+    stack.forEach(c => {
+        results.push("Unmatched opening '" + c + "'");
+    });
+
+    if (results.length === 0) {
+        document.getElementById("results").textContent = "No errors found.";
+    } else {
+        document.getElementById("results").textContent = results.join("\n");
+    }
+}
+</script>
+
+</body>
+</html>

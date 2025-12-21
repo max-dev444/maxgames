@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Palladium — AI Code Assistant (Local)</title>
+  <style>
+    :root{--bg:#071018;--panel:#0b1a24;--muted:#9fb3c8;--accent:#9b8cff;--good:#55b36b;--bad:#ff6b6b}
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#04111a,#021018);font-family:Inter,system-ui,Segoe UI,Roboto,Arial;color:#dbeefc}
+    .app{max-width:1200px;margin:20px auto;padding:16px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:0 8px 40px rgba(0,0,0,0.6)}
+    header{display:flex;align-items:center;gap:12px}
+    h1{margin:0;font-size:18px}
+    .meta{color:var(--muted);font-size:13px}
+    .top{display:flex;gap:12px;margin-top:12px}
+    select,input,button{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);color:inherit;padding:8px 10px;border-radius:8px}
+    .panel{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));padding:12px;border-radius:10px}
+    .row{display:grid;grid-template-columns:1fr 440px;gap:14px;margin-top:12px}
+    textarea{width:100%;height:520px;padding:12px;border-radius:8px;background:#021826;border:1px solid rgba(255,255,255,0.02);color:#dff4ff;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;font-size:13px;resize:vertical}
+    .sidebar{display:flex;flex-direction:column;gap:10px;height:520px}
+    .tabs{display:flex;gap:8px}
+    .tab{padding:8px 10px;border-radius:8px;cursor:pointer}
+    .tab.active{background:linear-gradient(180deg,#1f2a33,#12202a);border:1px solid rgba(255,255,255,0.03)}
+    .out{flex:1;overflow:auto;padding:10px;border-radius:8px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));border:1px solid rgba(255,255,255,0.02)}
+    .issue{padding:8px;border-radius:8px;margin-bottom:8px}
+    .issue.err{background:rgba(255,107,107,0.06);color:var(--bad)}
+    .issue.warn{background:rgba(255,183,77,0.04);color:#ffd17a}
+    .issue.ok{background:rgba(85,179,107,0.04);color:var(--good)}
+    .small{font-size:13px;color:var(--muted)}
+    pre{background:#021419;padding:10px;border-radius:6px;overflow:auto}
+    .controls{display:flex;gap:8px;align-items:center;margin-top:8px}
+    .actions{display:flex;gap:8px}
+    footer{margin-top:12px;color:var(--muted);font-size:13px}
+    @media (max-width:1000px){ .row{grid-template-columns:1fr} .sidebar{height:auto} textarea{height:360px} }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <h1>Palladium — AI Code Assistant (Local)</h1>
+        <div class="meta">Paste code, choose a language, and get instant analysis, smart fixes, and examples — no external AI required.</div>
+      </div>
+    </header>
+
+    <div class="top">
+      <label>
+        Language
+        <select id="language"></select>
+      </label>
+      <label>
+        Filename
+        <input id="fname" placeholder="myfile" />
+      </label>
+      <div class="actions" style="margin-left:auto">
+        <button id="analyze">Analyze</button>
+        <button id="fix">Suggest Fix</button>
+        <button id="format">Format</button>
+        <button id="download">Download</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <textarea id="code" placeholder="Paste your code here..."></textarea>
+        <div class="controls">
+          <div class="small">Size: <span id="size">0 B</span></div>
+          <div class="small">Lines: <span id="lines">0</span></div>
+          <div class="small">Detected: <span id="detected">-</span></div>
+        </div>
+      </div>
+
+      <aside class="sidebar">
+        <div class="panel">
+          <div class="tabs">
+            <div class="tab active" data-tab="summary">Summary</div>
+            <div class="tab" data-tab="issues">Issues</div>
+            <div class="tab" data-tab="fixes">Fixes</div>
+            <div class="tab" data-tab="structure">Structure</div>
+            <div class="tab" data-tab="examples">Examples</div>
+          </div>
+          <div id="out" class="out">
+            <div id="summaryTab">
+              <strong>Quick summary</strong>
+              <div id="summaryBody" class="small">No analysis yet. Paste code and click Analyze.</div>
+            </div>
+            <div id="issuesTab" style="display:none">
+              <div id="issuesList"></div>
+            </div>
+            <div id="fixesTab" style="display:none">
+              <div id="fixesList"></div>
+            </div>
+            <div id="structureTab" style="display:none">
+              <div id="structureBody" class="small">Structure will appear here.</div>
+            </div>
+            <div id="examplesTab" style="display:none">
+              <div id="examplesBody" class="small">Examples and snippets will appear here.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel small">
+          <strong>Quick actions</strong>
+          <div style="margin-top:8px;display:flex;gap:8px">
+            <button id="detect">Auto-detect</button>
+            <button id="copy">Copy Code</button>
+            <button id="clear">Clear</button>
+          </div>
+          <div style="margin-top:10px" class="small">Palladium performs lightweight, local analysis (brackets, quotes, JSON parse, function listing, CSS color scan). "Suggest Fix" provides editable candidate fixes — it's heuristic-based, not an external AI.</div>
+        </div>
+
+      </aside>
+    </div>
+
+    <footer>Tip: Use Format for JSON/HTML/CSS. Use Suggest Fix to get quick line-based corrections you can apply yourself.</footer>
+  </div>
+
+<script>
+// --- languages ---
+const LANGS = [
+  {id:'javascript', name:'JavaScript', ext:'js'},
+  {id:'typescript', name:'TypeScript', ext:'ts'},
+  {id:'python', name:'Python', ext:'py'},
+  {id:'java', name:'Java', ext:'java'},
+  {id:'c', name:'C', ext:'c'},
+  {id:'cpp', name:'C++', ext:'cpp'},
+  {id:'csharp', name:'C#', ext:'cs'},
+  {id:'go', name:'Go', ext:'go'},
+  {id:'rust', name:'Rust', ext:'rs'},
+  {id:'php', name:'PHP', ext:'php'},
+  {id:'ruby', name:'Ruby', ext:'rb'},
+  {id:'swift', name:'Swift', ext:'swift'},
+  {id:'kotlin', name:'Kotlin', ext:'kt'},
+  {id:'html', name:'HTML', ext:'html'},
+  {id:'css', name:'CSS', ext:'css'},
+  {id:'json', name:'JSON', ext:'json'},
+  {id:'yaml', name:'YAML', ext:'yaml'},
+  {id:'xml', name:'XML', ext:'xml'},
+  {id:'sql', name:'SQL', ext:'sql'},
+  {id:'bash', name:'Bash', ext:'sh'},
+  {id:'powershell', name:'PowerShell', ext:'ps1'},
+  {id:'lua', name:'Lua', ext:'lua'},
+  {id:'r', name:'R', ext:'r'},
+  {id:'perl', name:'Perl', ext:'pl'},
+  {id:'scala', name:'Scala', ext:'scala'}
+];
+const langSelect = document.getElementById('language');
+for(const l of LANGS){ const o=document.createElement('option'); o.value=l.id; o.textContent=l.name; langSelect.appendChild(o); }
+
+// elements
+const codeEl = document.getElementById('code');
+const sizeEl = document.getElementById('size');
+const linesEl = document.getElementById('lines');
+const detectedEl = document.getElementById('detected');
+const analyzeBtn = document.getElementById('analyze');
+const detectBtn = document.getElementById('detect');
+const issuesList = document.getElementById('issuesList');
+const summaryBody = document.getElementById('summaryBody');
+const fixesList = document.getElementById('fixesList');
+const structureBody = document.getElementById('structureBody');
+const examplesBody = document.getElementById('examplesBody');
+const fixesBtn = document.getElementById('fix');
+const formatBtn = document.getElementById('format');
+const downloadBtn = document.getElementById('download');
+const copyBtn = document.getElementById('copy');
+const clearBtn = document.getElementById('clear');
+
+function updateStats(){ const s = new TextEncoder().encode(codeEl.value).length; sizeEl.textContent = s<1024? s+' B' : (Math.round(s/1024*100)/100)+' KB'; linesEl.textContent = codeEl.value.split('\n').length; }
+codeEl.addEventListener('input', ()=>{ updateStats(); }); updateStats();
+
+// tabs
+const tabs = Array.from(document.querySelectorAll('.tab'));
+tabs.forEach(t=>{ t.addEventListener('click', ()=>{ tabs.forEach(x=>x.classList.remove('active')); t.classList.add('active'); showTab(t.dataset.tab); }); });
+function showTab(id){ document.getElementById('summaryTab').style.display = id==='summary' ? 'block' : 'none'; document.getElementById('issuesTab').style.display = id==='issues' ? 'block' : 'none'; document.getElementById('fixesTab').style.display = id==='fixes' ? 'block' : 'none'; document.getElementById('structureTab').style.display = id==='structure' ? 'block' : 'none'; document.getElementById('examplesTab').style.display = id==='examples' ? 'block' : 'none'; }
+
+// language detection (simple)
+function detectLanguage(code){ const sample = code.slice(0,5000); const heuristics = [
+  {id:'html', test:c=> /<\s*html|<!doctype html|<meta/i.test(c)},
+  {id:'json', test:c=> /^[\s\r\n]*[\[{]/.test(c) && /"\w+"\s*:\s*/.test(c)},
+  {id:'yaml', test:c=> /^\s*\w+:/.test(c) && /:\s/.test(c)},
+  {id:'python', test:c=> /\bdef\s+\w+\(|\bimport\s+\w+/i.test(c)},
+  {id:'javascript', test:c=> /\bfunction\b|=>|console\.log\(|\bvar\b|\blet\b|\bconst\b/.test(c)},
+  {id:'typescript', test:c=> /:\s*\w+\s*[=;,)\]]|interface\s+\w+/i.test(c)},
+  {id:'java', test:c=> /\bpublic\s+class\b|System\.out\.println\(|import\s+java\./.test(c)},
+  {id:'csharp', test:c=> /using\s+System;|namespace\s+\w+;|Console\.WriteLine\(/.test(c)},
+  {id:'php', test:c=> /<\?php|echo\s+['\"]|\$\w+/i.test(c)},
+  {id:'ruby', test:c=> /\bdef\s+\w+|end\b|puts\s+['\"]/i.test(c)},
+  {id:'go', test:c=> /package\s+main|import\s+\(|fmt\.Print/.test(c)},
+  {id:'rust', test:c=> /fn\s+main\(|let\s+mut\s+|println!\(/.test(c)},
+  {id:'c', test:c=> /#include\s+<|int\s+main\(|printf\(/.test(c)},
+  {id:'cpp', test:c=> /#include\s+<iostream>|std::\w+/.test(c)},
+  {id:'swift', test:c=> /import\s+Foundation|func\s+\w+\(/.test(c)},
+  {id:'kotlin', test:c=> /fun\s+main\(|package\s+\w+\n|val\s+\w+\:/.test(c)},
+  {id:'sql', test:c=> /select\s+|insert\s+into\s+|create\s+table\s+/i.test(c)},
+  {id:'bash', test:c=> /^#!\/bin\/bash|echo\s+\$|\bapt-get\b/.test(c)},
+  {id:'powershell', test:c=> /Get-Item|Write-Host|\$PSVersionTable/.test(c)},
+  {id:'lua', test:c=> /function\s+\w+\(|local\s+\w+\s*=/.test(c)},
+  {id:'r', test:c=> /<-\s*\w+|library\(|plot\(/.test(c)},
+  {id:'perl', test:c=> /use\s+strict;|print\s+\$|\$\w+->/.test(c)},
+  {id:'scala', test:c=> /object\s+\w+\s+extends|def\s+main\(/.test(c)},
+  {id:'xml', test:c=> /^\s*<\?xml|<\w+>/.test(c)}
+]; for(const h of heuristics) if(h.test(sample)) return h.id; return null; }
+
+// --- analysis ---
+function analyze(code, lang){ const issues=[]; const meta={};
+  // bracket matching
+  const stack=[]; const pairs={'(':')','{':'}','[':']'}; const open=Object.keys(pairs); const close=Object.values(pairs);
+  let inSingle=false, inDouble=false, inBack=false, escaped=false;
+  for(let i=0;i<code.length;i++){ const ch=code[i]; if(escaped){ escaped=false; continue; } if(ch==='\\'){ escaped=true; continue; } if(ch==="'"){ if(!inDouble && !inBack) inSingle=!inSingle; continue; } if(ch==='\"'){ if(!inSingle && !inBack) inDouble=!inDouble; continue; } if(ch==='`'){ if(!inSingle && !inDouble) inBack=!inBack; continue; } if(inSingle||inDouble||inBack) continue; if(open.includes(ch)) stack.push({ch,index:i}); if(close.includes(ch)){ if(stack.length && pairs[stack[stack.length-1].ch]===ch) stack.pop(); else issues.push({type:'err', message:`Unmatched closing '${ch}' at pos ${i}`}); } }
+  if(stack.length) issues.push({type:'err', message:`Unmatched opening '${stack[stack.length-1].ch}' at pos ${stack[stack.length-1].index}`});
+  // quotes
+  const singleCount=(code.match(/(?<!\\)'/g)||[]).length; const doubleCount=(code.match(/(?<!\\)\"/g)||[]).length; if(singleCount%2!==0) issues.push({type:'err', message:'Possible unclosed single quote.'}); if(doubleCount%2!==0) issues.push({type:'err', message:'Possible unclosed double quote.'});
+  // TODOs
+  if(/TODO|FIXME/.test(code)) issues.push({type:'warn', message:'Found TODO/FIXME comments.'});
+  // debug prints
+  if(/console\.log\(|printf\(|println!\(|System\.out\.println\(/.test(code)) issues.push({type:'warn', message:'Detected debug print statements.'});
+
+  // JSON quick check
+  if(lang==='json'){
+    try{ JSON.parse(code); meta.jsonValid=true; } catch(e){ issues.push({type:'err', message:'JSON parse error: '+e.message}); meta.jsonValid=false; }
+  }
+
+  // HTML/CSS visual scan
+  if(lang==='html' || /<\s*html/i.test(code)){
+    meta.title = (code.match(/<title[^>]*>([\s\S]*?)<\/title>/i)||[])[1]||null;
+    meta.metas = Array.from(code.matchAll(/<meta[^>]*name=["']?theme-color["']?[^>]*content=["']?([^"'> ]+)["']?[^>]*>/ig)).map(m=>m[1]);
+    meta.bodyBg = (code.match(/body[^\{]*\{[^}]*background(?:-image|-color)?\s*:\s*([^;\}]+)/i)||[])[1]||null;
+    meta.inlineColors = Array.from(code.matchAll(/style=["'][^"']*background(?:-color)?\s*:\s*([^;"']+)/ig)).map(m=>m[1]);
+  }
+
+  // function list/structure (simple)
+  const functions = [];
+  const fnMatches = code.matchAll(/\bfunction\s+(\w+)\s*\(|\bdef\s+(\w+)\s*\(|\bfunc\s+(\w+)\s*\(/g);
+  for(const m of fnMatches){ functions.push(m[1]||m[2]||m[3]); }
+  meta.functions = functions;
+
+  // CSS color suggestions
+  const cssColors = Array.from(code.matchAll(/(#(?:[0-9a-fA-F]{3,8})|rgba?\([^\)]+\)|hsla?\([^\)]+\))/g)).slice(0,20).map(m=>m[1]);
+  meta.colors = cssColors;
+
+  return {issues, meta}; }
+
+// render results
+function renderAnalysis(res){ issuesList.innerHTML=''; fixesList.innerHTML='';
+  if(res.issues.length===0) issuesList.innerHTML='<div class="issue ok">No issues found.</div>';
+  else{ for(const it of res.issues){ const d=document.createElement('div'); d.className='issue '+(it.type==='err'?'err':it.type==='warn'?'warn':'ok'); d.textContent = it.message; issuesList.appendChild(d); } }
+  // summary
+  let s = '';
+  if(res.meta){ s += '<div class="small">'; if(res.meta.title) s += `<div><strong>title:</strong> ${escapeHtml(res.meta.title)}</div>`; if(res.meta.metas && res.meta.metas.length) s += `<div><strong>meta theme-color:</strong> ${res.meta.metas.join(', ')}</div>`; if(res.meta.bodyBg) s += `<div><strong>body background:</strong> ${escapeHtml(res.meta.bodyBg)}</div>`; if(res.meta.inlineColors && res.meta.inlineColors.length) s += `<div><strong>inline backgrounds:</strong> ${res.meta.inlineColors.join(', ')}</div>`; if(res.meta.functions && res.meta.functions.length) s += `<div><strong>functions:</strong> ${res.meta.functions.slice(0,12).join(', ')}</div>`; if(res.meta.colors && res.meta.colors.length) s += `<div><strong>colors:</strong> ${res.meta.colors.slice(0,8).join(', ')}</div>`; s += '</div>'; }
+  summaryBody.innerHTML = s || '<div class="small">No visual/meta data found.</div>';
+
+  // generate simple fixes (heuristic)
+  const fixes = makeFixes(codeEl.value, langSelect.value);
+  if(fixes.length===0) fixesList.innerHTML = '<div class="small">No automatic fixes suggested.</div>';
+  else{ for(const f of fixes){ const wrap=document.createElement('div'); wrap.className='small'; wrap.style.marginBottom='10px'; wrap.innerHTML = `<div style="margin-bottom:6px"><strong>${escapeHtml(f.title)}</strong></div><pre>${escapeHtml(f.preview)}</pre><button data-fix='${encodeURIComponent(JSON.stringify(f))}'>Apply fix</button>`; fixesList.appendChild(wrap); } }
+}
+
+// small fix generator
+function makeFixes(code, lang){ const out=[];
+  // common: missing semicolons in JS-ish files (very naive)
+  if(['javascript','typescript','java','c','cpp','csharp','php'].includes(lang)){
+    // suggest adding semicolons for lines that look like statements missing ;
+    const lines=code.split('\n'); let changed=false; const preview = lines.map(L=>{ if(/^[ \t]*[a-zA-Z0-9_\)\]\"'\'`].*[^;{}]$/.test(L) && !/\{\s*$|\}\s*$|;\s*$|:\s*$/.test(L)){ changed=true; return L + ';'; } return L; }).join('\n');
+    if(changed) out.push({title:'Add trailing semicolons (heuristic)', preview});
+  }
+  // JSON: prettify
+  if(lang==='json'){
+    try{ const j = JSON.parse(code); out.push({title:'Prettify JSON', preview: JSON.stringify(j, null, 2)}); }catch(e){}
+  }
+  // HTML: ensure <meta charset>
+  if(lang==='html' || /<\s*html/i.test(code)){
+    if(!/<meta[^>]*charset/i.test(code)){
+      const preview = '<meta charset="utf-8">\n' + code;
+      out.push({title:'Insert <meta charset> tag', preview});
+    }
+  }
+  // CSS: replace rgb(...) with hex (example)
+  if(lang==='css' || /\{[^}]*\}/.test(code)){
+    const m = code.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/i);
+    if(m){ const hex = '#' + toHex(m[1]) + toHex(m[2]) + toHex(m[3]); const preview = code.replace(m[0], hex); out.push({title:'Convert rgb() to hex (sample)', preview}); }
+  }
+  return out; }
+function toHex(n){ const v = Math.max(0, Math.min(255, Number(n)||0)).toString(16); return v.length===1? '0'+v : v; }
+
+// apply fix
+fixesList.addEventListener('click', (e)=>{ if(e.target.matches('button')){ const f = JSON.parse(decodeURIComponent(e.target.getAttribute('data-fix'))); codeEl.value = f.preview; updateStats(); alert('Applied fix — review the code.'); } });
+
+// helpers
+function escapeHtml(s){ if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// button handlers
+analyzeBtn.addEventListener('click', ()=>{ const code = codeEl.value; const lang = langSelect.value || detectLanguage(code) || 'text'; detectedEl.textContent = lang; const res = analyze(code, lang); renderAnalysis(res); showTab('summary'); });
+
+detectBtn.addEventListener('click', ()=>{ const d = detectLanguage(codeEl.value); detectedEl.textContent = d || 'unknown'; if(d) langSelect.value = d; });
+
+formatBtn.addEventListener('click', ()=>{
+  const lang = langSelect.value;
+  try{
+    if(lang==='json'){ const j = JSON.parse(codeEl.value); codeEl.value = JSON.stringify(j, null, 2); updateStats(); alert('Formatted JSON'); return; }
+    if(lang==='html'){ // tiny html tidy: ensure closing tags for common singletons handled minimally
+      codeEl.value = codeEl.value.replace(/^\s+/gm,''); updateStats(); alert('Applied minimal HTML formatting'); return; }
+    if(lang==='css'){ // minimal: collapse extra spaces
+      codeEl.value = codeEl.value.replace(/\s{2,}/g,' '); updateStats(); alert('Applied minimal CSS formatting'); return; }
+    alert('Format: no formatter available for this language in Palladium (local).');
+  }catch(e){ alert('Format error: '+e.message); }
+});
+
+// suggest fix (shows fixes tab)
+fixesBtn.addEventListener('click', ()=>{ const lang = langSelect.value || detectLanguage(codeEl.value); const f = makeFixes(codeEl.value, lang); if(f.length===0){ fixesList.innerHTML = '<div class="small">No suggestions generated.</div>'; showTab('fixes'); } else { fixesList.innerHTML=''; for(const item of f){ const wrap=document.createElement('div'); wrap.className='small'; wrap.style.marginBottom='10px'; wrap.innerHTML = `<div style="margin-bottom:6px"><strong>${escapeHtml(item.title)}</strong></div><pre>${escapeHtml(item.preview)}</pre><button data-fix='${encodeURIComponent(JSON.stringify(item))}'>Apply fix</button>`; fixesList.appendChild(wrap); } showTab('fixes'); } });
+
+// download
+downloadBtn.addEventListener('click', ()=>{
+  const code = codeEl.value; if(!code){ alert('Nothing to download.'); return; }
+  const fname = (document.getElementById('fname').value || 'code') + '.' + (LANGS.find(l=>l.id===langSelect.value)||{ext:'txt'}).ext;
+  const blob = new Blob([code], {type:'text/plain;charset=utf-8'});
+  const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href=url; a.download=fname; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+});
+
+copyBtn.addEventListener('click', ()=>{ navigator.clipboard.writeText(codeEl.value).then(()=>{ alert('Copied to clipboard'); }).catch(()=>{ alert('Copy failed'); }); });
+clearBtn.addEventListener('click', ()=>{ codeEl.value=''; updateStats(); summaryBody.textContent='No analysis yet.'; issuesList.innerHTML=''; fixesList.innerHTML=''; detectedEl.textContent='-'; });
+
+// small structure extractor
+function extractStructure(code, lang){ const out = [];
+  if(/[\s\S]*function\s+\w+\s*\(|\bdef\s+\w+\s*\(/.test(code)){
+    const m = code.matchAll(/\bfunction\s+(\w+)\s*\(|\bdef\s+(\w+)\s*\(|\bfunc\s+(\w+)\s*\(/g);
+    for(const r of m) out.push(r[1]||r[2]||r[3]);
+  }
+  if(/class\s+\w+/.test(code)){
+    const m = code.matchAll(/class\s+(\w+)/g); for(const r of m) out.push('class:'+r[1]);
+  }
+  return out;
+}
+
+// structure tab
+document.querySelector('[data-tab="structure"]').addEventListener('click', ()=>{ const st = extractStructure(codeEl.value, langSelect.value); structureBody.innerHTML = st.length ? '<div class="small">'+st.join(', ')+'</div>' : '<div class="small">No functions or classes detected.'</div>'; });
+
+// examples tab
+document.querySelector('[data-tab="examples"]').addEventListener('click', ()=>{
+  examplesBody.innerHTML = '<div class="small"><strong>Snippets</strong><pre>// JS: safe console wrapper\n(function(){console.log("hi")})();\n\n/* HTML: basic template */\n<!doctype html>\n<html><head><meta charset="utf-8"><title>Page</title></head><body></body></html></pre></div>';
+});
+
+// auto detect on paste
+codeEl.addEventListener('paste', ()=>{ setTimeout(()=>{ const d = detectLanguage(codeEl.value); if(d){ detectedEl.textContent=d; langSelect.value=d; } }, 50); });
+
+// initial example
+codeEl.value = `<!doctype html>\n<html>\n<head><meta charset="utf-8"><title>Palladium example</title></head>\n<body><h1>Hello Palladium</h1><script>console.log('hello')</script></body>\n</html>`; updateStats();
+</script>
+</body>
+</html>

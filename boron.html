@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Boron — Puzzles</title>
+<style>
+    body { background:#0e0f16; color:white; font-family:Arial; text-align:center; padding:40px; }
+    h1 { font-size:40px; }
+    h2 { margin-top:40px; }
+
+    /* memory */
+    #memBoard { display:flex; flex-wrap:wrap; width:300px; margin:20px auto; }
+    .card {
+        width:70px; height:70px;
+        margin:5px;
+        background:#1a1d27;
+        display:flex; align-items:center; justify-content:center;
+        font-size:30px;
+        border-radius:6px;
+        cursor:pointer;
+    }
+
+    /* sliding puzzle */
+    #slideBoard { 
+        display:grid;
+        grid-template-columns: repeat(3, 100px);
+        gap:5px;
+        width:315px;
+        margin:20px auto;
+    }
+    .tile {
+        width:100px; height:100px;
+        background:#1a1d27;
+        display:flex; align-items:center; justify-content:center;
+        font-size:30px;
+        border-radius:6px;
+        cursor:pointer;
+    }
+    .blank { background:none; cursor:default; }
+</style>
+</head>
+<body>
+
+<h1>Boron</h1>
+
+<h2>Memory Match</h2>
+<div id="memBoard"></div>
+<p id="memMsg"></p>
+
+<h2>Sliding Puzzle</h2>
+<div id="slideBoard"></div>
+
+<script>
+//////////////// MEMORY GAME ////////////////
+const emojis = ["🍎","🍎","⭐","⭐","🔥","🔥","🐱","🐱"];
+let memFlipped = [];
+let memLocked = false;
+
+function drawMem() {
+    const board = document.getElementById("memBoard");
+    board.innerHTML = "";
+    const mix = emojis.sort(() => Math.random()-0.5);
+    mix.forEach((emo,i)=>{
+        const card = document.createElement("div");
+        card.className = "card";
+        card.dataset.val = emo;
+        card.onclick = ()=>flipMem(card);
+        card.innerText = "";
+        board.appendChild(card);
+    });
+}
+function flipMem(card) {
+    if (memLocked || card.innerText !== "") return;
+    card.innerText = card.dataset.val;
+    memFlipped.push(card);
+    if (memFlipped.length === 2) {
+        memLocked = true;
+        setTimeout(()=>{
+            if (memFlipped[0].dataset.val !== memFlipped[1].dataset.val) {
+                memFlipped.forEach(c=>c.innerText="");
+            }
+            memFlipped = [];
+            memLocked = false;
+        },800);
+    }
+}
+drawMem();
+
+//////////////// SLIDING PUZZLE ////////////////
+let tiles = ["1","2","3","4","5","6","7","8",""];
+
+function drawSlide() {
+    const board = document.getElementById("slideBoard");
+    board.innerHTML = "";
+    tiles.forEach((t,i)=>{
+        const div = document.createElement("div");
+        div.className = "tile";
+        if (t==="") div.classList.add("blank");
+        div.innerText = t;
+        div.onclick = () => moveTile(i);
+        board.appendChild(div);
+    });
+}
+function moveTile(i) {
+    const blank = tiles.indexOf("");
+    const near = [i-1, i+1, i-3, i+3];
+    if (near.includes(blank)) {
+        [tiles[i], tiles[blank]] = [tiles[blank], tiles[i]];
+        drawSlide();
+    }
+}
+tiles.sort(()=>Math.random()-0.5);
+drawSlide();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Chromium — Color Picker Studio</title>
+<style>
+    body {
+        background: #0d0f17;
+        color: #fff;
+        font-family: Arial;
+        text-align: center;
+        padding-top: 80px;
+    }
+    h1 { font-size: 40px; margin-bottom: 30px; }
+    #preview {
+        width: 200px; height: 200px;
+        margin: 20px auto;
+        border-radius: 12px;
+        border: 4px solid #222;
+    }
+    input[type=color] {
+        width: 200px; height: 80px;
+        border: none; border-radius: 10px;
+        cursor: pointer;
+    }
+    .btn {
+        margin-top: 20px;
+        padding: 12px 22px;
+        font-size: 18px;
+        background: #1e90ff;
+        border-radius: 8px;
+        cursor: pointer;
+        border: none;
+        color: white;
+    }
+    #list { margin-top: 30px; }
+    .saved {
+        padding: 8px;
+        margin: 6px auto;
+        width: 200px;
+        border-radius: 6px;
+        background: #1a1d27;
+    }
+</style>
+</head>
+<body>
+
+<h1>Chromium</h1>
+
+<input type="color" id="picker">
+<div id="preview"></div>
+
+<button class="btn" onclick="saveColor()">Save Color</button>
+
+<h2>Saved Colors</h2>
+<div id="list"></div>
+
+<script>
+const picker = document.getElementById("picker");
+const preview = document.getElementById("preview");
+const list = document.getElementById("list");
+
+picker.addEventListener("input", () => {
+    preview.style.background = picker.value;
+});
+
+function saveColor() {
+    const c = picker.value;
+    const box = document.createElement("div");
+    box.className = "saved";
+    box.style.background = c;
+    box.textContent = c;
+    list.appendChild(box);
+}
+</script>
+
+</body>
+</html>

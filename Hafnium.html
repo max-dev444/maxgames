@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Hafnium — Performance Tester</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  body{
+    margin:0;
+    background:#0a0f1f;
+    color:#eaf0ff;
+    font-family:Arial, Helvetica, sans-serif;
+    text-align:center;
+    padding:20px;
+  }
+  h1{color:#7dd3fc;margin-top:0}
+  .panel{
+    max-width:760px;
+    margin:16px auto;
+    background:#121a33;
+    border-radius:14px;
+    padding:18px;
+    box-shadow:0 12px 30px rgba(0,0,0,.45);
+  }
+  button{
+    padding:12px 18px;
+    border:none;
+    border-radius:10px;
+    background:#7dd3fc;
+    color:#00121a;
+    font-weight:700;
+    cursor:pointer;
+    margin:6px;
+  }
+  button:hover{opacity:.9}
+  .out{
+    font-size:18px;
+    margin-top:10px;
+    min-height:26px;
+  }
+  canvas{
+    background:#060a18;
+    border-radius:10px;
+    margin-top:10px;
+  }
+  .muted{color:#9aa4ff;font-size:13px}
+</style>
+</head>
+<body>
+
+<h1>Hafnium — Performance Tester</h1>
+
+<div class="panel">
+  <h3>FPS Test</h3>
+  <button onclick="startFPS()">Start FPS Test</button>
+  <button onclick="stopFPS()">Stop</button>
+  <div class="out" id="fpsOut">FPS: —</div>
+  <canvas id="fpsCanvas" width="500" height="120"></canvas>
+</div>
+
+<div class="panel">
+  <h3>CPU Stress (JavaScript)</h3>
+  <button onclick="startStress()">Start Stress</button>
+  <button onclick="stopStress()">Stop</button>
+  <div class="out" id="stressOut">Idle</div>
+</div>
+
+<div class="panel">
+  <h3>Memory Fill Test</h3>
+  <button onclick="allocMem()">Allocate Memory</button>
+  <button onclick="clearMem()">Clear</button>
+  <div class="out" id="memOut">0 MB allocated</div>
+</div>
+
+<p class="muted">Hafnium v1 — browser performance & stress tool</p>
+
+<script>
+/* ---------- FPS TEST ---------- */
+let fpsRunning=false, frames=0, lastTime=performance.now();
+let fpsData=[];
+const canvas=document.getElementById("fpsCanvas");
+const ctx=canvas.getContext("2d");
+
+function loopFPS(t){
+  if(!fpsRunning) return;
+  frames++;
+  if(t-lastTime>=1000){
+    const fps=frames;
+    frames=0;
+    lastTime=t;
+    fpsData.push(fps);
+    if(fpsData.length>50) fpsData.shift();
+    document.getElementById("fpsOut").textContent="FPS: "+fps;
+    drawFPS();
+  }
+  requestAnimationFrame(loopFPS);
+}
+
+function drawFPS(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.strokeStyle="#7dd3fc";
+  ctx.beginPath();
+  fpsData.forEach((v,i)=>{
+    const x=i*(canvas.width/50);
+    const y=canvas.height-(v/120)*canvas.height;
+    if(i===0) ctx.moveTo(x,y);
+    else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+}
+
+function startFPS(){
+  if(fpsRunning) return;
+  fpsRunning=true;
+  frames=0;
+  lastTime=performance.now();
+  requestAnimationFrame(loopFPS);
+}
+function stopFPS(){fpsRunning=false;}
+
+/* ---------- CPU STRESS ---------- */
+let stress=false;
+function burn(){
+  if(!stress) return;
+  let x=0;
+  for(let i=0;i<1e7;i++) x+=Math.sqrt(i);
+  setTimeout(burn,0);
+}
+function startStress(){
+  if(stress) return;
+  stress=true;
+  document.getElementById("stressOut").textContent="CPU stress running…";
+  burn();
+}
+function stopStress(){
+  stress=false;
+  document.getElementById("stressOut").textContent="Stopped";
+}
+
+/* ---------- MEMORY ---------- */
+let mem=[];
+function allocMem(){
+  mem.push(new Array(5_000_000).fill(0));
+  document.getElementById("memOut").textContent =
+    Math.round(mem.length*5*8/1024)+" MB allocated";
+}
+function clearMem(){
+  mem=[];
+  document.getElementById("memOut").textContent="0 MB allocated";
+}
+</script>
+
+</body>
+</html>

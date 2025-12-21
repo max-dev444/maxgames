@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Cobalt — Toolbox</title>
+<style>
+    body { background:#0e0f16; color:white; font-family:Arial; text-align:center; padding:40px; }
+    h1 { font-size:40px; margin-bottom:30px; }
+    .tool { background:#1a1d27; padding:20px; margin:20px auto; width:300px; border-radius:8px; }
+    input, button { padding:10px; font-size:16px; margin-top:10px; border:none; border-radius:6px; }
+    button { background:#1e90ff; color:white; cursor:pointer; }
+</style>
+</head>
+<body>
+
+<h1>Cobalt</h1>
+
+<div class="tool">
+    <h2>Calculator</h2>
+    <input id="calc" placeholder="1+2*3">
+    <button onclick="doCalc()">=</button>
+    <p id="calcOut"></p>
+</div>
+
+<div class="tool">
+    <h2>Timer</h2>
+    <input type="number" id="secs" placeholder="Seconds">
+    <button onclick="startTimer()">Start</button>
+    <p id="timerOut"></p>
+</div>
+
+<div class="tool">
+    <h2>Random Number</h2>
+    <button onclick="rand()">Generate</button>
+    <p id="r"></p>
+</div>
+
+<div class="tool">
+    <h2>Unit Converter (cm → inches)</h2>
+    <input type="number" id="cm" placeholder="cm">
+    <button onclick="convert()">Convert</button>
+    <p id="convOut"></p>
+</div>
+
+<script>
+function doCalc() {
+    try { document.getElementById("calcOut").innerText = eval(document.getElementById("calc").value); }
+    catch { document.getElementById("calcOut").innerText = "Error"; }
+}
+
+function startTimer() {
+    let s = Number(document.getElementById("secs").value);
+    const out = document.getElementById("timerOut");
+    out.innerText = s;
+    const int = setInterval(() => {
+        s--; out.innerText = s;
+        if (s <= 0) clearInterval(int);
+    }, 1000);
+}
+
+function rand() {
+    document.getElementById("r").innerText = Math.floor(Math.random()*1000);
+}
+
+function convert() {
+    const cm = Number(document.getElementById("cm").value);
+    document.getElementById("convOut").innerText = (cm / 2.54).toFixed(2) + " inches";
+}
+</script>
+
+</body>
+</html>

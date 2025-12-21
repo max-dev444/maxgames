@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Lithium — multi-language single-file tool</title>
+  <style>
+    :root{ --bg:#0b0f14; --panel:#081018; --accent:#56ccf2; --muted:#9aa6b2; --success:#55b36b; --danger:#ff6b6b }
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#07101a 0%, #06111a 100%);color:#e6eef6;font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial}
+    .app{max-width:1100px;margin:28px auto;padding:18px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:0 6px 30px rgba(2,6,23,0.6)}
+    header{display:flex;gap:12px;align-items:center}
+    h1{font-size:20px;margin:0}
+    .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    select,input,button{background:#07121a;border:1px solid rgba(255,255,255,0.03);color:inherit;padding:8px 10px;border-radius:8px}
+    textarea{width:100%;height:420px;padding:12px;border-radius:10px;background:#071823;border:1px solid rgba(255,255,255,0.02);color:#d9eef7;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;font-size:13px;resize:vertical}
+    .row{display:grid;grid-template-columns:1fr 340px;gap:18px;margin-top:14px}
+    .panel{padding:12px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));border:1px solid rgba(255,255,255,0.02)}
+    .summary{font-size:13px;line-height:1.4;color:var(--muted)}
+    .issues{margin-top:8px}
+    .issue{padding:8px;border-radius:8px;margin-bottom:8px}
+    .issue.ok{background:rgba(85,179,107,0.08);border:1px solid rgba(85,179,107,0.08);color:var(--success)}
+    .issue.warn{background:rgba(255,183,77,0.06);color:#ffc857}
+    .issue.err{background:rgba(255,107,107,0.06);color:var(--danger)}
+    footer{margin-top:14px;font-size:13px;color:var(--muted)}
+    small{color:var(--muted)}
+    .tag{display:inline-block;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.02);margin-right:6px}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <h1>Lithium</h1>
+        <small>Accepts code in 25 popular languages — download, quick lint, and extract basic UI/visual info</small>
+      </div>
+    </header>
+
+    <div class="controls">
+      <label>
+        Language
+        <select id="language" aria-label="language selector"></select>
+      </label>
+
+      <label>
+        Filename
+        <input id="filename" placeholder="myfile" />
+      </label>
+
+      <button id="detectBtn">Auto-detect</button>
+      <button id="analyzeBtn">Analyze</button>
+      <button id="downloadBtn">Download</button>
+      <button id="clearBtn">Clear</button>
+    </div>
+
+    <div class="row">
+      <div>
+        <textarea id="code" placeholder="Paste code here..."></textarea>
+        <div style="display:flex;gap:8px;margin-top:6px;align-items:center">
+          <label class="tag">Size: <span id="size">0 B</span></label>
+          <label class="tag">Lines: <span id="lines">0</span></label>
+          <label class="tag">Detected: <span id="detected">-</span></label>
+        </div>
+      </div>
+
+      <aside class="panel">
+        <div class="summary" id="summary">
+          <strong>Summary</strong>
+          <div id="summaryBody">No analysis yet. Paste code and click Analyze.</div>
+        </div>
+
+        <div class="issues" id="issues" style="margin-top:12px">
+          <strong>Issues</strong>
+          <div id="issuesList"><div class="issue ok">No analysis run.</div></div>
+        </div>
+
+      </aside>
+    </div>
+
+    <footer>
+      Tip: choose a language, paste code, click Analyze, then Download. Lithium performs lightweight checks (matching braces/quotes, JSON validity, finds CSS background colors and common HTML elements).
+    </footer>
+  </div>
+
+<script>
+// --- Language setup ---
+const LANGS = [
+  {id:'javascript', name:'JavaScript', ext:'js'},
+  {id:'typescript', name:'TypeScript', ext:'ts'},
+  {id:'python', name:'Python', ext:'py'},
+  {id:'java', name:'Java', ext:'java'},
+  {id:'c', name:'C', ext:'c'},
+  {id:'cpp', name:'C++', ext:'cpp'},
+  {id:'csharp', name:'C#', ext:'cs'},
+  {id:'go', name:'Go', ext:'go'},
+  {id:'rust', name:'Rust', ext:'rs'},
+  {id:'php', name:'PHP', ext:'php'},
+  {id:'ruby', name:'Ruby', ext:'rb'},
+  {id:'swift', name:'Swift', ext:'swift'},
+  {id:'kotlin', name:'Kotlin', ext:'kt'},
+  {id:'html', name:'HTML', ext:'html'},
+  {id:'css', name:'CSS', ext:'css'},
+  {id:'json', name:'JSON', ext:'json'},
+  {id:'yaml', name:'YAML', ext:'yaml'},
+  {id:'xml', name:'XML', ext:'xml'},
+  {id:'sql', name:'SQL', ext:'sql'},
+  {id:'bash', name:'Bash', ext:'sh'},
+  {id:'powershell', name:'PowerShell', ext:'ps1'},
+  {id:'lua', name:'Lua', ext:'lua'},
+  {id:'r', name:'R', ext:'r'},
+  {id:'perl', name:'Perl', ext:'pl'},
+  {id:'scala', name:'Scala', ext:'scala'}
+];
+
+const langSelect = document.getElementById('language');
+LANGS.forEach(l=>{
+  const opt=document.createElement('option');opt.value=l.id;opt.textContent=l.name;langSelect.appendChild(opt);
+});
+
+const codeEl = document.getElementById('code');
+const sizeEl = document.getElementById('size');
+const linesEl = document.getElementById('lines');
+const detectedEl = document.getElementById('detected');
+const summaryBody = document.getElementById('summaryBody');
+const issuesList = document.getElementById('issuesList');
+
+function updateStats(){
+  const s = new TextEncoder().encode(codeEl.value).length;
+  sizeEl.textContent = s < 1024 ? s + ' B' : (Math.round(s/1024*100)/100) + ' KB';
+  const ln = codeEl.value.split('\n').length;
+  linesEl.textContent = ln;
+}
+codeEl.addEventListener('input', ()=>{ updateStats(); });
+updateStats();
+
+// --- Basic heuristics to detect language ---
+function detectLanguage(code){
+  const sample = code.slice(0,5000);
+  const heuristics = [
+    {id:'html', test: c=> /<\s*html|<!doctype html|<meta/i.test(c)},
+    {id:'json', test: c=> /^[\s\r\n]*[\[{]/.test(c) && /"\w+"\s*:\s*/.test(c)},
+    {id:'yaml', test: c=> /^\s*\w+:/.test(c) && /:\s/.test(c)},
+    {id:'python', test: c=> /\bdef\s+\w+\(|\bimport\s+\w+/i.test(c)},
+    {id:'javascript', test: c=> /\bfunction\b|=>|console\.log\(|\bvar\b|\blet\b|\bconst\b/.test(c)},
+    {id:'typescript', test: c=> /:\s*\w+\s*[=;,)\]]|interface\s+\w+/i.test(c)},
+    {id:'java', test: c=> /\bpublic\s+class\b|System\.out\.println\(|import\s+java\./.test(c)},
+    {id:'csharp', test: c=> /using\s+System;|namespace\s+\w+;|Console\.WriteLine\(/.test(c)},
+    {id:'php', test: c=> /<\?php|echo\s+['\"]|\$\w+/i.test(c)},
+    {id:'ruby', test: c=> /\bdef\s+\w+|end\b|puts\s+['\"]/i.test(c)},
+    {id:'go', test: c=> /package\s+main|import\s+\(|fmt\.Print/.test(c)},
+    {id:'rust', test: c=> /fn\s+main\(|let\s+mut\s+|println!\(/.test(c)},
+    {id:'c', test: c=> /#include\s+<|int\s+main\(|printf\(/.test(c)},
+    {id:'cpp', test: c=> /#include\s+<iostream>|std::\w+/.test(c)},
+    {id:'swift', test: c=> /import\s+Foundation|func\s+\w+\(/.test(c)},
+    {id:'kotlin', test: c=> /fun\s+main\(|package\s+\w+\n|val\s+\w+\:/.test(c)},
+    {id:'sql', test: c=> /select\s+|insert\s+into\s+|create\s+table\s+/i.test(c)},
+    {id:'bash', test: c=> /^#!\/bin\/bash|echo\s+\$|\bapt-get\b/.test(c)},
+    {id:'powershell', test: c=> /Get-Item|Write-Host|\$PSVersionTable/.test(c)},
+    {id:'lua', test: c=> /function\s+\w+\(|local\s+\w+\s*=/.test(c)},
+    {id:'r', test: c=> /<-\s*\w+|library\(|plot\(/.test(c)},
+    {id:'perl', test: c=> /use\s+strict;|print\s+\$|\$\w+->/.test(c)},
+    {id:'scala', test: c=> /object\s+\w+\s+extends|def\s+main\(/.test(c)},
+    {id:'xml', test: c=> /^\s*<\?xml|<\w+>/.test(c)}
+  ];
+  for(const h of heuristics) if(h.test(sample)) return h.id;
+  return null;
+}
+
+function getLangObj(id){return LANGS.find(l=>l.id===id)||LANGS[0];}
+
+// --- Analysis routines ---
+function analyze(code, lang){
+  const issues = [];
+  // 1) simple bracket/paren/quote matching
+  const stack = [];
+  const pairs = { '(':')', '{':'}', '[':']' };
+  const open = Object.keys(pairs);
+  const close = Object.values(pairs);
+  let inSingle=false, inDouble=false, inBack=false, escaped=false;
+  for(let i=0;i<code.length;i++){
+    const ch = code[i];
+    if(escaped){ escaped=false; continue; }
+    if(ch==='\\') { escaped=true; continue; }
+    if(ch==="'") { if(!inDouble && !inBack) inSingle = !inSingle; continue; }
+    if(ch==='\"') { if(!inSingle && !inBack) inDouble = !inDouble; continue; }
+    if(ch==='`') { if(!inSingle && !inDouble) inBack = !inBack; continue; }
+    if(inSingle || inDouble || inBack) continue;
+    if(open.includes(ch)) { stack.push({ch,index:i}); }
+    if(close.includes(ch)){
+      const expected = pairs[stack.length?stack[stack.length-1].ch:null];
+      if(stack.length && pairs[stack[stack.length-1].ch]===ch){ stack.pop(); }
+      else{ issues.push({type:'err', message:`Unmatched closing '${ch}' at pos ${i}`}); }
+    }
+  }
+  if(stack.length) issues.push({type:'err', message:`Unmatched opening '${stack[stack.length-1].ch}' at pos ${stack[stack.length-1].index}`});
+
+  // 2) unclosed quotes
+  const singleCount = (code.match(/(?<!\\)'/g)||[]).length;
+  const doubleCount = (code.match(/(?<!\\)\"/g)||[]).length;
+  if(singleCount%2!==0) issues.push({type:'err', message:'Possible unclosed single quote.'});
+  if(doubleCount%2!==0) issues.push({type:'err', message:'Possible unclosed double quote.'});
+
+  // 3) language specific quick checks
+  if(lang==='json'){
+    try{ JSON.parse(code); issues.push({type:'ok', message:'Valid JSON.'}); }
+    catch(e){ issues.push({type:'err', message:'JSON parse error: '+e.message}); }
+  }
+  if(lang==='html' || /<\s*html/i.test(code)){
+    // find title, body, meta theme-color, inline styles with background
+    const title = (code.match(/<title[^>]*>([\s\S]*?)<\/title>/i)||[])[1];
+    const metas = Array.from(code.matchAll(/<meta[^>]*name=["']?theme-color["']?[^>]*content=["']?([^"'> ]+)["']?[^>]*>/ig)).map(m=>m[1]);
+    const bodyBg = (code.match(/body[^\{]*\{[^}]*background(?:-image|-color)?\s*:\s*([^;\}]+)/i)||[])[1];
+    const inlineColors = Array.from(code.matchAll(/style=["'][^"']*background(?:-color)?\s*:\s*([^;"']+)/ig)).map(m=>m[1]);
+    const cssColors = Array.from(code.matchAll(/background(?:-color)?\s*:\s*([^;\}]+)/ig)).map(m=>m[1]);
+    const tags = Array.from(code.matchAll(/<([a-z0-9\-]+)/ig)).slice(0,40).map(m=>m[1]);
+    return { issues, meta:{title:title||null, metas, bodyBg: bodyBg?bodyBg.trim():null, inlineColors, cssColors, tags: Array.from(new Set(tags)) } };
+  }
+
+  // 4) general suggestions
+  if(/console\.log\(|printf\(|println!\(|System\.out\.println\(/.test(code)){
+    issues.push({type:'warn', message:'Detected debug prints. Remove for production.'});
+  }
+  if(/TODO|FIXME/.test(code)) issues.push({type:'warn', message:'Found TODO/FIXME comments.'});
+
+  return { issues, meta: null };
+}
+
+function renderAnalysis(result, lang){
+  issuesList.innerHTML='';
+  if(result.issues.length===0) issuesList.innerHTML = '<div class="issue ok">No issues found.</div>';
+  else{
+    for(const it of result.issues){
+      const d = document.createElement('div'); d.className = 'issue '+(it.type==='err'?'err':it.type==='warn'?'warn':'ok'); d.textContent = it.message; issuesList.appendChild(d);
+    }
+  }
+  // summary
+  let sHtml = '';
+  if(result.meta){
+    sHtml += '<div style="margin-top:6px">';
+    if(result.meta.title) sHtml += `<div><strong>title:</strong> ${escapeHtml(result.meta.title)}</div>`;
+    if(result.meta.metas && result.meta.metas.length) sHtml += `<div><strong>meta theme-color:</strong> ${result.meta.metas.join(', ')}</div>`;
+    if(result.meta.bodyBg) sHtml += `<div><strong>body background:</strong> ${escapeHtml(result.meta.bodyBg)}</div>`;
+    if(result.meta.inlineColors && result.meta.inlineColors.length) sHtml += `<div><strong>inline backgrounds:</strong> ${result.meta.inlineColors.join(', ')}</div>`;
+    if(result.meta.cssColors && result.meta.cssColors.length) sHtml += `<div><strong>CSS backgrounds:</strong> ${result.meta.cssColors.slice(0,6).join(', ')}</div>`;
+    if(result.meta.tags && result.meta.tags.length) sHtml += `<div><strong>HTML tags found:</strong> ${result.meta.tags.slice(0,12).join(', ')}</div>`;
+    sHtml += '</div>';
+  } else {
+    sHtml += '<div style="margin-top:6px">No visual/meta data found for this language. (Lithium only extracts basic UI/visual info from HTML/CSS/inline styles/JSON)</div>';
+  }
+  summaryBody.innerHTML = sHtml;
+}
+
+function escapeHtml(s){ if(!s) return ''; return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// --- Buttons ---
+document.getElementById('detectBtn').addEventListener('click', ()=>{
+  const detected = detectLanguage(codeEl.value);
+  detectedEl.textContent = detected || 'unknown';
+  if(detected) langSelect.value = detected;
+});
+
+document.getElementById('analyzeBtn').addEventListener('click', ()=>{
+  const code = codeEl.value;
+  const lang = langSelect.value;
+  detectedEl.textContent = (detectLanguage(code) || lang || '-');
+  const res = analyze(code, lang);
+  renderAnalysis(res, lang);
+});
+
+document.getElementById('downloadBtn').addEventListener('click', ()=>{
+  const code = codeEl.value;
+  if(!code){ alert('Nothing to download. Paste some code first.'); return; }
+  const lang = langSelect.value || 'text';
+  const langObj = getLangObj(lang)||{ext:'txt'};
+  const fname = (document.getElementById('filename').value || 'code') + '.' + langObj.ext;
+  const blob = new Blob([code], {type: 'text/plain;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = fname; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+});
+
+document.getElementById('clearBtn').addEventListener('click', ()=>{ codeEl.value=''; updateStats(); summaryBody.innerHTML='No analysis yet.'; issuesList.innerHTML='<div class="issue ok">Cleared.</div>'; detectedEl.textContent='-'; });
+
+// update stats live
+setInterval(updateStats, 800);
+
+// small helper: auto-detect on paste
+codeEl.addEventListener('paste', ()=>{ setTimeout(()=>{ const d = detectLanguage(codeEl.value); if(d) detectedEl.textContent = d; }, 50); });
+
+// initial example filler
+codeEl.value = `<!doctype html>
+<html>
+  <head>
+    <meta name="theme-color" content="#0aa0ff">
+    <title>Example</title>
+    <style>body{background:#0b1220;color:#e6eef6}</style>
+  </head>
+  <body>
+    <h1>Hello from Lithium</h1>
+  </body>
+</html>`;
+updateStats();
+</script>
+</body>
+</html>
