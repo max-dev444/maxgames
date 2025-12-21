@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Info Page</title>
+  <style>
+    body {
+      background: radial-gradient(circle at top, #1a0000, #000000);
+      font-family: Arial, sans-serif;
+      color: white;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 64px;
+      color: #ff4d4d;
+      margin-top: 50px;
+      text-shadow: 0 0 20px #ff4d4d, 0 0 40px #ff9999;
+      position: relative;
+      z-index: 2;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 50px auto;
+      padding: 20px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .section {
+      margin-bottom: 50px;
+      padding: 25px;
+      background: rgba(255, 0, 0, 0.1);
+      border-left: 6px solid #ff4d4d;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(255,0,0,0.2);
+      position: relative;
+      z-index: 2;
+    }
+
+    .section h2 {
+      font-size: 36px;
+      margin-bottom: 15px;
+      color: #ff9999;
+      text-shadow: 0 0 10px #ff4d4d;
+    }
+
+    .section p {
+      font-size: 18px;
+      line-height: 1.6;
+      opacity: 0.9;
+    }
+
+    .back {
+      display: block;
+      text-align: center;
+      margin: 50px auto;
+      padding: 15px 30px;
+      width: fit-content;
+      font-size: 20px;
+      background: linear-gradient(135deg, #ff4d4d, #ff9999);
+      color: white;
+      text-decoration: none;
+      border-radius: 30px;
+      box-shadow: 0 0 20px rgba(255,77,77,0.6);
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+      z-index: 2;
+    }
+
+    .back:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 30px rgba(255,77,77,0.9);
+    }
+
+    /* SPARKLES */
+    .sparkle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: yellow;
+      border-radius: 50%;
+      opacity: 0.8;
+      animation: moveSideways linear infinite;
+      top: 0;
+    }
+
+    @keyframes moveSideways {
+      from { left: -10px; }
+      to { left: 100vw; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sparkles -->
+  <script>
+    const sparkleCount = 50; // number of sparkles
+    for(let i=0; i < sparkleCount; i++){
+      let s = document.createElement('div');
+      s.className = 'sparkle';
+      s.style.top = Math.random() * window.innerHeight + 'px';
+      s.style.width = s.style.height = 2 + Math.random()*4 + 'px';
+      s.style.animationDuration = 3 + Math.random()*4 + 's';
+      s.style.opacity = 0.5 + Math.random()*0.5;
+      document.body.appendChild(s);
+    }
+  </script>
+
+  <h1>INFO</h1>
+  <div class="container">
+
+    <div class="section">
+      <h2>TMS</h2>
+      <p>A nerdy math program. It does a cool little sequence, and you can see how cool it is to use the target option to try to find HIGH RECURSION OUTPUTS, which are really rare! This also has a thing on it that shows you all the percentages of a number of recursions, like how 2 recursions is 25%.</p>
+    </div>
+
+    <div class="section">
+      <h2>Element OS</h2>
+      <p>Lots of apps and tools that help you with stuff like coding, and deciding things. One of the best is Lithium, as it detects coding errors for you. Cobalt is also like a mini-magic 8 ball.</p>
+    </div>
+
+    <div class="section">
+      <h2>Gamers Hub</h2>
+      <p>This is Gamer's Hub, which has 3 games, with 20 little minigames and a luck simulator! Not much to say about it, other than you need to be REALLY LUCKY to get all 53 Crazies.</p>
+    </div>
+
+    <div class="section">
+      <h2>Bored Button</h2>
+      <p>100 sites pickled randomly that may or may not cure your boredom. It's not the best thing, though. I personally think that Youtube is a better boredom curer. :)</p>
+    </div>
+
+  </div>
+
+  <a class="back" href="index.html">⬅ Back to Hub</a>
+
+</body>
+</html>
