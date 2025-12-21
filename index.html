@@ -45,10 +45,9 @@ h1 {
 .buttons {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 10px; /* very close together */
-    width: 90%; /* takes most of page width */
-    max-width: 960px;
-    justify-items: center;
+    gap: 10px; /* tight vertical & horizontal spacing */
+    width: auto; /* container wraps buttons tightly */
+    justify-content: center; /* buttons cluster in middle */
 }
 
 button {
