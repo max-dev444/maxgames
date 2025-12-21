@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bored Button</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: radial-gradient(circle at top, #ff8c42, #ff3d00);
+      font-family: Arial, sans-serif;
+      color: white;
+      flex-direction: column;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 48px;
+      margin-bottom: 50px;
+      text-shadow: 0 0 20px rgba(0,0,0,0.4);
+    }
+
+    button {
+      font-size: 28px;
+      padding: 20px 50px;
+      background: linear-gradient(135deg, #fff, #ffcc00);
+      color: #000;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      transition: transform 0.2s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 30px rgba(0,0,0,0.5);
+    }
+
+    .back {
+      margin-top: 60px;
+      font-size: 18px;
+      color: white;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Bored Button</h1>
+  <button onclick="goRandom()">Click Me!</button>
+  <a class="back" href="index.html">⬅ Back to Hub</a>
+
+  <script>
+    const sites = [
+      "https://www.coolmathgames.com/",
+      "https://www.youtube.com/",
+      "https://www.wikipedia.org/",
+      "https://www.boredpanda.com/",
+      "https://www.nationalgeographic.com/",
+      "https://www.howstuffworks.com/",
+      "https://www.space.com/",
+      "https://www.boredhumans.com/",
+      "https://www.reddit.com/",
+      "https://www.stumbleupon.com/",
+      "https://www.sporcle.com/",
+      "https://www.pinterest.com/",
+      "https://www.kongregate.com/",
+      "https://www.newgrounds.com/",
+      "https://www.addictinggames.com/",
+      "https://www.funbrain.com/",
+      "https://www.coolmath4kids.com/",
+      "https://www.hoodamath.com/",
+      "https://www.sporcle.com/",
+      "https://www.wimp.com/",
+      "https://www.natgeokids.com/",
+      "https://www.brainpop.com/",
+      "https://www.fantasynamegenerators.com/",
+      "https://www.factmonster.com/",
+      "https://www.instructables.com/",
+      "https://www.kizi.com/",
+      "https://www.pbskids.org/",
+      "https://www.mathplayground.com/",
+      "https://www.ted.com/",
+      "https://www.khanacademy.org/",
+      "https://www.sciencenewsforstudents.org/",
+      "https://www.coolmathgames.com/0-adventure-games",
+      "https://www.mentalfloss.com/",
+      "https://www.buzzfeed.com/",
+      "https://www.cracked.com/",
+      "https://www.theguardian.com/",
+      "https://www.nytimes.com/",
+      "https://www.wikipedia.org/wiki/Special:Random",
+      "https://www.npr.org/",
+      "https://www.nationalgeographic.com/science/",
+      "https://www.space.com/33001-space-facts.html",
+      "https://www.howstuffworks.com/random",
+      "https://www.boredpanda.com/funny/",
+      "https://www.funology.com/",
+      "https://www.coolmath.com/",
+      "https://www.sporcle.com/games/",
+      "https://www.addictinggames.com/",
+      "https://www.kongregate.com/games/",
+      "https://www.newgrounds.com/collection/funny",
+      "https://www.funnyjunk.com/",
+      "https://www.theonion.com/",
+      "https://www.memecenter.com/",
+      "https://www.geoguessr.com/",
+      "https://www.mashable.com/",
+      "https://www.boredhumans.com/paint.php",
+      "https://www.mrdoob.com/projects/",
+      "https://www.nintendo.com/",
+      "https://www.coolmath4kids.com/fun-games.htm",
+      "https://www.mathsisfun.com/games/index.html",
+      "https://www.funbrain.com/games",
+      "https://www.shadyurl.com/",
+      "https://www.weirdorconfusing.com/",
+      "https://www.fantasynamegenerators.com/",
+      "https://www.viralnova.com/",
+      "https://www.thechive.com/",
+      "https://www.uncrate.com/",
+      "https://www.collegehumor.com/",
+      "https://www.ebaumsworld.com/",
+      "https://www.cheezburger.com/",
+      "https://www.sporcle.com/",
+      "https://www.brainist.com/",
+      "https://www.odditycentral.com/",
+      "https://www.futilitycloset.com/",
+      "https://www.ranker.com/",
+      "https://www.coolthings.com/",
+      "https://www.boredpanda.com/funny-animals/",
+      "https://www.sadanduseless.com/",
+      "https://www.damninteresting.com/",
+      "https://www.toptenz.net/",
+      "https://www.kidzworld.com/",
+      "https://www.funology.com/fun-things-to-do",
+      "https://www.wimp.com/funny/",
+      "https://www.stuffonmycat.com/",
+      "https://www.weirdworm.com/",
+      "https://www.oddee.com/",
+      "https://www.listverse.com/",
+      "https://www.amusingplanet.com/",
+      "https://www.coolweirdstuff.com/",
+      "https://www.everydayfun.com/",
+      "https://www.todayifoundout.com/",
+      "https://www.ripleys.com/",
+      "https://www.mentalfloss.com/",
+      "https://www.howstuffworks.com/",
+      "https://www.boredpanda.com/",
+      "https://www.ted.com/talks",
+      "https://www.khanacademy.org/",
+      "https://www.space.com/",
+      "https://www.nasa.gov/",
+      "https://www.wikipedia.org/wiki/Special:Random",
+      "https://www.buzzfeed.com/",
+      "https://www.cracked.com/",
+      "https://www.theonion.com/",
+      "https://www.viralnova.com/"
+    ];
+
+    function goRandom() {
+      const rand = Math.floor(Math.random() * sites.length);
+      window.open(sites[rand], "_blank");
+    }
+  </script>
+
+</body>
+</html>
