@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gamers Hub</title>
+<style>
+:root{--bg:#05070f;--panel:#101733;--accent:#6cf;--accent2:#b56cff}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:system-ui,monospace;background:radial-gradient(circle at top,#1b2b66,#000);color:white}
+header{padding:24px;text-align:center;font-size:36px;font-weight:900;letter-spacing:2px;color:var(--accent);text-shadow:0 0 25px #000}
+#wrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px;padding:24px}
+.card{background:linear-gradient(180deg,#141c44,#0b1028);border-radius:24px;padding:22px;box-shadow:0 0 40px #000}
+.card h2{margin-top:0;color:#9ad}
+button{width:100%;padding:14px;border-radius:18px;border:1px solid #2d3a73;background:linear-gradient(180deg,#24306a,#1a224a);color:white;font-size:18px;font-weight:800;cursor:pointer;box-shadow:0 0 20px #000}
+button:hover{filter:brightness(1.25)}
+.stat{padding:8px 0;border-bottom:1px solid #1f2a52;font-size:15px}
+.big{font-size:22px;font-weight:900;color:var(--accent2)}
+.rainbow{background:linear-gradient(90deg,red,orange,yellow,green,cyan,blue,violet);-webkit-background-clip:text;color:transparent;font-weight:900}
+footer{text-align:center;opacity:.6;padding:16px}
+</style>
+</head>
+<body>
+<header>🎮 GAMERS HUB 🎮</header>
+
+<div id="wrap">
+
+  <div class="card">
+    <h2>GLOBAL COLLECTION TRACKER</h2>
+    <div id="global"></div>
+  </div>
+
+  <div class="card">
+    <h2>Play</h2>
+    <button onclick="goArcane2()">Arcane 2</button>
+    <p style="opacity:.7">10 new minigames • new currencies</p>
+
+```
+<button onclick="goLuck()">Luck Simulator</button>
+<p style="opacity:.7">Hatch Supers, Legendaries, Ultras & Titanics</p>
+
+<button onclick="goArcane()">Arcane</button>
+<p style="opacity:.7">Original Addiction Arcade (Final)</p>
+```
+
+  </div>
+
+  <div class="card">
+    <h2>Arcane 2 Stats</h2>
+    <div id="statsArcane2"></div>
+  </div>
+
+  <div class="card">
+    <h2>Luck Simulator Stats</h2>
+    <div id="statsLuck"></div>
+  </div>
+
+  <div class="card">
+    <h2>Arcane Stats</h2>
+    <div id="statsArcane"></div>
+  </div>
+
+</div>
+
+<footer>Gamers Hub • Offline Gamer Hub</footer>
+
+<script>
+function goArcane2(){window.open('Arcane 2.html','_blank')}
+function goLuck(){window.open('LuckSimulator.html','_blank')}
+function goArcane(){window.open('Arcane 0.6.html','_blank')}
+
+function loadArcade(saveKey, el){
+  const box=document.getElementById(el);
+  const raw=localStorage.getItem(saveKey);
+  if(!raw){box.innerHTML='<p>No save found.</p>';return}
+  const d=JSON.parse(raw);
+  let total=0;
+  for(const k in d.currencies) total+=d.currencies[k];
+  box.innerHTML=`
+    <div class='stat big'>Total Currency: ${total}</div>
+    ${Object.keys(d.currencies).map(c=>`<div class='stat'>${c}: ${d.currencies[c]}</div>`).join('')}
+    <div class='stat'>Supers: ${Object.values(d.rares).filter(v=>v).length}/${Object.keys(d.rares).length}</div>
+    <div class='stat'>Legendaries: ${Object.values(d.legends).filter(v=>v).length}/${Object.keys(d.legends).length}</div>
+    <div class='stat'>Ultras: ${Object.values(d.ultras).filter(v=>v).length}/${Object.keys(d.ultras).length}</div>
+  `
+}
+
+function loadLuck(){
+  const box=document.getElementById('statsLuck');
+  const raw=localStorage.getItem('luckSimSave');
+  if(!raw){box.innerHTML='<p>No save found.</p>';return}
+  const d=JSON.parse(raw);
+  const supers=Object.keys(d.found).filter(x=>x.startsWith('Super')).length;
+  const legs=Object.keys(d.found).filter(x=>x.startsWith('Legendary')).length;
+  const ultras=Object.keys(d.found).filter(x=>x.startsWith('Crazy')).length;
+  const tit=Object.keys(d.found).filter(x=>x.startsWith('Titanic')).length;
+  box.innerHTML=`
+    <div class='stat big'>Hatches: ${d.hatches}</div>
+    <div class='stat'>Supers: ${supers}/25</div>
+    <div class='stat'>Legendaries: ${legs}/25</div>
+    <div class='stat'>Ultras: ${ultras}/5</div>
+    <div class='stat'>Titanics: ${tit}/3</div>
+  `
+}
+
+function globalTracker(){
+  let s=0,l=0,u=0;
+
+  const luck=JSON.parse(localStorage.getItem('luckSimSave')||'{}');
+  if(luck.found){
+    s+=Object.keys(luck.found).filter(x=>x.startsWith('Super')).length;
+    l+=Object.keys(luck.found).filter(x=>x.startsWith('Legendary')).length;
+    u+=Object.keys(luck.found).filter(x=>x.startsWith('Crazy')).length;
+  }
+
+  ['arcane2Save','arcadeSave'].forEach(k=>{
+    const d=JSON.parse(localStorage.getItem(k)||'{}');
+    if(d.rares) s+=Object.values(d.rares).filter(v=>v).length;
+    if(d.legends) l+=Object.values(d.legends).filter(v=>v).length;
+    if(d.ultras) u+=Object.values(d.ultras).filter(v=>v).length;
+  })
+
+  document.getElementById('global').innerHTML=`
+    <div class='big rainbow'>SUPERS: ${s}</div>
+    <div class='big'>LEGENDARIES: ${l}</div>
+    <div class='big'>ULTRAS: ${u}</div>
+  `
+}
+
+loadArcade('arcane2Save','statsArcane2');
+loadArcade('arcadeSave','statsArcane');
+loadLuck();
+globalTracker();
+</script>
+
+</body>
+</html>

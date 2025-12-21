@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Luck Simulator</title>
+<style>
+body{margin:0;background:radial-gradient(circle,#111,#000);color:white;font-family:system-ui,monospace;text-align:center}
+h1{margin-top:20px;font-size:42px;background:linear-gradient(90deg,red,orange,yellow,green,cyan,blue,violet);-webkit-background-clip:text;color:transparent}
+#egg{font-size:120px;cursor:pointer;user-select:none}
+#result{margin-top:20px;font-size:28px;min-height:40px}
+.rainbow{animation:rb 1s linear infinite}
+@keyframes rb{0%{color:red}25%{color:yellow}50%{color:lime}75%{color:cyan}100%{color:magenta}}
+.legend{color:gold;text-shadow:0 0 15px gold}
+.crazy{color:#ff00ff;text-shadow:0 0 20px #ff00ff}
+.titanic{color:white;text-shadow:0 0 25px cyan,0 0 50px magenta}
+.panel{margin:20px auto;width:90%;max-width:600px;background:#111;border-radius:20px;padding:16px}
+button{padding:10px 16px;margin:6px;border-radius:14px;border:none;cursor:pointer;font-weight:700}
+.small{opacity:.7;font-size:14px}
+</style>
+</head>
+<body>
+
+<h1>LUCK SIMULATOR</h1>
+<div id="egg">🥚</div>
+<div id="result"></div>
+
+<div class="panel">
+  <div id="stats"></div>
+  <button onclick="luckBoost()">🍀 Luck Boost</button>
+  <div id="boost"></div>
+  <div id="autoBtns"></div>
+  <button onclick="wipe()">WIPE SAVE</button>
+</div>
+
+<script>
+const key="luckSimSave";
+let d=JSON.parse(localStorage.getItem(key))||{
+  hatches:0,found:{},boostUntil:0,bad:false,good:false
+};
+
+const normals=["Dust Cat","Rock Dog","Broken Frog","Wet Mouse","Sad Blob"];
+const supers=Array.from({length:25},(_,i)=>"Super Pet "+(i+1));
+const legs=Array.from({length:25},(_,i)=>"Legendary Pet "+(i+1));
+const crazys=Array.from({length:5},(_,i)=>"Crazy Pet "+(i+1));
+const titanics=["Titanic Alpha","Titanic Omega","Titanic Void"];
+
+function hatch(){
+  d.hatches++;
+  let mult=Date.now()<d.boostUntil?5:1;
+  let r=Math.random()*100/mult;
+  let name,cls="";
+  if(r<0.05){name=pick(titanics);cls="titanic"}
+  else if(r<0.15){name=pick(crazys);cls="crazy"}
+  else if(r<1.15){name=pick(legs);cls="legend"}
+  else if(r<11.15){name=pick(supers);cls="rainbow"}
+  else name=pick(normals);
+  d.found[name]=true;
+  result.innerHTML=`<span class="${cls}">${name}</span>`;
+  save(); update();
+}
+
+function luckBoost(){
+  let owned=supers.filter(s=>d.found[s]);
+  if(owned.length<3){alert("Need 3 Supers");return}
+  removeRandom(owned,3);
+  d.boostUntil=Date.now()+300000;
+  save(); update();
+}
+
+function unlockBad(){
+  let owned=supers.filter(s=>d.found[s]);
+  if(owned.length<5){alert("Need 5 Supers");return}
+  removeRandom(owned,5);
+  d.bad=true; save(); update();
+}
+
+function unlockGood(){
+  let owned=legs.filter(l=>d.found[l]);
+  if(owned.length<5){alert("Need 5 Legendaries");return}
+  removeRandom(owned,5);
+  d.good=true; save(); update();
+}
+
+function removeRandom(arr,n){
+  for(let i=0;i<n;i++){
+    let r=arr.splice(Math.floor(Math.random()*arr.length),1)[0];
+    delete d.found[r];
+  }
+}
+
+let badInt=null,goodInt=null;
+
+function toggleBad(){
+  if(badInt){clearInterval(badInt);badInt=null}
+  else badInt=setInterval(hatch,500);
+}
+
+function toggleGood(){
+  if(goodInt){clearInterval(goodInt);goodInt=null}
+  else goodInt=setInterval(hatch,200);
+}
+
+function update(){
+  stats.innerHTML=`
+🥚 ${d.hatches}<br>
+🌈 Supers ${count(supers)}/25<br>
+⭐ Legs ${count(legs)}/25<br>
+💥 Crazys ${count(crazys)}/5<br>
+🗿 Titanics ${count(titanics)}/3<br>
+<div class="small">Super 10% • Legendary 1% • Crazy 0.1% • Titanic 0.05%</div>
+`;
+  boost.innerHTML=d.boostUntil>Date.now()
+    ?`🍀 5× Luck: ${Math.ceil((d.boostUntil-Date.now())/1000)}s`
+    :"";
+  autoBtns.innerHTML="";
+  if(!d.bad) autoBtns.innerHTML+=`<button onclick="unlockBad()">Unlock Bad Autoclicker</button>`;
+  if(d.bad) autoBtns.innerHTML+=`<button onclick="toggleBad()">Bad Autoclicker</button>`;
+  if(!d.good) autoBtns.innerHTML+=`<button onclick="unlockGood()">Unlock Good Autoclicker</button>`;
+  if(d.good) autoBtns.innerHTML+=`<button onclick="toggleGood()">Good Autoclicker</button>`;
+}
+
+function count(a){return a.filter(x=>d.found[x]).length}
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+function save(){localStorage.setItem(key,JSON.stringify(d))}
+function wipe(){if(confirm("WIPE?")){localStorage.removeItem(key);location.reload()}}
+
+egg.onclick=hatch;
+update();
+</script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Arcane 2</title>
+<style>
+:root{--bg:#0a0f1a;--panel:#141a2e;--accent:#4cc9f0}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,monospace;background:radial-gradient(circle at top,#16213e,#000);color:white}
+#top{padding:12px;background:#111;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:6px;border-bottom:2px solid var(--accent)}
+.stat{background:var(--panel);padding:6px 8px;border-radius:8px;font-size:13px}
+#wrap{display:grid;grid-template-columns:280px 1fr;min-height:calc(100vh - 60px)}
+#menu{background:#0f1325;border-right:2px solid #1f2a52;padding:10px;overflow:auto}
+#menu h2{margin-top:10px;color:var(--accent)}
+#menu button{width:100%;margin-bottom:6px;background:#1b2440;color:white;border:1px solid #2d3a73;padding:8px;border-radius:10px;cursor:pointer}
+#game{padding:20px}
+.card{background:var(--panel);border-radius:16px;padding:16px;box-shadow:0 0 25px #000}
+.rainbow{background:linear-gradient(90deg,red,orange,yellow,green,cyan,blue,violet);-webkit-background-clip:text;background-clip:text;color:transparent}
+.legend{background:linear-gradient(90deg,#ff00ff,#00ffff,#ffff00);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ultra{background:linear-gradient(90deg,#fff,#ff00ff,#00ffff,#fff);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 8px white}
+.wipe{background:#ff5c5c!important}
+.rate{font-size:11px;opacity:.8}
+</style>
+</head>
+<body>
+<div id="top"></div>
+<div id="wrap">
+  <div id="menu"></div>
+  <div id="game"></div>
+</div>
+<script>
+// ===== DOM =====
+const topEl=document.getElementById('top');
+const menuEl=document.getElementById('menu');
+const gameEl=document.getElementById('game');
+
+// ===== RATES =====
+const RARE_RATE=0.025;
+const LEGEND_RATE=0.005;
+const ULTRA_RATE=0.0003;
+
+// ===== SAVE =====
+function save(){localStorage.setItem('arcane2Save',JSON.stringify({currencies,rares,legends,ultras}))}
+function load(){const s=localStorage.getItem('arcane2Save');if(s){const d=JSON.parse(s);Object.assign(currencies,d.currencies||{});Object.assign(rares,d.rares||{});Object.assign(legends,d.legends||{});Object.assign(ultras,d.ultras||{})}}
+function wipe(){if(confirm('WIPE ALL PROGRESS?')){localStorage.removeItem('arcane2Save');location.reload()}}
+
+// ===== DATA =====
+const currencies={Orbs:0,Stars:0,Coins:0,Keys:0,Dust:0,Tokens:0,Cubes:0,Shards:0,Crowns:0,Balloons:0};
+const rares=Object.fromEntries(Object.keys(currencies).map(k=>[k,false]));
+const legends=Object.fromEntries(Object.keys(currencies).map(k=>[k,false]));
+const ultras=Object.fromEntries(Object.keys(currencies).map(k=>[k,false]));
+
+// ===== UI =====
+function updateTop(){topEl.innerHTML='';for(let c in currencies){const d=document.createElement('div');d.className='stat';d.textContent=`${c}: ${currencies[c]}`;topEl.appendChild(d)}}
+function showGame(html){gameEl.innerHTML=html}
+function grant(currency){
+currencies[currency]++;
+if(!rares[currency]&&Math.random()<RARE_RATE)rares[currency]=true;
+if(!legends[currency]&&Math.random()<LEGEND_RATE)legends[currency]=true;
+if(!ultras[currency]&&Math.random()<ULTRA_RATE)ultras[currency]=true;
+updateTop();save();buildMenu();
+}
+function mainMenu(){showGame(`<div class='card'><h1>Arcane 2</h1><p>10 new addictive games with Supers, Legendaries, and Crazies!</p></div>`)}
+
+// ===== GAMES =====
+const games=[
+{name:'Color Dash',c:'Orbs',play(){let seq=[];let i=0;function nextSeq(){seq.push(['Red','Green','Blue','Yellow'][Math.floor(Math.random()*4)]);i=0;showGame(`<button onclick='mainMenu()'>Menu</button><div class='card'><h3>Color Dash</h3><p id='q'>${seq.join(' - ')}</p><input id='in'><button id='b'>Enter</button></div>`);document.getElementById('b').onclick=function(){if(document.getElementById('in').value===seq[i]){i++;grant('Orbs');if(i===seq.length)nextSeq();}else i=0;}}nextSeq();}},
+{name:'Gravity Flip',c:'Stars',play(){let pos=0;let d=1;showGame(`<button onclick='mainMenu()'>Menu</button><div class='card'><h3>Gravity Flip</h3><p>Use Arrow keys to flip!</p><p id='p'>Position: 0</p></div>`);document.onkeydown=e=>{if(e.code==='ArrowUp'||e.code==='ArrowDown'){pos+=d;grant('Stars');document.getElementById('p').textContent='Position: '+pos}}}},
+{name:'Coin Rain',c:'Coins',play(){showGame(`<button onclick='mainMenu()'>Menu</button><div class='card'><h3>Coin Rain</h3><button id='b'>Catch Coin</button></div>`);document.getElementById('b').onclick=()=>grant('Coins')}},
+{name:'Button Spammer',c:'Tokens',play(){showGame(`<button onclick='mainMenu()'>Menu</button><div class='card'><h3>Button Spammer</h3><button id='b'>SPAM</button></div>`);document.getElementById('b').onclick=()=>grant('Tokens')}},
+{name:'Laser Maze',c:'Cubes',play(){let pos=0;showGame(`<button onclick='mainMenu()'>Menu</button><div class='card'><h3>Laser Maze</h3><p>Press ArrowRight to advance</p><p id='p'>Position: 0</p></div>`);document.onkeydown=e=>{if(e.code==='ArrowRight'){pos++;grant('Cubes');document.getElementById('p').textContent='Position: '+pos}}}},
+{name:'Memory Tiles',c:'Keys',play(){let seq=[Math.floor(Math.random()*4)];let i=0;showGame(`<button onclick='mainMenu()'>Menu</button><div class='card'><h3>Memory Tiles</h3><div id='d'></div></div>`);const d=document.getElementById('d');for(let j=0;j<4;j++){const b=document.createElement('button');b.textContent=j;b.onclick=()=>{if(j===seq[i]){i++;grant('Keys');if(i===seq.length){seq.push(Math.floor(Math.random()*4));i=0;}}else i=0;};d.appendChild(b)}}},
+{name:'Puzzle Stack',c:'Shards',play(){let h=0;showGame(`<button onclick='mainMenu()'>Menu</button><div class='card'><h3>Puzzle Stack</h3><button id='b'>Stack Block</button><p id='p'>Height: 0</p></div>`);document.getElementById('b').onclick=()=>{h++;grant('Shards');document.getElementById('p').textContent='Height: '+h}}},
+{name:'Reflex Tap',c:'Dust',play(){showGame(`<button onclick='mainMenu()'>Menu</button><div class='card'><h3>Reflex Tap</h3><p>Click fast when text appears!</p><p id='t'>WAIT...</p></div>`);setTimeout(()=>{document.getElementById('t').textContent='CLICK';document.onclick=()=>{grant('Dust');document.onclick=null}},1000)}},
+{name:'Balloon Pop',c:'Balloons',play(){showGame(`<button onclick='mainMenu()'>Menu</button><div class='card'><h3>Balloon Pop</h3><button id='b'>POP</button></div>`);document.getElementById('b').onclick=()=>grant('Balloons')}},
+{name:'Treasure Hunt',c:'Crowns',play(){showGame(`<button onclick='mainMenu()'>Menu</button><div class='card'><h3>Treasure Hunt</h3><button id='b'>FIND TREASURE</button></div>`);document.getElementById('b').onclick=()=>grant('Crowns')}}
+]
+
+// ===== MENU =====
+function buildMenu(){
+menuEl.innerHTML='<h2>Minigames</h2>'
+games.forEach((g,i)=>menuEl.innerHTML+=`<button onclick="games[${i}].play()">${g.name}</button>`)
+menuEl.innerHTML+=`<h2>Drop Rates</h2><div class='rate'>Super: 2.5%<br>Legendary: 0.5%<br>Crazy: 0.03%</div>`
+menuEl.innerHTML+='<h2>Supers</h2>'
+for(let c in rares)menuEl.innerHTML+=`<div class='${rares[c]?'rainbow':''}'>Super ${c}: ${rares[c]?'✔':'???'}</div>`
+menuEl.innerHTML+='<h2>Legendaries</h2>'
+for(let c in legends)menuEl.innerHTML+=`<div class='${legends[c]?'legend':''}'>Legendary ${c}: ${legends[c]?'✔':'???'}</div>`
+menuEl.innerHTML+='<h2>Crazies</h2>'
+for(let c in ultras)menuEl.innerHTML+=`<div class='${ultras[c]?'ultra':''}'>Crazy ${c}: ${ultras[c]?'✔':'???'}</div>`
+menuEl.innerHTML+='<br><button class="wipe" onclick="wipe()">WIPE SAVE</button>'
+}
+
+load();updateTop();buildMenu();mainMenu(); </script>
+
+</body>
+</html>

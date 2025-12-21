@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Addiction Arcade</title>
+<style>
+:root{--bg:#0b0f1a;--panel:#141a2e;--accent:#4cc9f0;--bad:#ff5c5c}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,monospace;background:radial-gradient(circle at top,#16213e,#000);color:white}
+#top{padding:12px;background:#111;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:6px;border-bottom:2px solid var(--accent)}
+.stat{background:var(--panel);padding:6px 8px;border-radius:8px;font-size:13px}
+#wrap{display:grid;grid-template-columns:280px 1fr;min-height:calc(100vh - 70px)}
+#menu{background:#0f1325;border-right:2px solid #1f2a52;padding:10px;overflow:auto}
+#menu h2{margin-top:10px;color:var(--accent)}
+#menu button{width:100%;margin-bottom:6px;background:#1b2440;color:white;border:1px solid #2d3a73;padding:8px;border-radius:10px;cursor:pointer}
+#game{padding:20px}
+.card{background:var(--panel);border-radius:16px;padding:16px;box-shadow:0 0 25px #000}
+.rainbow{background:linear-gradient(90deg,red,orange,yellow,green,cyan,blue,violet);-webkit-background-clip:text;background-clip:text;color:transparent}
+.legend{background:linear-gradient(90deg,#ff00ff,#00ffff,#ffff00);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ultra{background:linear-gradient(90deg,#fff,#ff00ff,#00ffff,#fff);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 8px white}
+.wipe{background:var(--bad)!important}
+.rate{font-size:11px;opacity:.8}
+</style>
+</head>
+<body>
+<div id="top"></div>
+<div id="wrap">
+  <div id="menu"></div>
+  <div id="game"></div>
+</div>
+<script>
+// ===== DOM =====
+const topEl=document.getElementById('top')
+const menuEl=document.getElementById('menu')
+const gameEl=document.getElementById('game')
+
+// ===== RATES =====
+const RARE_RATE=0.025
+const LEGEND_RATE=0.005
+const ULTRA_RATE=0.0003
+
+// ===== SAVE =====
+function save(){localStorage.setItem('arcadeSave',JSON.stringify({currencies,rares,legends,ultras}))}
+function load(){const s=localStorage.getItem('arcadeSave');if(s){const d=JSON.parse(s);Object.assign(currencies,d.currencies||{});Object.assign(rares,d.rares||{});Object.assign(legends,d.legends||{});Object.assign(ultras,d.ultras||{})}}
+function wipe(){if(confirm('WIPE ALL PROGRESS?')){localStorage.removeItem('arcadeSave');location.reload()}}
+
+// ===== DATA =====
+const currencies={Coins:0,Gems:0,Stars:0,Keys:0,Dust:0,Tokens:0,Cubes:0,Orbs:0,Crowns:0,Shards:0}
+
+const rares={Coins:false,Gems:false,Stars:false,Keys:false,Dust:false,Tokens:false,Cubes:false,Orbs:false,Crowns:false,Shards:false}
+const legends={Coins:false,Gems:false,Stars:false,Keys:false,Dust:false,Tokens:false,Cubes:false,Orbs:false,Crowns:false,Shards:false}
+const ultras={Coins:false,Gems:false,Stars:false,Keys:false,Dust:false,Tokens:false,Cubes:false,Orbs:false,Crowns:false,Shards:false}
+
+// ===== UI =====
+function updateTop(){topEl.innerHTML='';for(let c in currencies){const d=document.createElement('div');d.className='stat';d.textContent=`${c}: ${currencies[c]}`;topEl.appendChild(d)}}
+
+function showGame(html){gameEl.innerHTML=html}
+
+function grant(currency){
+  currencies[currency]++
+  if(!rares[currency]&&Math.random()<RARE_RATE)rares[currency]=true
+  if(!legends[currency]&&Math.random()<LEGEND_RATE)legends[currency]=true
+  if(!ultras[currency]&&Math.random()<ULTRA_RATE)ultras[currency]=true
+  updateTop();save();buildMenu()
+}
+
+function mainMenu(){showGame(`<div class='card'><h1>Addiction Arcade</h1><p>10 games. 10 currencies. Grind forever.</p></div>`)}
+
+// ===== GAMES =====
+const games=[
+{n:'Click Frenzy',c:'Coins',p(){showGame(`<div class='card'><button onclick='mainMenu()'>Menu</button><h3>Click as fast as you want</h3><button onclick="grant('Coins')">CLICK</button></div>`)}},
+{n:'Lucky Roll',c:'Gems',p(){showGame(`<div class='card'><button onclick='mainMenu()'>Menu</button><button onclick="grant('Gems')">ROLL</button></div>`)}},
+{n:'Perfect Stop',c:'Stars',p(){let x=0,d=1;showGame(`<div class='card'><button onclick='mainMenu()'>Menu</button><div id='bar' style='height:20px;border:1px solid'></div><button id='s'>STOP</button></div>`);const b=document.getElementById('bar');const L=setInterval(()=>{x+=d*4;if(x>280||x<0)d*=-1;b.style.background=`linear-gradient(90deg,#0f0 ${x}px,#000 0)`},30);document.getElementById('s').onclick=()=>{clearInterval(L);grant('Stars')}}},
+{n:'Number Guess',c:'Keys',p(){const n=Math.floor(Math.random()*10);showGame(`<div class='card'><button onclick='mainMenu()'>Menu</button><input id='g'><button id='b'>Guess</button></div>`);b.onclick=()=>{if(+g.value===n)grant('Keys')}}},
+{n:'Idle Dust',c:'Dust',p(){showGame(`<div class='card'><button onclick='mainMenu()'>Menu</button><p>+1 Dust per second</p></div>`);setInterval(()=>grant('Dust'),1000)}},
+{n:'Reaction Test',c:'Tokens',p(){showGame(`<div class='card'><button onclick='mainMenu()'>Menu</button><p id='t'>WAIT...</p></div>`);setTimeout(()=>{t.textContent='CLICK';document.onclick=()=>{grant('Tokens');document.onclick=null}},1200)}},
+{n:'Space Spam',c:'Cubes',p(){showGame(`<div class='card'><button onclick='mainMenu()'>Menu</button><p>Press SPACE</p></div>`);document.onkeydown=e=>{if(e.code==='Space')grant('Cubes')}}},
+{n:'Memory Tap',c:'Orbs',p(){let seq=[Math.floor(Math.random()*4)],i=0;showGame(`<div class='card'><button onclick='mainMenu()'>Menu</button><div id='d'></div></div>`);const d=document.getElementById('d');for(let j=0;j<4;j++){const bt=document.createElement('button');bt.textContent=j;bt.onclick=()=>{if(j===seq[i]){i++;grant('Orbs');if(i===seq.length){seq.push(Math.floor(Math.random()*4));i=0}}else i=0};d.appendChild(bt)}}},
+{n:'Risk Button',c:'Crowns',p(){showGame(`<div class='card'><button onclick='mainMenu()'>Menu</button><button onclick="grant('Crowns')">PRESS</button></div>`)}},
+{n:'Treasure Chest',c:'Shards',p(){showGame(`<div class='card'><button onclick='mainMenu()'>Menu</button><button onclick="grant('Shards')">OPEN</button></div>`)}},
+]
+
+// ===== MENU =====
+function buildMenu(){
+  menuEl.innerHTML='<h2>Minigames</h2>'
+  games.forEach((g,i)=>menuEl.innerHTML+=`<button onclick="games[${i}].p()">${g.n}</button>`)
+
+  menuEl.innerHTML+=`<h2>Drop Rates</h2><div class='rate'>Super: 2.5%<br>Legendary: 0.5%<br>Crazy: 0.03%</div>`
+
+  menuEl.innerHTML+='<h2>Supers</h2>'
+  for(let c in rares)menuEl.innerHTML+=`<div class='${rares[c]?'rainbow':''}'>Super ${c}: ${rares[c]?'✔':'???'}</div>`
+
+  menuEl.innerHTML+='<h2>Legendaries</h2>'
+  for(let c in legends)menuEl.innerHTML+=`<div class='${legends[c]?'legend':''}'>Legendary ${c}: ${legends[c]?'✔':'???'}</div>`
+
+  menuEl.innerHTML+='<h2>Crazies</h2>'
+  for(let c in ultras)menuEl.innerHTML+=`<div class='${ultras[c]?'ultra':''}'>Crazy ${c}: ${ultras[c]?'✔':'???'}</div>`
+
+  menuEl.innerHTML+='<br><button class="wipe" onclick="wipe()">WIPE SAVE</button>'
+}
+
+load();updateTop();buildMenu();mainMenu();
+</script>
+</body>
+</html>
