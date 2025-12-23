@@ -41,7 +41,6 @@ h1 {
     max-width: 650px;
 }
 
-/* BIG BUTTONS, TIGHT GRID */
 .buttons {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -70,24 +69,12 @@ button:hover {
     box-shadow: 0 0 25px #ff4444;
 }
 
-/* ACCOUNT BUTTON (LEFT, SEPARATE) */
-#accountButton {
-    position: absolute;
-    left: 20px;
-    top: 20px;
-    width: auto;
-    height: auto;
-    padding: 12px 18px;
-    font-size: 1.1em;
-}
-
 footer {
     margin-top: auto;
     margin-bottom: 20px;
     color: #888;
 }
 
-/* RED SPARKLES */
 .sparkle {
     position: absolute;
     width: 4px;
@@ -102,13 +89,16 @@ footer {
     50% { opacity: 0.4; transform: translateY(-15px); }
     100% { opacity: 1; transform: translateY(0); }
 }
+
+#logoutBtn {
+    position: absolute;
+    left: 20px;
+    top: 70px;
+}
 </style>
 </head>
 
 <body>
-
-<!-- ACCOUNT BUTTON -->
-<button id="accountButton"></button>
 
 <h1>Maxgames.org - FUN GAMES - V1.5</h1>
 
@@ -127,12 +117,15 @@ Created by MAX — play TMS, Element OS, Gamers Hub, and more.
     <button onclick="window.open('specialthanks.html','_blank')">Special Thanks</button>
 </div>
 
+<!-- LOGOUT BUTTON -->
+<button id="logoutBtn">Log Out</button>
+
 <footer>
 © 2025 Max — 67!!
 </footer>
 
 <script>
-// sparkles
+// SPARKLES
 for (let i = 0; i < 60; i++) {
     const s = document.createElement("div");
     s.className = "sparkle";
@@ -143,19 +136,18 @@ for (let i = 0; i < 60; i++) {
 }
 
 // ACCOUNT LOGIC
-const accountBtn = document.getElementById("accountButton");
 const account = JSON.parse(localStorage.getItem("maxgames_account"));
+const loggedIn = localStorage.getItem("maxgames_loggedin") === "true";
+const logoutBtn = document.getElementById("logoutBtn");
 
-if (account) {
-    accountBtn.textContent = "Account: " + account.username;
-    accountBtn.onclick = () => {
-        window.location.href = "accountdeletion.html";
+if (loggedIn && account) {
+    logoutBtn.style.display = "block";
+    logoutBtn.onclick = () => {
+        localStorage.setItem("maxgames_loggedin", "false");
+        location.reload();
     };
 } else {
-    accountBtn.textContent = "Create Account";
-    accountBtn.onclick = () => {
-        window.location.href = "accountcreation.html";
-    };
+    logoutBtn.style.display = "none";
 }
 </script>
 
