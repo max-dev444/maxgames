@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Account</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Verdana, sans-serif;
+    background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
+    color: white;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+}
+
+.box {
+    background: #1c1c1c;
+    padding: 30px;
+    border-radius: 15px;
+    width: 320px;
+    box-shadow: 0 0 20px #ff0000;
+    z-index: 2;
+}
+
+h2 {
+    text-align: center;
+    color: #ff4444;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    margin-top: 15px;
+    font-size: 1em;
+    border-radius: 10px;
+    border: none;
+}
+
+button {
+    width: 100%;
+    margin-top: 20px;
+    padding: 14px;
+    font-size: 1.1em;
+    background: #222;
+    color: white;
+    border: 3px solid #ff4444;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+button:hover {
+    background: #ff4444;
+    color: black;
+}
+
+/* RED SPARKLES */
+.sparkle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #ff3333;
+    border-radius: 50%;
+    animation: sparkle 3s infinite ease-in-out;
+}
+
+@keyframes sparkle {
+    0% { opacity: 1; transform: translateY(0); }
+    50% { opacity: 0.4; transform: translateY(-15px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+    <h2>Create Account</h2>
+
+    <input id="username" placeholder="Username">
+    <input id="password" type="password" placeholder="Password">
+
+    <button onclick="createAccount()">CREATE ACCOUNT!!</button>
+    <button onclick="login()">Login (Existing Account)</button>
+</div>
+
+<script>
+// CREATE ACCOUNT
+function createAccount() {
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    if (!username || !password) {
+        alert("Fill in both fields!");
+        return;
+    }
+
+    const account = {
+        username: username,
+        password: password
+    };
+
+    localStorage.setItem("maxgames_account", JSON.stringify(account));
+    window.location.href = "index.html";
+}
+
+// LOGIN
+function login() {
+    const saved = JSON.parse(localStorage.getItem("maxgames_account"));
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    if (!saved) {
+        alert("No account exists!");
+        return;
+    }
+
+    if (saved.username === username && saved.password === password) {
+        window.location.href = "index.html";
+    } else {
+        alert("Wrong username or password!");
+    }
+}
+
+// SPARKLES
+for (let i = 0; i < 60; i++) {
+    const s = document.createElement("div");
+    s.className = "sparkle";
+    s.style.left = Math.random() * window.innerWidth + "px";
+    s.style.top = Math.random() * window.innerHeight + "px";
+    s.style.width = s.style.height = (3 + Math.random() * 4) + "px";
+    document.body.appendChild(s);
+}
+</script>
+
+</body>
+</html>
