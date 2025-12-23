@@ -69,6 +69,18 @@ button:hover {
     box-shadow: 0 0 25px #ff4444;
 }
 
+#leftBtn {
+    position: absolute;
+    left: 20px;
+    top: 70px;
+}
+
+#rightBtn {
+    position: absolute;
+    right: 20px;
+    top: 70px;
+}
+
 footer {
     margin-top: auto;
     margin-bottom: 20px;
@@ -89,12 +101,6 @@ footer {
     50% { opacity: 0.4; transform: translateY(-15px); }
     100% { opacity: 1; transform: translateY(0); }
 }
-
-#logoutBtn {
-    position: absolute;
-    left: 20px;
-    top: 70px;
-}
 </style>
 </head>
 
@@ -106,6 +112,11 @@ footer {
 Created by MAX — play TMS, Element OS, Gamers Hub, and more.
 </div>
 
+<!-- LEFT BUTTON -->
+<button id="leftBtn"></button>
+<!-- RIGHT BUTTON -->
+<button id="rightBtn" style="display:none;">Log Out</button>
+
 <div class="buttons">
     <button onclick="window.open('Element OS.html','_blank')">Element OS</button>
     <button onclick="window.open('Gamers Hub V4.html','_blank')">Gamer's Hub</button>
@@ -116,9 +127,6 @@ Created by MAX — play TMS, Element OS, Gamers Hub, and more.
     <button onclick="window.open('updatelog.html','_blank')">Update Log</button>
     <button onclick="window.open('specialthanks.html','_blank')">Special Thanks</button>
 </div>
-
-<!-- LOGOUT BUTTON -->
-<button id="logoutBtn">Log Out</button>
 
 <footer>
 © 2025 Max — 67!!
@@ -136,18 +144,27 @@ for (let i = 0; i < 60; i++) {
 }
 
 // ACCOUNT LOGIC
+const leftBtn = document.getElementById("leftBtn");
+const rightBtn = document.getElementById("rightBtn");
 const account = JSON.parse(localStorage.getItem("maxgames_account"));
 const loggedIn = localStorage.getItem("maxgames_loggedin") === "true";
-const logoutBtn = document.getElementById("logoutBtn");
 
-if (loggedIn && account) {
-    logoutBtn.style.display = "block";
-    logoutBtn.onclick = () => {
-        localStorage.setItem("maxgames_loggedin", "false");
+if (!account) {
+    leftBtn.textContent = "Create Account";
+    leftBtn.onclick = () => { window.location.href = "accountcreation.html"; };
+    rightBtn.style.display = "none";
+} else if (!loggedIn) {
+    leftBtn.textContent = "Log In";
+    leftBtn.onclick = () => { window.location.href = "accountcreation.html"; };
+    rightBtn.style.display = "none";
+} else {
+    leftBtn.textContent = account.username;
+    leftBtn.onclick = () => { window.location.href = "accountdeletion.html"; };
+    rightBtn.style.display = "block";
+    rightBtn.onclick = () => {
+        localStorage.setItem("maxgames_loggedin","false");
         location.reload();
     };
-} else {
-    logoutBtn.style.display = "none";
 }
 </script>
 
