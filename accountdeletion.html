@@ -3,66 +3,43 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Account Settings</title>
-
+<title>Manage Account</title>
 <style>
-body {margin:0; font-family:Verdana,sans-serif; background:linear-gradient(135deg,#2b1b0f,#1a120a); color:#c9ffb5; min-height:100vh; display:flex; justify-content:center; align-items:center; overflow:hidden; position:relative;}
-.box {background:#3a2616; padding:30px; border-radius:18px; width:360px; box-shadow:0 0 25px #7dff6a; z-index:2;}
-h2 {text-align:center;color:#9dff7a;margin-bottom:10px;}
-p{text-align:center;margin-bottom:20px;}
-input {width:100%; padding:12px; margin-top:12px; font-size:1em; border-radius:10px; border:none;}
-button {width:100%; margin-top:15px; padding:14px; font-size:1.05em; background:#1e140c; color:#c9ffb5; border:3px solid #7dff6a; border-radius:12px; cursor:pointer; transition:0.25s;}
-button:hover{background:#7dff6a;color:#1a120a;}
-.sparkle{position:absolute;width:4px;height:4px;background:#9dff7a;border-radius:50%;animation:sparkle 3s infinite ease-in-out;}
-@keyframes sparkle {0%{opacity:1;transform:translateY(0);}50%{opacity:0.4;transform:translateY(-15px);}100%{opacity:1;transform:translateY(0);}}
+body {
+    margin:0;
+    font-family:Verdana,sans-serif;
+    background:linear-gradient(135deg,#1a1100,#554422);
+    color:#ccff99;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    overflow-x:hidden;
+    position:relative;
+}
+h1{margin-top:50px;font-size:2.8em;color:#aadd44;text-shadow:2px 2px #000;}
+.subtitle{font-size:1.4em;color:#bbff88;margin-bottom:30px;text-align:center;max-width:600px;}
+form{display:flex;flex-direction:column;gap:15px;width:300px;}
+input{padding:10px;font-size:1.2em;border-radius:10px;border:2px solid #bbff88;background:#332200;color:#ccff99;}
+button{padding:15px;font-size:1.3em;background:#332200;color:#ccff99;border:3px solid #bbff88;border-radius:15px;cursor:pointer;box-shadow:0 0 12px #88ff44;transition:all 0.25s;}
+button:hover{background:#bbff88;color:#332200;transform:scale(1.05);box-shadow:0 0 25px #88ff44;}
+.sparkle{position:absolute;width:4px;height:4px;background:#bbff44;border-radius:50%;animation:sparkle 3s infinite ease-in-out;}
+@keyframes sparkle{0%{opacity:1;transform:translateY(0);}50%{opacity:0.4;transform:translateY(-15px);}100%{opacity:1;transform:translateY(0);}}
 </style>
 </head>
-
 <body>
 
-<div class="box">
-<h2>Account Settings</h2>
-<p id="userDisplay"></p>
-<input id="newUsername" placeholder="New Username">
-<button onclick="changeUsername()">Change Username</button>
-<input id="newPassword" type="password" placeholder="New Password">
-<button onclick="changePassword()">Change Password</button>
-<button onclick="deleteAccount()">DELETE ACCOUNT</button>
-<button onclick="goBack()">Back to Hub</button>
-</div>
+<h1>Manage Account</h1>
+<div class="subtitle">Delete account or change username/password.</div>
+
+<form id="manageForm">
+    <input type="text" id="newUsername" placeholder="New Username">
+    <input type="password" id="newPassword" placeholder="New Password">
+    <button type="button" id="updateBtn">Update Account</button>
+    <button type="button" id="deleteBtn">Delete Account</button>
+</form>
 
 <script>
-const account = JSON.parse(localStorage.getItem("maxgames_account"));
-const loggedIn = localStorage.getItem("maxgames_loggedin")==="true";
-if(!account || !loggedIn){window.location.href="index.html";}
-else{document.getElementById("userDisplay").textContent="Logged in as: "+account.username;}
-
-function changeUsername(){
-    const newName=document.getElementById("newUsername").value.trim();
-    if(!newName) return alert("Enter a username!");
-    account.username=newName;
-    localStorage.setItem("maxgames_account",JSON.stringify(account));
-    alert("Username changed!");
-}
-
-function changePassword(){
-    const newPass=document.getElementById("newPassword").value.trim();
-    if(!newPass) return alert("Enter a password!");
-    account.password=newPass;
-    localStorage.setItem("maxgames_account",JSON.stringify(account));
-    alert("Password changed!");
-}
-
-function deleteAccount(){
-    if(confirm("Are you SURE you want to delete your account?")){
-        localStorage.removeItem("maxgames_account");
-        localStorage.setItem("maxgames_loggedin","false");
-        window.location.href="index.html";
-    }
-}
-
-function goBack(){window.location.href="index.html";}
-
 // SPARKLES
 for(let i=0;i<60;i++){
     const s=document.createElement("div");
@@ -72,6 +49,34 @@ for(let i=0;i<60;i++){
     s.style.width=s.style.height=(3+Math.random()*4)+"px";
     document.body.appendChild(s);
 }
+
+// ACCOUNT LOGIC
+const updateBtn = document.getElementById("updateBtn");
+const deleteBtn = document.getElementById("deleteBtn");
+
+updateBtn.addEventListener("click", function(){
+    let account = JSON.parse(localStorage.getItem("maxgames_account"));
+    if(!account){ alert("No account found!"); return; }
+
+    const newUsername = document.getElementById("newUsername").value.trim();
+    const newPassword = document.getElementById("newPassword").value;
+
+    if(newUsername) account.username = newUsername;
+    if(newPassword) account.password = newPassword;
+
+    localStorage.setItem("maxgames_account", JSON.stringify(account));
+    alert("Account updated!");
+});
+
+deleteBtn.addEventListener("click", function(){
+    if(confirm("Are you sure you want to delete your account?")){
+        localStorage.removeItem("maxgames_account");
+        localStorage.setItem("maxgames_loggedin","false");
+        alert("Account deleted!");
+        window.location.href="index.html";
+    }
+});
 </script>
+
 </body>
 </html>
