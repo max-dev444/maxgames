@@ -17,8 +17,6 @@ body {
     align-items: center;
     overflow-x: hidden;
     position: relative;
-    <button id="sneakpeek" onclick="location.href='sneakpeek.html'">sneakpeek</button>
-
 }
 
 h1 {
@@ -104,7 +102,7 @@ footer {
     100% { opacity: 1; transform: translateY(0); }
 }
 
-    #sneakpeek {
+#sneakpeek {
     position: fixed;
     bottom: 6px;
     right: 6px;
@@ -122,6 +120,9 @@ footer {
     opacity: 1;
 }
 
+.locked {
+    display:none;
+}
 </style>
 </head>
 
@@ -133,12 +134,10 @@ footer {
 Created by MAX — play TMS, Element OS, Gamers Hub, and more.
 </div>
 
-<!-- LEFT BUTTON -->
 <button id="leftBtn"></button>
-<!-- RIGHT BUTTON -->
 <button id="rightBtn" style="display:none;">Log Out</button>
 
-<div class="buttons">
+<div class="buttons locked" id="mainButtons">
     <button onclick="window.open('Element OS.html','_blank')">Element OS</button>
     <button onclick="window.open('Gamers Hub V4.html','_blank')">Gamer's Hub</button>
     <button onclick="window.open('TMSswitcherv2.html')">TMS</button>
@@ -148,29 +147,24 @@ Created by MAX — play TMS, Element OS, Gamers Hub, and more.
     <button onclick="window.open('updatelog.html','_blank')">Update Log</button>
     <button onclick="window.open('specialthanks.html','_blank')">Special Thanks</button>
 </div>
-<div style="margin:20px 0; text-align:center;">
-    <button id="websitesBtn" style="
-        background:none;
-        border:none;
-        color:#3399ff;
-        font-size:1.3em;
-        text-decoration:underline;
-        cursor:pointer;
-    ">Websites</button>
-</div>
 
-<script>
-// Navigate to websitepage.html when clicked
-document.getElementById("websitesBtn").onclick = function() {
-    window.location.href = "websitepage.html";
-};
-</script>
+<div id="websitesWrap" class="locked" style="margin:20px 0; text-align:center;">
+    <button id="websitesBtn" style="background:none;border:none;color:#3399ff;font-size:1.3em;text-decoration:underline;cursor:pointer;">
+        Websites
+    </button>
+</div>
 
 <footer>
 © 2025 Max — 67!!
 </footer>
 
+<button id="sneakpeek" onclick="window.location.href='sneakpeek.html'">sneakpeek</button>
+
 <script>
+document.getElementById("websitesBtn").onclick = function() {
+    window.location.href = "websitepage.html";
+};
+
 // SPARKLES
 for (let i = 0; i < 60; i++) {
     const s = document.createElement("div");
@@ -181,35 +175,39 @@ for (let i = 0; i < 60; i++) {
     document.body.appendChild(s);
 }
 
-// ACCOUNT LOGIC
+// ACCOUNT LOCK SYSTEM
 const leftBtn = document.getElementById("leftBtn");
 const rightBtn = document.getElementById("rightBtn");
+const buttons = document.getElementById("mainButtons");
+const websites = document.getElementById("websitesWrap");
+
 const account = JSON.parse(localStorage.getItem("maxgames_account"));
 const loggedIn = localStorage.getItem("maxgames_loggedin") === "true";
 
 if (!account) {
     leftBtn.textContent = "Create Account";
-    leftBtn.onclick = () => { window.location.href = "accountcreation.html"; };
-    rightBtn.style.display = "none";
-} else if (!loggedIn) {
+    leftBtn.onclick = () => location.href="accountcreation.html";
+    buttons.style.display = "none";
+    websites.style.display = "none";
+} 
+else if (!loggedIn) {
     leftBtn.textContent = "Log In";
-    leftBtn.onclick = () => { window.location.href = "accountcreation.html"; };
-    rightBtn.style.display = "none";
-} else {
+    leftBtn.onclick = () => location.href="accountcreation.html";
+    buttons.style.display = "none";
+    websites.style.display = "none";
+} 
+else {
     leftBtn.textContent = account.username;
-    leftBtn.onclick = () => { window.location.href = "accountdeletion.html"; };
+    leftBtn.onclick = () => location.href="accountdeletion.html";
     rightBtn.style.display = "block";
+    buttons.style.display = "grid";
+    websites.style.display = "block";
     rightBtn.onclick = () => {
         localStorage.setItem("maxgames_loggedin","false");
         location.reload();
     };
 }
 </script>
-
-    <button id="sneakpeek" onclick="window.location.href='sneakpeek.html'">
-    sneakpeek
-</button>
-
 
 </body>
 </html>
