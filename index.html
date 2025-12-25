@@ -195,8 +195,64 @@ const rightBtn = document.getElementById("rightBtn");
 const buttons = document.getElementById("mainButtons");
 const websites = document.getElementById("websitesWrap");
 
-const account = JSON.parse(localStorage.getItem("maxgames_account"));
-const loggedIn = localStorage.getItem("maxgames_loggedin") === "true";
+const leftBtn = document.getElementById("leftBtn");
+const rightBtn = document.getElementById("rightBtn");
+const buttons = document.getElementById("mainButtons");
+const websites = document.getElementById("websitesWrap");
+
+let account = JSON.parse(localStorage.getItem("maxgames_account"));
+let loggedIn = localStorage.getItem("maxgames_loggedin") === "true";
+let guest = localStorage.getItem("maxgames_guest") === "true";
+
+// NO ACCOUNT → OFFER GUEST
+if (!account && !guest) {
+    leftBtn.textContent = "Guest Account";
+    leftBtn.onclick = () => {
+        const num = Math.floor(Math.random() * 1000000);
+        const guestName = "Guest" + num;
+
+        localStorage.setItem("maxgames_guest", "true");
+        localStorage.setItem("maxgames_guestname", guestName);
+        location.reload();
+    };
+
+    buttons.style.display = "none";
+    websites.style.display = "none";
+}
+
+// GUEST MODE
+else if (guest) {
+    const guestName = localStorage.getItem("maxgames_guestname");
+
+    leftBtn.textContent = guestName;
+    leftBtn.onclick = () => location.href = "accountcreation.html";
+
+    buttons.style.display = "grid";
+    websites.style.display = "block";
+}
+
+// REAL ACCOUNT BUT NOT LOGGED IN
+else if (account && !loggedIn) {
+    leftBtn.textContent = "Log In";
+    leftBtn.onclick = () => location.href="accountcreation.html";
+    buttons.style.display = "none";
+    websites.style.display = "none";
+}
+
+// REAL ACCOUNT LOGGED IN
+else {
+    leftBtn.textContent = account.username;
+    leftBtn.onclick = () => location.href="accountdeletion.html";
+    rightBtn.style.display = "block";
+    buttons.style.display = "grid";
+    websites.style.display = "block";
+
+    rightBtn.onclick = () => {
+        localStorage.setItem("maxgames_loggedin","false");
+        location.reload();
+    };
+}
+
 
 if (!account) {
     leftBtn.textContent = "Create Account";
