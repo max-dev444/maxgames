@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>You are secure</title>
+  <style>
+    body {
+      background: radial-gradient(circle at top, #1a0000, #000000);
+      font-family: Arial, sans-serif;
+      color: white;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 64px;
+      color: #ff4d4d;
+      margin-top: 50px;
+      text-shadow: 0 0 20px #ff4d4d, 0 0 40px #ff9999;
+      position: relative;
+      z-index: 2;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 50px auto;
+      padding: 20px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .section {
+      margin-bottom: 50px;
+      padding: 25px;
+      background: rgba(255, 0, 0, 0.1);
+      border-left: 6px solid #ff4d4d;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(255,0,0,0.2);
+      position: relative;
+      z-index: 2;
+    }
+
+    .section h2 {
+      font-size: 36px;
+      margin-bottom: 15px;
+      color: #ff9999;
+      text-shadow: 0 0 10px #ff4d4d;
+    }
+
+    .section p {
+      font-size: 18px;
+      line-height: 1.6;
+      opacity: 0.9;
+    }
+
+    .back {
+      display: block;
+      text-align: center;
+      margin: 50px auto;
+      padding: 15px 30px;
+      width: fit-content;
+      font-size: 20px;
+      background: linear-gradient(135deg, #ff4d4d, #ff9999);
+      color: white;
+      text-decoration: none;
+      border-radius: 30px;
+      box-shadow: 0 0 20px rgba(255,77,77,0.6);
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+      z-index: 2;
+    }
+
+    .back:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 30px rgba(255,77,77,0.9);
+    }
+
+    /* SPARKLES */
+    .sparkle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: orange;
+      border-radius: 50%;
+      opacity: 0.8;
+      animation: moveSideways linear infinite;
+      top: 0;
+    }
+
+    @keyframes moveSideways {
+      from { left: -10px; }
+      to { left: 100vw; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sparkles -->
+  <script>
+    const sparkleCount = 250; // number of sparkles
+    for(let i=0; i < sparkleCount; i++){
+      let s = document.createElement('div');
+      s.className = 'sparkle';
+      s.style.top = Math.random() * window.innerHeight + 'px';
+      s.style.width = s.style.height = 2 + Math.random()*4 + 'px';
+      s.style.animationDuration = 3 + Math.random()*4 + 's';
+      s.style.opacity = 0.5 + Math.random()*0.5;
+      document.body.appendChild(s);
+    }
+  </script>
+
+  <h1>You are secure</h1>
+  <div class="container">
+
+    <div class="section">
+      <h2>How do you know this?</h2>
+      <p>I spent money on extra security, and I swear that this website WILL NOT hack you or steal your information. I am just a kid who wants to practice his coding skills. Again I will say this, you will not get any information taken from you. I cannot access or know how to access any of it, so you will be ABSOLUTELY FINE. Best regards, Max</p>
+    </div>
+
+  </div>
+
+  <a class="back" href="index.html">⬅ Back to Hub</a>
+
+</body>
+</html>
