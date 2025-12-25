@@ -233,6 +233,17 @@ else if (isGuest) {
 else if (account && !loggedIn) {
     leftBtn.textContent = "Log In";
     leftBtn.onclick = () => location.href = "accountcreation.html";
+
+    rightBtn.style.display = "block";
+    rightBtn.textContent = "Make Guest Account";
+    rightBtn.onclick = () => {
+        const num = Math.floor(Math.random() * 1000000);
+        localStorage.setItem("maxgames_guest", "true");
+        localStorage.setItem("maxgames_guestname", "Guest" + num);
+        location.reload();
+    };
+}
+
 }
 
 // REAL ACCOUNT LOGGED IN
@@ -250,56 +261,6 @@ else {
     buttons.style.display = "grid";
     websites.style.display = "block";
 }
-
-// NO ACCOUNT → OFFER GUEST
-if (!account && !guest) {
-    leftBtn.textContent = "Guest Account";
-    leftBtn.onclick = () => {
-        const num = Math.floor(Math.random() * 1000000);
-        const guestName = "Guest" + num;
-
-        localStorage.setItem("maxgames_guest", "true");
-        localStorage.setItem("maxgames_guestname", guestName);
-        location.reload();
-    };
-
-    buttons.style.display = "none";
-    websites.style.display = "none";
-}
-
-// GUEST MODE
-else if (guest) {
-    const guestName = localStorage.getItem("maxgames_guestname");
-
-    leftBtn.textContent = guestName;
-    leftBtn.onclick = () => location.href = "accountcreation.html";
-
-    buttons.style.display = "grid";
-    websites.style.display = "block";
-}
-
-// REAL ACCOUNT BUT NOT LOGGED IN
-else if (account && !loggedIn) {
-    leftBtn.textContent = "Log In";
-    leftBtn.onclick = () => location.href="accountcreation.html";
-    buttons.style.display = "none";
-    websites.style.display = "none";
-}
-
-// REAL ACCOUNT LOGGED IN
-else {
-    leftBtn.textContent = account.username;
-    leftBtn.onclick = () => location.href="accountdeletion.html";
-    rightBtn.style.display = "block";
-    buttons.style.display = "grid";
-    websites.style.display = "block";
-
-    rightBtn.onclick = () => {
-        localStorage.setItem("maxgames_loggedin","false");
-        location.reload();
-    };
-}
-
 
 if (!account) {
     leftBtn.textContent = "Create Account";
