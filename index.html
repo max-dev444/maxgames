@@ -189,20 +189,67 @@ for (let i = 0; i < 60; i++) {
     document.body.appendChild(s);
 }
 
-// ACCOUNT LOCK SYSTEM
+// ACCOUNT + GUEST SYSTEM
 const leftBtn = document.getElementById("leftBtn");
 const rightBtn = document.getElementById("rightBtn");
 const buttons = document.getElementById("mainButtons");
 const websites = document.getElementById("websitesWrap");
 
-const leftBtn = document.getElementById("leftBtn");
-const rightBtn = document.getElementById("rightBtn");
-const buttons = document.getElementById("mainButtons");
-const websites = document.getElementById("websitesWrap");
+const account = JSON.parse(localStorage.getItem("maxgames_account"));
+const loggedIn = localStorage.getItem("maxgames_loggedin") === "true";
+const isGuest = localStorage.getItem("maxgames_guest") === "true";
+const guestName = localStorage.getItem("maxgames_guestname");
 
-let account = JSON.parse(localStorage.getItem("maxgames_account"));
-let loggedIn = localStorage.getItem("maxgames_loggedin") === "true";
-let guest = localStorage.getItem("maxgames_guest") === "true";
+// DEFAULT: everything hidden
+buttons.style.display = "none";
+websites.style.display = "none";
+rightBtn.style.display = "none";
+
+// NO ACCOUNT → SHOW GUEST + CREATE
+if (!account && !isGuest) {
+    leftBtn.textContent = "Guest Account";
+    leftBtn.onclick = () => {
+        const num = Math.floor(Math.random() * 1000000);
+        localStorage.setItem("maxgames_guest", "true");
+        localStorage.setItem("maxgames_guestname", "Guest" + num);
+        location.reload();
+    };
+
+    rightBtn.style.display = "block";
+    rightBtn.textContent = "Create Account";
+    rightBtn.onclick = () => location.href = "accountcreation.html";
+}
+
+// GUEST MODE
+else if (isGuest) {
+    leftBtn.textContent = guestName;
+    leftBtn.onclick = () => location.href = "accountcreation.html";
+
+    buttons.style.display = "grid";
+    websites.style.display = "block";
+}
+
+// REAL ACCOUNT NOT LOGGED IN
+else if (account && !loggedIn) {
+    leftBtn.textContent = "Log In";
+    leftBtn.onclick = () => location.href = "accountcreation.html";
+}
+
+// REAL ACCOUNT LOGGED IN
+else {
+    leftBtn.textContent = account.username;
+    leftBtn.onclick = () => location.href = "accountdeletion.html";
+
+    rightBtn.style.display = "block";
+    rightBtn.textContent = "Log Out";
+    rightBtn.onclick = () => {
+        localStorage.setItem("maxgames_loggedin","false");
+        location.reload();
+    };
+
+    buttons.style.display = "grid";
+    websites.style.display = "block";
+}
 
 // NO ACCOUNT → OFFER GUEST
 if (!account && !guest) {
