@@ -171,14 +171,12 @@ Created by MAX — play TMS, Element OS, Gamers Hub, and more.
 </div>
 
 <footer>
-© 2025 Max — 67!!
+© 2025 Max — 67!! Also, to play games, create an account.
 </footer>
     
 <button id="subbtn" onclick="window.open('https://www.youtube.com/@Maxplaysalot','_blank')">
 Give Max a sub
 </button>
-<script>
-
 <script>
 
 // SPARKLES
@@ -191,46 +189,38 @@ for (let i = 0; i < 60; i++) {
     document.body.appendChild(s);
 }
 
-// ACCOUNT SYSTEM
+// ACCOUNT LOCK SYSTEM
 const leftBtn = document.getElementById("leftBtn");
 const rightBtn = document.getElementById("rightBtn");
 const buttons = document.getElementById("mainButtons");
-
-// ALWAYS show games
-buttons.style.display = "grid";
+const websites = document.getElementById("websitesWrap");
 
 const account = JSON.parse(localStorage.getItem("maxgames_account"));
 const loggedIn = localStorage.getItem("maxgames_loggedin") === "true";
 
-rightBtn.style.display = "none";
-
-// No account exists
 if (!account) {
     leftBtn.textContent = "Create Account";
-    leftBtn.onclick = () => location.href = "accountcreation.html";
-}
-
-// Account exists but not logged in
+    leftBtn.onclick = () => location.href="accountcreation.html";
+    buttons.style.display = "none";
+    websites.style.display = "none";
+} 
 else if (!loggedIn) {
     leftBtn.textContent = "Log In";
-    leftBtn.onclick = () => location.href = "accountcreation.html";
-}
-
-// Logged in
+    leftBtn.onclick = () => location.href="accountcreation.html";
+    buttons.style.display = "none";
+    websites.style.display = "none";
+} 
 else {
     leftBtn.textContent = account.username;
-    leftBtn.onclick = () => location.href = "accountdeletion.html";
-
+    leftBtn.onclick = () => location.href="accountdeletion.html";
     rightBtn.style.display = "block";
-    rightBtn.textContent = "Log Out";
-    rightBtn.onclick = () => location.href = "note.html"; 
-        localStorage.setItem("maxgames_loggedin", "false");
+    buttons.style.display = "grid";
+    websites.style.display = "block";
+    rightBtn.onclick = () => {
+        localStorage.setItem("maxgames_loggedin","false");
         location.reload();
     };
 }
-
-</script>
-
 </script>
 
 </body>
