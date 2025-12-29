@@ -53,13 +53,13 @@ const firebaseConfig = {
   measurementId: "G-C7K68ZWPWZ"
 };
 const firebaseConfig = {
-    apiKey: "PASTE",
-    authDomain: "PASTE",
-    databaseURL: "PASTE",
-    projectId: "PASTE",
-    storageBucket: "PASTE",
-    messagingSenderId: "PASTE",
-    appId: "PASTE"
+    apiKey: "AIzaSyBI7jbEgrN-z7SUx7moImNTDA10B-q8fuw",
+    authDomain: "blockworld-e9b9d.firebaseapp.com",
+    databaseURL: https://blockworld-e9b9d-default-rtdb.firebaseio.com,
+    projectId: "blockworld-e9b9d",
+    storageBucket: "blockworld-e9b9d.firebasestorage.app",
+    messagingSenderId: "915723982814",
+    appId: "1:915723982814:web:95b24f6272e63facdcaf4f"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -68,7 +68,7 @@ const blocksRef = db.ref("blocks");
 
 // GAME SETTINGS
 const GRID_SIZE = 1024;
-const CELL = 8;
+const CELL = 32;
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
