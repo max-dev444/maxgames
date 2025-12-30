@@ -21,20 +21,28 @@ body {
     z-index:10;
 }
 
-#color {
-    width:50px;
-    height:50px;
-    border:none;
+#color { width:50px;height:50px;border:none; }
+
+#deleteToggle {
+    margin-top:8px;
+    padding:6px;
+    background:#400;
+    border:2px solid red;
+    color:white;
+    cursor:pointer;
 }
 
-#deleteToggle{
-    width:100%;
-    margin-top:6px;
-    background:#ff4444;
-    color:black;
-    border:none;
-    padding:6px;
-    cursor:pointer;
+#players{
+    position:fixed;
+    left:10px;
+    top:10px;
+    background:#111;
+    border:2px solid #ff4444;
+    padding:10px;
+    min-width:180px;
+    max-height:90vh;
+    overflow-y:auto;
+    z-index:15;
 }
 
 #sidebar{
@@ -42,24 +50,21 @@ body {
     right:0;
     top:0;
     width:320px;
-    height:100%;
+    height:100vh;
     background:#111;
     border-left:3px solid #ff4444;
-    padding:12px;
+    padding:15px;
     display:none;
     z-index:20;
-    overflow-y:auto;
 }
 
 #closeSide{
     position:absolute;
-    right:10px;
     top:10px;
-    background:#ff4444;
-    border:none;
-    color:black;
-    font-size:18px;
+    right:10px;
     cursor:pointer;
+    color:red;
+    font-size:20px;
 }
 </style>
 </head>
@@ -67,15 +72,17 @@ body {
 
 <canvas id="game"></canvas>
 
+<div id="players"><b>PLAYERS</b><br></div>
+
 <div id="ui">
-    Block Color:<br>
-    <input type="color" id="color" value="#ffffff">
-    <button id="deleteToggle">Delete Mode: OFF</button>
+Block Color<br>
+<input type="color" id="color" value="#ffffff"><br>
+<button id="deleteToggle">Delete Mode OFF</button>
 </div>
 
 <div id="sidebar">
-    <button id="closeSide">X</button>
-    <div id="blockInfo"></div>
+<div id="closeSide">✖</div>
+<div id="blockInfo"></div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -92,57 +99,76 @@ const firebaseConfig = {
   appId: "1:915723982814:web:95b24f6272e63facdcaf4f"
 };
 firebase.initializeApp(firebaseConfig);
-
 const db = firebase.database();
 const blocksRef = db.ref("blocks");
+const playersRef = db.ref("players");
 
-const GRID_SIZE = 1024;
-const CELL = 32;
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
 
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-
-canvas.width = innerWidth;
-canvas.height = innerHeight;
-
+const GRID=1024;
+const CELL=32;
 let camX=0, camY=0;
+let deleteMode=false;
+let dragging=false;
+
 const blocks={};
 
-blocksRef.on("value",snap=>{
-    Object.assign(blocks,snap.val()||{});
-});
+blocksRef.on("child_added",s=>blocks[s.key]=s.val());
+blocksRef.on("child_changed",s=>blocks[s.key]=s.val());
 
-// --- GEO LOCATION ---
-let myLocation="Unknown";
-let myName="UnknownPlayer";
+let myLocation="Loading";
+let myName="LoadingPlayer";
+let myID=Math.random().toString(36).substr(2,9);
+
 fetch("https://ipapi.co/json/")
 .then(r=>r.json())
 .then(d=>{
-    myLocation=d.region || d.country_name;
+    if(d.region) myLocation=d.region;
+    else return fetch("https://ipwho.is/");
+    return null;
+})
+.then(r=>r?r.json():null)
+.then(d=>{
+    if(d && d.country) myLocation=d.country;
     myName=myLocation.replace(/ /g,"")+"Player";
+    playersRef.child(myID).set({name:myName,location:myLocation,lastSeen:Date.now()});
 });
 
-// --- DRAW ---
+setInterval(()=>{
+    playersRef.child(myID+"/lastSeen").set(Date.now());
+},5000);
+
+playersRef.on("value",snap=>{
+    players.innerHTML="<b>PLAYERS</b><br>";
+    const p=snap.val()||{};
+    Object.values(p).forEach(pl=>{
+        if(Date.now()-pl.lastSeen<15000){
+            players.innerHTML+=pl.name+"<br>";
+        }
+    });
+});
+
 function draw(){
     ctx.fillStyle="#000";
     ctx.fillRect(0,0,canvas.width,canvas.height);
+    let sx=Math.floor(camX/CELL);
+    let sy=Math.floor(camY/CELL);
+    let ex=sx+Math.ceil(canvas.width/CELL);
+    let ey=sy+Math.ceil(canvas.height/CELL);
 
-    let startX=Math.floor(camX/CELL);
-    let startY=Math.floor(camY/CELL);
-
-    for(let x=startX;x<startX+50;x++){
-        for(let y=startY;y<startY+30;y++){
-            if(x<0||y<0||x>=GRID_SIZE||y>=GRID_SIZE) continue;
-
+    for(let x=sx;x<=ex;x++){
+        for(let y=sy;y<=ey;y++){
+            if(x<0||y<0||x>=GRID||y>=GRID) continue;
             let px=x*CELL-camX;
             let py=y*CELL-camY;
-
             ctx.strokeStyle="#222";
             ctx.strokeRect(px,py,CELL,CELL);
-
-            let key=x+"_"+y;
-            if(blocks[key]?.color){
-                ctx.fillStyle=blocks[key].color;
+            let k=x+"_"+y;
+            if(blocks[k]){
+                ctx.fillStyle=blocks[k].color;
                 ctx.fillRect(px,py,CELL,CELL);
             }
         }
@@ -151,89 +177,74 @@ function draw(){
 }
 draw();
 
-// --- CAMERA ---
-document.onkeydown=e=>{
-    if(e.key==="ArrowLeft") camX-=CELL*5;
-    if(e.key==="ArrowRight") camX+=CELL*5;
-    if(e.key==="ArrowUp") camY-=CELL*5;
-    if(e.key==="ArrowDown") camY+=CELL*5;
-};
-
-// --- DELETE MODE ---
-let deleteMode=false;
-deleteToggle.onclick=()=>{
+document.getElementById("deleteToggle").onclick=()=>{
     deleteMode=!deleteMode;
-    deleteToggle.textContent="Delete Mode: "+(deleteMode?"ON":"OFF");
+    deleteToggle.textContent=deleteMode?"Delete Mode ON":"Delete Mode OFF";
 };
 
-// --- HISTORY SAVE ---
-function writeBlock(key,color,deleted=false){
-    blocksRef.child(key).once("value").then(s=>{
-        let h=s.val()?.history||[];
-        h.push({
-            color:color,
-            deleted:deleted,
-            time:new Date().toLocaleString(),
-            location:myLocation
-        });
-        blocksRef.child(key).set({
-            color:deleted?null:color,
-            history:h
-        });
-    });
-}
-
-// --- DRAG BUILD ---
-let dragging=false;
-canvas.onmousedown=()=>dragging=true;
-canvas.onmouseup=()=>dragging=false;
-
-canvas.onmousemove=e=>{
-    if(!dragging) return;
-    place(e);
-};
-
-canvas.onclick=e=>place(e);
-
-function place(e){
-    const rect=canvas.getBoundingClientRect();
-    const gx=Math.floor((e.clientX-rect.left+camX)/CELL);
-    const gy=Math.floor((e.clientY-rect.top+camY)/CELL);
+function place(mx,my){
+    let gx=Math.floor(mx/CELL);
+    let gy=Math.floor(my/CELL);
+    if(gx<0||gy<0||gx>=GRID||gy>=GRID) return;
     const key=gx+"_"+gy;
     if(deleteMode){
-        if(blocks[key]) writeBlock(key,blocks[key].color,true);
+        blocksRef.child(key).set({
+            color:"#000000",
+            deletedBy:myName,
+            deletedAt:Date.now(),
+            deletedFrom:myLocation
+        });
     }else{
-        writeBlock(key,color.value,false);
+        blocksRef.child(key).set({
+            color:color.value,
+            placedBy:myName,
+            placedAt:Date.now(),
+            placedFrom:myLocation
+        });
     }
 }
 
-// --- SIDEBAR ---
-canvas.oncontextmenu=e=>{
-    e.preventDefault();
-    const rect=canvas.getBoundingClientRect();
-    const gx=Math.floor((e.clientX-rect.left+camX)/CELL);
-    const gy=Math.floor((e.clientY-rect.top+camY)/CELL);
-    const key=gx+"_"+gy;
-    if(!blocks[key]) return;
+canvas.addEventListener("mousedown",e=>{dragging=true;});
+canvas.addEventListener("mouseup",e=>{dragging=false;});
+canvas.addEventListener("mousemove",e=>{
+    if(!dragging) return;
+    const r=canvas.getBoundingClientRect();
+    place(e.clientX-r.left+camX,e.clientY-r.top+camY);
+});
 
+canvas.addEventListener("click",e=>{
+    const r=canvas.getBoundingClientRect();
+    place(e.clientX-r.left+camX,e.clientY-r.top+camY);
+});
+
+canvas.addEventListener("contextmenu",e=>{
+    e.preventDefault();
+    const r=canvas.getBoundingClientRect();
+    const gx=Math.floor((e.clientX-r.left+camX)/CELL);
+    const gy=Math.floor((e.clientY-r.top+camY)/CELL);
+    const key=gx+"_"+gy;
+    const b=blocks[key];
+    if(!b) return;
     sidebar.style.display="block";
     ui.style.display="none";
+    players.style.display="none";
 
-    blockInfo.innerHTML="<h3>Block "+key+"</h3>";
-    blocks[key].history.forEach(h=>{
-        blockInfo.innerHTML+=`
-        <div style="border-bottom:1px solid #333;margin-bottom:8px;">
-        ${h.deleted?"Deleted":"Placed"}<br>
-        Color: ${h.color}<br>
-        Location: ${h.location}<br>
-        Time: ${h.time}
-        </div>`;
-    });
-};
+    blockInfo.innerHTML=`
+    <b>Block</b><br>
+    Color: ${b.color}<br><br>
+    Placed By: ${b.placedBy||"?"}<br>
+    Place: ${b.placedFrom||"?"}<br>
+    Time: ${b.placedAt?new Date(b.placedAt).toLocaleString():""}<br><br>
+    Deleted By: ${b.deletedBy||""}<br>
+    Place: ${b.deletedFrom||""}<br>
+    Time: ${b.deletedAt?new Date(b.deletedAt).toLocaleString():""}
+    `;
+});
 
 closeSide.onclick=()=>{
     sidebar.style.display="none";
     ui.style.display="block";
+    players.style.display="block";
 };
 </script>
 
