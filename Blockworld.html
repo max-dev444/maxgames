@@ -21,40 +21,46 @@ body {
     z-index:10;
 }
 
-#color { width:50px; height:50px; border:none; margin-bottom:5px; }
-#deleteMode { display:block; margin-bottom:5px; }
+#color {
+    width:50px;
+    height:50px;
+    border:none;
+}
 
-#sidebar {
+#deleteToggle{
+    width:100%;
+    margin-top:6px;
+    background:#ff4444;
+    color:black;
+    border:none;
+    padding:6px;
+    cursor:pointer;
+}
+
+#sidebar{
     position:fixed;
     right:0;
     top:0;
-    width:250px;
+    width:320px;
     height:100%;
     background:#111;
-    overflow-y:auto;
-    padding:10px;
+    border-left:3px solid #ff4444;
+    padding:12px;
     display:none;
-    z-index:9;
-}
-
-#sidebar h2 { margin-top:0; display:flex; justify-content:space-between; }
-#sidebar button { background:#444; color:white; border:none; border-radius:5px; cursor:pointer; }
-
-#playersList {
-    position:fixed;
-    left:0;
-    top:0;
-    width:200px;
-    height:100%;
-    background:#111;
+    z-index:20;
     overflow-y:auto;
-    padding:10px;
-    z-index:9;
 }
-#playersList h2 { margin-top:0; }
 
-canvas { display:block; }
-
+#closeSide{
+    position:absolute;
+    right:10px;
+    top:10px;
+    background:#ff4444;
+    border:none;
+    color:black;
+    font-size:18px;
+    cursor:pointer;
+}
 </style>
 </head>
 <body>
@@ -63,25 +69,19 @@ canvas { display:block; }
 
 <div id="ui">
     Block Color:<br>
-    <input type="color" id="color" value="#ffffff"><br>
-    <label><input type="checkbox" id="deleteMode"> Delete Mode</label>
+    <input type="color" id="color" value="#ffffff">
+    <button id="deleteToggle">Delete Mode: OFF</button>
 </div>
 
 <div id="sidebar">
-    <h2>Block Info <button id="closeSidebar">X</button></h2>
+    <button id="closeSide">X</button>
     <div id="blockInfo"></div>
-</div>
-
-<div id="playersList">
-    <h2>Players</h2>
-    <ul id="players"></ul>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
 <script>
-// Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyBI7jbEgrN-z7SUx7moImNTDA10B-q8fuw",
   authDomain: "blockworld-e9b9d.firebaseapp.com",
@@ -89,150 +89,152 @@ const firebaseConfig = {
   projectId: "blockworld-e9b9d",
   storageBucket: "blockworld-e9b9d.firebasestorage.app",
   messagingSenderId: "915723982814",
-  appId: "1:915723982814:web:95b24f6272e63facdcaf4f",
-  measurementId: "G-C7K68ZWPWZ"
-}
+  appId: "1:915723982814:web:95b24f6272e63facdcaf4f"
+};
 firebase.initializeApp(firebaseConfig);
+
 const db = firebase.database();
 const blocksRef = db.ref("blocks");
-const playersRef = db.ref("players");
-
-// Canvas
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
 
 const GRID_SIZE = 1024;
 const CELL = 32;
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+canvas.width = innerWidth;
+canvas.height = innerHeight;
+
 let camX=0, camY=0;
 const blocks={};
 
-// UI
-const colorPicker = document.getElementById("color");
-const deleteToggle = document.getElementById("deleteMode");
-const sidebar = document.getElementById("sidebar");
-const blockInfoDiv = document.getElementById("blockInfo");
-const closeSidebarBtn = document.getElementById("closeSidebar");
-const playersList = document.getElementById("players");
-
-// Player info
-let playerName = "Player_"+Math.floor(Math.random()*1000000);
-let playerCountry = "Unknown";
-
-// Get player country
-fetch("https://ipapi.co/json/").then(r=>r.json()).then(data=>{
-    playerCountry = data.country_name;
+blocksRef.on("value",snap=>{
+    Object.assign(blocks,snap.val()||{});
 });
 
-// Add player to list
-const playerRef = playersRef.child(playerName);
-playerRef.set({country:playerCountry});
-playerRef.onDisconnect().remove();
-
-// Update live players list
-playersRef.on("value", snap=>{
-    playersList.innerHTML = "<h2>Players</h2><ul>" + 
-        Object.keys(snap.val()||{}).map(p=>" <li>"+p+"</li>").join("") +
-        "</ul>";
+// --- GEO LOCATION ---
+let myLocation="Unknown";
+let myName="UnknownPlayer";
+fetch("https://ipapi.co/json/")
+.then(r=>r.json())
+.then(d=>{
+    myLocation=d.region || d.country_name;
+    myName=myLocation.replace(/ /g,"")+"Player";
 });
 
-// Sync blocks
-blocksRef.on("child_added", snap=>{blocks[snap.key]=snap.val();});
-blocksRef.on("child_changed", snap=>{blocks[snap.key]=snap.val();});
-blocksRef.on("child_removed", snap=>{delete blocks[snap.key];});
-
-// Draw
+// --- DRAW ---
 function draw(){
     ctx.fillStyle="#000";
     ctx.fillRect(0,0,canvas.width,canvas.height);
 
     let startX=Math.floor(camX/CELL);
     let startY=Math.floor(camY/CELL);
-    let endX=startX+Math.ceil(canvas.width/CELL);
-    let endY=startY+Math.ceil(canvas.height/CELL);
 
-    for(let x=startX;x<=endX;x++){
-        for(let y=startY;y<=endY;y++){
+    for(let x=startX;x<startX+50;x++){
+        for(let y=startY;y<startY+30;y++){
             if(x<0||y<0||x>=GRID_SIZE||y>=GRID_SIZE) continue;
-            let px = x*CELL-camX;
-            let py = y*CELL-camY;
+
+            let px=x*CELL-camX;
+            let py=y*CELL-camY;
+
             ctx.strokeStyle="#222";
             ctx.strokeRect(px,py,CELL,CELL);
 
             let key=x+"_"+y;
-            if(blocks[key] && blocks[key].history && blocks[key].history.length){
-                ctx.fillStyle=blocks[key].history[blocks[key].history.length-1].color;
+            if(blocks[key]?.color){
+                ctx.fillStyle=blocks[key].color;
                 ctx.fillRect(px,py,CELL,CELL);
             }
         }
     }
-
     requestAnimationFrame(draw);
 }
 draw();
 
-// Camera movement
-document.addEventListener("keydown", e=>{
+// --- CAMERA ---
+document.onkeydown=e=>{
     if(e.key==="ArrowLeft") camX-=CELL*5;
     if(e.key==="ArrowRight") camX+=CELL*5;
     if(e.key==="ArrowUp") camY-=CELL*5;
     if(e.key==="ArrowDown") camY+=CELL*5;
-    camX=Math.max(0, Math.min(camX, GRID_SIZE*CELL - canvas.width));
-    camY=Math.max(0, Math.min(camY, GRID_SIZE*CELL - canvas.height));
-});
+};
 
-// Right-click info
-canvas.addEventListener("contextmenu", e=>{
-    e.preventDefault();
-    const rect = canvas.getBoundingClientRect();
-    const gx = Math.floor((e.clientX-rect.left+camX)/CELL);
-    const gy = Math.floor((e.clientY-rect.top+camY)/CELL);
-    const key = gx+"_"+gy;
-    if(blocks[key] && blocks[key].history){
-        sidebar.style.display="block";
-        blockInfoDiv.innerHTML = "<b>Block "+key+"</b><br>";
-        blocks[key].history.forEach((h,i)=>{
-            blockInfoDiv.innerHTML += (i+1)+". "+(h.deleted?"Deleted":"Placed")+
-                " | "+h.color+" | "+h.country+" | "+h.time+"<br>";
+// --- DELETE MODE ---
+let deleteMode=false;
+deleteToggle.onclick=()=>{
+    deleteMode=!deleteMode;
+    deleteToggle.textContent="Delete Mode: "+(deleteMode?"ON":"OFF");
+};
+
+// --- HISTORY SAVE ---
+function writeBlock(key,color,deleted=false){
+    blocksRef.child(key).once("value").then(s=>{
+        let h=s.val()?.history||[];
+        h.push({
+            color:color,
+            deleted:deleted,
+            time:new Date().toLocaleString(),
+            location:myLocation
         });
-    }
-});
-
-closeSidebarBtn.onclick = ()=>{ sidebar.style.display="none"; };
-
-// Place/Delete/Drag
-let isDragging=false;
-
-function updateBlock(x,y,color,deleted=false){
-    const key = x+"_"+y;
-    const timestamp = new Date().toLocaleString();
-    const historyEntry = {color,color, country:playerCountry, time:timestamp, deleted};
-    if(!blocks[key]) blocks[key]={history:[]};
-    blocks[key].history.push(historyEntry);
-    blocksRef.child(key).set(blocks[key]);
+        blocksRef.child(key).set({
+            color:deleted?null:color,
+            history:h
+        });
+    });
 }
 
-canvas.addEventListener("mousedown", e=>{
-    if(e.button!==0) return;
-    isDragging=true;
-    handleBlockPlacement(e);
-});
-canvas.addEventListener("mouseup", e=>{isDragging=false;});
-canvas.addEventListener("mousemove", e=>{ if(isDragging) handleBlockPlacement(e); });
+// --- DRAG BUILD ---
+let dragging=false;
+canvas.onmousedown=()=>dragging=true;
+canvas.onmouseup=()=>dragging=false;
 
-function handleBlockPlacement(e){
-    const rect = canvas.getBoundingClientRect();
-    const gx = Math.floor((e.clientX-rect.left+camX)/CELL);
-    const gy = Math.floor((e.clientY-rect.top+camY)/CELL);
-    if(gx<0||gy<0||gx>=GRID_SIZE||gy>=GRID_SIZE) return;
+canvas.onmousemove=e=>{
+    if(!dragging) return;
+    place(e);
+};
 
-    if(deleteToggle.checked){
-        updateBlock(gx,gy,"#000",true);
-    } else {
-        updateBlock(gx,gy,colorPicker.value,false);
+canvas.onclick=e=>place(e);
+
+function place(e){
+    const rect=canvas.getBoundingClientRect();
+    const gx=Math.floor((e.clientX-rect.left+camX)/CELL);
+    const gy=Math.floor((e.clientY-rect.top+camY)/CELL);
+    const key=gx+"_"+gy;
+    if(deleteMode){
+        if(blocks[key]) writeBlock(key,blocks[key].color,true);
+    }else{
+        writeBlock(key,color.value,false);
     }
 }
+
+// --- SIDEBAR ---
+canvas.oncontextmenu=e=>{
+    e.preventDefault();
+    const rect=canvas.getBoundingClientRect();
+    const gx=Math.floor((e.clientX-rect.left+camX)/CELL);
+    const gy=Math.floor((e.clientY-rect.top+camY)/CELL);
+    const key=gx+"_"+gy;
+    if(!blocks[key]) return;
+
+    sidebar.style.display="block";
+    ui.style.display="none";
+
+    blockInfo.innerHTML="<h3>Block "+key+"</h3>";
+    blocks[key].history.forEach(h=>{
+        blockInfo.innerHTML+=`
+        <div style="border-bottom:1px solid #333;margin-bottom:8px;">
+        ${h.deleted?"Deleted":"Placed"}<br>
+        Color: ${h.color}<br>
+        Location: ${h.location}<br>
+        Time: ${h.time}
+        </div>`;
+    });
+};
+
+closeSide.onclick=()=>{
+    sidebar.style.display="none";
+    ui.style.display="block";
+};
 </script>
 
 </body>
