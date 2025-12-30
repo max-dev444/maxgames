@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Play Fun Games on the Site!</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Verdana, sans-serif;
+    background: linear-gradient(135deg, #0b0b15, #151530);
+    color: white;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+h1 {
+    font-size: 2.6em;
+    color: #3399ff;
+    text-shadow: 3px 3px #000;
+    margin-bottom: 30px;
+}
+
+select {
+    padding: 15px;
+    font-size: 1.2em;
+    border-radius: 12px;
+    border: 2px solid #3399ff;
+    background: #1a1a2e;
+    color: white;
+    outline: none;
+}
+
+button {
+    padding: 15px 25px;
+    font-size: 1.2em;
+    margin-left: 10px;
+    border-radius: 12px;
+    border: 2px solid #3399ff;
+    background: #1a1a2e;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+button:hover {
+    background: #3399ff;
+    color: black;
+    transform: scale(1.05);
+}
+
+.note {
+    margin-top: 25px;
+    color: #aaa;
+}
+
+/* BLUE SPARKLES (TMS theme) */
+.sparkle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #3399ff;
+    border-radius: 50%;
+    animation: sparkle 3s infinite ease-in-out;
+}
+
+@keyframes sparkle {
+    0% { opacity: 1; transform: translateY(0); }
+    50% { opacity: 0.4; transform: translateY(-12px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+
+<body>
+
+<h1>So Fun!</h1>
+
+<div>
+    <select id="ver">
+        <option value="">Select a Game</option>
+        <option value="Element%20OS.html">Element OS</option>
+        <option value="Gamers%20Hub%20V4.html">Gamer's Hub</option>
+       <option value="TMSswitcherv2.html">The Maximumonical Switch (TMS)</option>
+       <option value="boredbutton.html">Bored Button</option>
+       <option value="minicraft.html">Minicraft</option>
+       <option value="boredbutton.html">Bored Button</option>
+       <option value="Blockworld.html">Block World</option>
+    </select>
+
+    <button onclick="openTMS()">Open</button>
+</div>
+
+<div class="note">
+Opens fun apps!
+</div>
+
+<script>
+function openTMS() {
+    const v = document.getElementById("ver").value;
+    if (!v) {
+        alert("Select a game!");
+        return;
+    }
+    window.open(v, "_blank");
+}
+
+// sparkles
+for (let i = 0; i < 30; i++) {
+    const s = document.createElement("div");
+    s.className = "sparkle";
+    s.style.left = Math.random() * innerWidth + "px";
+    s.style.top = Math.random() * innerHeight + "px";
+    s.style.width = s.style.height = (2 + Math.random() * 4) + "px";
+    document.body.appendChild(s);
+}
+</script>
+
+</body>
+</html>
