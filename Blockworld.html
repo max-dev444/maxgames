@@ -1,87 +1,31 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Global Block Builder</title>
+<title>World of Blocks</title>
 <style>
-body {
-    margin:0;
-    overflow:hidden;
-    background:#111;
-    color:white;
-    font-family: monospace;
-}
-
-#ui {
-    position:fixed;
-    right:10px;
-    top:10px;
-    background:#222;
-    padding:10px;
-    border-radius:8px;
-    z-index:10;
-}
-
-#color { width:50px;height:50px;border:none; }
-
-#deleteToggle {
-    margin-top:8px;
-    padding:6px;
-    background:#400;
-    border:2px solid red;
-    color:white;
-    cursor:pointer;
-}
-
-#players{
-    position:fixed;
-    left:10px;
-    top:10px;
-    background:#111;
-    border:2px solid #ff4444;
-    padding:10px;
-    min-width:180px;
-    max-height:90vh;
-    overflow-y:auto;
-    z-index:15;
-}
-
-#sidebar{
-    position:fixed;
-    right:0;
-    top:0;
-    width:320px;
-    height:100vh;
-    background:#111;
-    border-left:3px solid #ff4444;
-    padding:15px;
-    display:none;
-    z-index:20;
-}
-
-#closeSide{
-    position:absolute;
-    top:10px;
-    right:10px;
-    cursor:pointer;
-    color:red;
-    font-size:20px;
-}
+body{margin:0;overflow:hidden;background:#111;color:white;font-family:monospace}
+#ui{position:fixed;right:10px;top:10px;background:#222;padding:10px;border-radius:8px;z-index:5}
+#players{position:fixed;left:10px;top:10px;background:#222;padding:10px;border-radius:8px;z-index:5;max-height:90vh;overflow:auto}
+#sidebar{position:fixed;right:0;top:0;width:300px;height:100%;background:#111;border-left:3px solid #ff4444;display:none;padding:15px;z-index:10}
+#close{float:right;cursor:pointer;color:red}
+button{margin-top:5px;width:100%}
 </style>
 </head>
 <body>
 
 <canvas id="game"></canvas>
 
-<div id="players"><b>PLAYERS</b><br></div>
-
 <div id="ui">
-Block Color<br>
-<input type="color" id="color" value="#ffffff"><br>
-<button id="deleteToggle">Delete Mode OFF</button>
+Color<br>
+<input type="color" id="color"><br>
+<button id="del">Delete Mode: OFF</button>
 </div>
 
+<div id="players"><b>PLAYERS</b><br></div>
+
 <div id="sidebar">
-<div id="closeSide">✖</div>
+<span id="close">[ X ]</span>
+<h3>Block Info</h3>
 <div id="blockInfo"></div>
 </div>
 
@@ -89,164 +33,128 @@ Block Color<br>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyBI7jbEgrN-z7SUx7moImNTDA10B-q8fuw",
-  authDomain: "blockworld-e9b9d.firebaseapp.com",
-  databaseURL: "https://blockworld-e9b9d-default-rtdb.firebaseio.com",
-  projectId: "blockworld-e9b9d",
-  storageBucket: "blockworld-e9b9d.firebasestorage.app",
-  messagingSenderId: "915723982814",
-  appId: "1:915723982814:web:95b24f6272e63facdcaf4f"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-const blocksRef = db.ref("blocks");
-const playersRef = db.ref("players");
+firebase.initializeApp({
+  apiKey:"AIzaSyBI7jbEgrN-z7SUx7moImNTDA10B-q8fuw",
+  authDomain:"blockworld-e9b9d.firebaseapp.com",
+  databaseURL:"https://blockworld-e9b9d-default-rtdb.firebaseio.com",
+  projectId:"blockworld-e9b9d"
+});
+
+const db=firebase.database();
+const blocksRef=db.ref("blocks");
+const playersRef=db.ref("players");
 
 const canvas=document.getElementById("game");
 const ctx=canvas.getContext("2d");
-canvas.width=window.innerWidth;
-canvas.height=window.innerHeight;
+canvas.width=innerWidth;
+canvas.height=innerHeight;
 
-const GRID=1024;
-const CELL=32;
+const GRID=1024, CELL=32;
 let camX=0, camY=0;
-let deleteMode=false;
 let dragging=false;
-
+let deleteMode=false;
 const blocks={};
 
-blocksRef.on("child_added",s=>blocks[s.key]=s.val());
-blocksRef.on("child_changed",s=>blocks[s.key]=s.val());
+const color=document.getElementById("color");
+const ui=document.getElementById("ui");
+const players=document.getElementById("players");
+const sidebar=document.getElementById("sidebar");
+const blockInfo=document.getElementById("blockInfo");
 
-let myLocation="Loading";
-let myName="LoadingPlayer";
+document.getElementById("del").onclick=()=>{
+ deleteMode=!deleteMode;
+ document.getElementById("del").textContent="Delete Mode: "+(deleteMode?"ON":"OFF");
+};
+
+document.getElementById("close").onclick=()=>{
+ sidebar.style.display="none";
+ ui.style.display="block";
+ players.style.display="block";
+};
+
 let myID=Math.random().toString(36).substr(2,9);
+let myName="LoadingPlayer";
+let myLocation="Earth";
 
 fetch("https://ipapi.co/json/")
 .then(r=>r.json())
 .then(d=>{
-    if(d.region) myLocation=d.region;
-    else return fetch("https://ipwho.is/");
-    return null;
-})
-.then(r=>r?r.json():null)
-.then(d=>{
-    if(d && d.country) myLocation=d.country;
-    myName=myLocation.replace(/ /g,"")+"Player";
-    playersRef.child(myID).set({name:myName,location:myLocation,lastSeen:Date.now()});
+ myLocation=d.region||d.country_name||"Earth";
+ myName=myLocation.replace(/[^a-zA-Z0-9]/g,"")+"Player";
+ playersRef.child(myID).set({name:myName,location:myLocation,lastSeen:Date.now()});
 });
 
-setInterval(()=>{
-    playersRef.child(myID+"/lastSeen").set(Date.now());
-},5000);
+setInterval(()=>playersRef.child(myID+"/lastSeen").set(Date.now()),5000);
 
 playersRef.on("value",snap=>{
-    players.innerHTML="<b>PLAYERS</b><br>";
-    const p=snap.val()||{};
-    Object.values(p).forEach(pl=>{
-        if(Date.now()-pl.lastSeen<15000){
-            players.innerHTML+=pl.name+"<br>";
-        }
-    });
+ players.innerHTML="<b>PLAYERS</b><br>";
+ const p=snap.val()||{};
+ Object.values(p).forEach(pl=>{
+  if(pl.name && Date.now()-pl.lastSeen<15000){
+   players.innerHTML+=pl.name+"<br>";
+  }
+ });
+});
+
+blocksRef.on("value",snap=>{
+ Object.assign(blocks,snap.val()||{});
 });
 
 function draw(){
-    ctx.fillStyle="#000";
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    let sx=Math.floor(camX/CELL);
-    let sy=Math.floor(camY/CELL);
-    let ex=sx+Math.ceil(canvas.width/CELL);
-    let ey=sy+Math.ceil(canvas.height/CELL);
-
-    for(let x=sx;x<=ex;x++){
-        for(let y=sy;y<=ey;y++){
-            if(x<0||y<0||x>=GRID||y>=GRID) continue;
-            let px=x*CELL-camX;
-            let py=y*CELL-camY;
-            ctx.strokeStyle="#222";
-            ctx.strokeRect(px,py,CELL,CELL);
-            let k=x+"_"+y;
-            if(blocks[k]){
-                ctx.fillStyle=blocks[k].color;
-                ctx.fillRect(px,py,CELL,CELL);
-            }
-        }
-    }
-    requestAnimationFrame(draw);
+ ctx.fillStyle="#000";
+ ctx.fillRect(0,0,canvas.width,canvas.height);
+ let sx=Math.floor(camX/CELL), sy=Math.floor(camY/CELL);
+ let ex=sx+Math.ceil(canvas.width/CELL);
+ let ey=sy+Math.ceil(canvas.height/CELL);
+ for(let x=sx;x<=ex;x++){
+  for(let y=sy;y<=ey;y++){
+   if(x<0||y<0||x>=GRID||y>=GRID)continue;
+   let px=x*CELL-camX, py=y*CELL-camY;
+   ctx.strokeStyle="#222"; ctx.strokeRect(px,py,CELL,CELL);
+   const k=x+"_"+y;
+   if(blocks[k]){
+    ctx.fillStyle=blocks[k].color;
+    ctx.fillRect(px,py,CELL,CELL);
+   }
+  }
+ }
+ requestAnimationFrame(draw);
 }
 draw();
 
-document.getElementById("deleteToggle").onclick=()=>{
-    deleteMode=!deleteMode;
-    deleteToggle.textContent=deleteMode?"Delete Mode ON":"Delete Mode OFF";
-};
-
 function place(mx,my){
-    let gx=Math.floor(mx/CELL);
-    let gy=Math.floor(my/CELL);
-    if(gx<0||gy<0||gx>=GRID||gy>=GRID) return;
-    const key=gx+"_"+gy;
-    if(deleteMode){
-        blocksRef.child(key).set({
-            color:"#000000",
-            deletedBy:myName,
-            deletedAt:Date.now(),
-            deletedFrom:myLocation
-        });
-    }else{
-        blocksRef.child(key).set({
-            color:color.value,
-            placedBy:myName,
-            placedAt:Date.now(),
-            placedFrom:myLocation
-        });
-    }
+ let gx=Math.floor(mx/CELL), gy=Math.floor(my/CELL);
+ if(gx<0||gy<0||gx>=GRID||gy>=GRID)return;
+ const key=gx+"_"+gy;
+ if(deleteMode){
+  blocksRef.child(key).set({color:"#000",deletedBy:myName,deletedFrom:myLocation,deletedAt:Date.now()});
+ } else {
+  blocksRef.child(key).set({color:color.value,placedBy:myName,placedFrom:myLocation,placedAt:Date.now()});
+ }
 }
 
-canvas.addEventListener("mousedown",e=>{dragging=true;});
-canvas.addEventListener("mouseup",e=>{dragging=false;});
-canvas.addEventListener("mousemove",e=>{
-    if(!dragging) return;
-    const r=canvas.getBoundingClientRect();
-    place(e.clientX-r.left+camX,e.clientY-r.top+camY);
-});
+canvas.onmousedown=e=>{dragging=true; place(e.clientX+camX,e.clientY+camY)};
+canvas.onmouseup=()=>dragging=false;
+canvas.onmousemove=e=>{if(dragging) place(e.clientX+camX,e.clientY+camY)};
 
-canvas.addEventListener("click",e=>{
-    const r=canvas.getBoundingClientRect();
-    place(e.clientX-r.left+camX,e.clientY-r.top+camY);
-});
-
-canvas.addEventListener("contextmenu",e=>{
-    e.preventDefault();
-    const r=canvas.getBoundingClientRect();
-    const gx=Math.floor((e.clientX-r.left+camX)/CELL);
-    const gy=Math.floor((e.clientY-r.top+camY)/CELL);
-    const key=gx+"_"+gy;
-    const b=blocks[key];
-    if(!b) return;
-    sidebar.style.display="block";
-    ui.style.display="none";
-    players.style.display="none";
-
-    blockInfo.innerHTML=`
-    <b>Block</b><br>
-    Color: ${b.color}<br><br>
-    Placed By: ${b.placedBy||"?"}<br>
-    Place: ${b.placedFrom||"?"}<br>
-    Time: ${b.placedAt?new Date(b.placedAt).toLocaleString():""}<br><br>
-    Deleted By: ${b.deletedBy||""}<br>
-    Place: ${b.deletedFrom||""}<br>
-    Time: ${b.deletedAt?new Date(b.deletedAt).toLocaleString():""}
-    `;
-});
-
-closeSide.onclick=()=>{
-    sidebar.style.display="none";
-    ui.style.display="block";
-    players.style.display="block";
+canvas.oncontextmenu=e=>{
+ e.preventDefault();
+ const gx=Math.floor((e.clientX+camX)/CELL);
+ const gy=Math.floor((e.clientY+camY)/CELL);
+ const b=blocks[gx+"_"+gy];
+ if(!b)return;
+ sidebar.style.display="block";
+ ui.style.display="none";
+ players.style.display="none";
+ blockInfo.innerHTML=`<b>Coords:</b> ${gx},${gy}<br>
+ <b>Color:</b> ${b.color}<br><br>
+ <b>Placed By:</b> ${b.placedBy||"N/A"}<br>
+ <b>From:</b> ${b.placedFrom||"N/A"}<br>
+ <b>Time:</b> ${b.placedAt?new Date(b.placedAt).toLocaleString():"N/A"}<br><br>
+ <b>Deleted By:</b> ${b.deletedBy||"N/A"}<br>
+ <b>From:</b> ${b.deletedFrom||"N/A"}<br>
+ <b>Time:</b> ${b.deletedAt?new Date(b.deletedAt).toLocaleString():"N/A"}`;
 };
 </script>
-
 </body>
 </html>
