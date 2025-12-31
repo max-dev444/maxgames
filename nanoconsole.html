@@ -4,14 +4,12 @@
 <meta charset="UTF-8">
 <title>NanoConsole</title>
 <style>
-body { background:#0b0b0b; color:#00ffcc; font-family:monospace; }
-h1 { color:#00ffff; }
-#console { background:#000; border:2px solid #00ffcc; padding:10px; height:220px; overflow-y:auto; }
-#editor { width:100%; height:220px; background:#000; color:#00ffcc; border:2px solid #00ffcc; }
-input { background:#000; color:#00ffcc; border:1px solid #00ffcc; width:70%; }
-button { background:#111; color:#00ffcc; border:1px solid #00ffcc; margin:4px; }
-#files button.active { background:#00ffcc; color:#000; }
-#help,#ops { display:none; background:#000; border:2px solid #00ffff; padding:10px; margin-top:10px; }
+body{background:#0b0b0b;color:#00ffcc;font-family:monospace}
+#console{background:#000;border:2px solid #00ffcc;padding:10px;height:220px;overflow-y:auto}
+#editor{width:100%;height:220px;background:#000;color:#00ffcc;border:2px solid #00ffcc}
+input,button{background:#000;color:#00ffcc;border:1px solid #00ffcc;margin:4px}
+#files button.active{background:#00ffcc;color:#000}
+#help,#ops{display:none;background:#000;border:2px solid #00ffff;padding:10px}
 </style>
 </head>
 <body>
@@ -29,110 +27,93 @@ button { background:#111; color:#00ffcc; border:1px solid #00ffcc; margin:4px; }
 <div id="files"></div>
 <button onclick="newFile()">New File</button>
 
-<h3>Code Editor</h3>
 <textarea id="editor"></textarea>
 <button onclick="save()">Save</button>
 
 <div id="help">
-<h3>What is NanoConsole?</h3>
-<p>NanoConsole is a tiny programmable universe that lives inside one web page. It lets you build your own functions, language rules, and systems using a custom scripting syntax that you control. Everything you type, every file you make, and every command you run is saved automatically inside your browser so your world never disappears.</p>
-<p>You write functions in the editor using simple lines like <b>define add(x,y)=x+y</b>. When you press Save, NanoConsole scans every file, loads every function, and makes them available in the console. You can then run them by typing things like <b>add(5,10)</b> and pressing Run.</p>
-<p>Files let you organize your ideas. One file can hold math tools, another can hold game logic, another can hold story generators. You can switch between them instantly, just like a real programming project.</p>
-<p>NanoConsole is designed so you never have to memorize complicated syntax. You can define functions in multiple styles, use built-in math, text tools, random generators, and logic systems, all while keeping things readable and fun.</p>
-<p>This isn’t just a toy — it’s a customizable language engine. You are building your own way to control a computer, one function at a time.</p>
+<h3>How NanoConsole Works</h3>
+<p>You create functions in the editor using lines like: define add(x,y)=x+y. When you press Save, NanoConsole loads every function from all files so they can be used in the console.</p>
+<p>You run a function by typing its name with values: add(5,10). Strings must be in quotes, numbers don’t.</p>
+<p>You can also store variables using: set hp = 100 or set name = "Max". Those values can be used inside functions.</p>
+<p>You can use random, conditions, loops, and game helpers to build games, generators, or simulations.</p>
+<p>Everything is saved automatically inside your browser.</p>
 </div>
 
 <div id="ops">
-<h3>Variables & Operators</h3>
+<h3>Tools</h3>
 <p>
-+  -  *  /  %  **  <br>
-==  !=  >  <  >=  <=  <br>
-and  or  not <br><br>
-abs(x) sqrt(x) pow(a,b) min(a,b) max(a,b) <br>
-round(x) floor(x) ceil(x) <br>
-rand() rand(n) randInt(a,b) pick(a,b,c) <br><br>
-upper(text) lower(text) length(text) repeat(text,n) reverse(text) first(text) last(text) contains(text,"a") <br><br>
-if(condition, true, false) <br>
-clamp(x,min,max) even(x) odd(x) percent(x,total)
++ - * / % ** <br>
+== != > < >= <= <br>
+if(cond,a,b) loop(i,a,b,code)<br>
+rand() rand(n) randInt(a,b) pick(a,b,c) <br>
+upper(x) lower(x) length(x) repeat(x,n) reverse(x) <br>
+rollDice() chance(x) randPos(n)
 </p>
 </div>
 
 <script>
-let files=JSON.parse(localStorage.getItem("nano_files")||'{"main":""}');
-let current=localStorage.getItem("nano_current")||"main";
-let consoleLog=JSON.parse(localStorage.getItem("nano_log")||"[]");
+let files=JSON.parse(localStorage.nano_files||'{"main":""}');
+let vars=JSON.parse(localStorage.nano_vars||"{}");
+let logData=JSON.parse(localStorage.nano_log||"[]");
+let current=localStorage.nano_current||"main";
 let funcs={};
 
+function saveAll(){
+ localStorage.nano_files=JSON.stringify(files);
+ localStorage.nano_vars=JSON.stringify(vars);
+ localStorage.nano_log=JSON.stringify(logData);
+ localStorage.nano_current=current;
+}
+
+function log(t){logData.push(t);saveAll();renderConsole();}
+function renderConsole(){console.innerHTML=logData.join("<br>");console.scrollTop=console.scrollHeight;}
+
 function renderFiles(){
- let d=document.getElementById("files"); d.innerHTML="";
+ filesDiv.innerHTML="";
  for(let f in files){
-  let b=document.createElement("button"); b.textContent=f;
-  if(f===current) b.classList.add("active");
-  b.onclick=()=>switchFile(f); d.appendChild(b);
+  let b=document.createElement("button");b.textContent=f;
+  if(f==current)b.classList.add("active");
+  b.onclick=()=>switchFile(f);filesDiv.appendChild(b);
  }
 }
 
-function switchFile(f){
- files[current]=editor.value; current=f;
- editor.value=files[current];
- localStorage.setItem("nano_current",current);
- renderFiles();
-}
+function switchFile(f){files[current]=editor.value;current=f;editor.value=files[current];saveAll();renderFiles();}
+function newFile(){let n="file"+(Object.keys(files).length+1);files[n]="";switchFile(n);}
 
-function newFile(){
- let n="file"+(Object.keys(files).length+1);
- files[n]=""; switchFile(n);
-}
-
-function save(){
- files[current]=editor.value;
- localStorage.setItem("nano_files",JSON.stringify(files));
- loadFunctions();
- log("Saved "+current);
-}
+function save(){files[current]=editor.value;saveAll();loadFunctions();log("Saved "+current);}
 
 function loadFunctions(){
  funcs={};
  for(let f in files){
   files[f].split("\n").forEach(l=>{
-   let m=l.match(/^(define|func|make|create|fn) (\w+)\(([\w,]*)\).*(=|->|does) (.*)$/);
-   if(m){
-    funcs[m[2]]={p:m[3].split(",").filter(x=>x),b:m[5]};
-   }
+   let m=l.match(/^(define|func|make|fn) (\w+)\(([\w,]*)\)\s*=\s*(.*)$/);
+   if(m)funcs[m[2]]={p:m[3].split(",").filter(x=>x),b:m[4]};
   });
  }
 }
 
 function run(){
- let c=cmd.value; cmd.value="";
+ let c=cmd.value.trim();cmd.value="";
+ if(c.startsWith("set ")){
+  let p=c.slice(4).split("=");
+  vars[p[0].trim()]=eval(p[1]);
+  saveAll();log("set "+p[0]);
+  return;
+ }
  let m=c.match(/^(\w+)\((.*)\)$/);
- if(!m||!funcs[m[1]]){log("Invalid command");return;}
+ if(!m||!funcs[m[1]]){log("Invalid");return;}
  let f=funcs[m[1]];
- let args=m[2].split(",").map(a=>eval(a));
+ let args=m[2].split(",").map(x=>eval(x));
  let body=f.b;
  f.p.forEach((p,i)=>body=body.replaceAll(p,args[i]));
- try{ log(eval(body)); }catch(e){log("Error");}
+ try{
+  let result=eval(body);
+  log(result);
+ }catch(e){log("Error");}
 }
 
-function log(t){
- consoleLog.push(t);
- localStorage.setItem("nano_log",JSON.stringify(consoleLog));
- renderConsole();
-}
-
-function renderConsole(){
- console.innerHTML=consoleLog.join("<br>");
- console.scrollTop=console.scrollHeight;
-}
-
-function clearConsole(){
- consoleLog=[]; localStorage.setItem("nano_log","[]"); renderConsole();
-}
-
-function toggle(id){
- let e=document.getElementById(id);
- e.style.display=e.style.display=="none"?"block":"none";
-}
+function clearConsole(){logData=[];saveAll();renderConsole();}
+function toggle(id){let e=document.getElementById(id);e.style.display=e.style.display=="none"?"block":"none";}
 
 editor.value=files[current];
 renderFiles();
