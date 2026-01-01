@@ -1,0 +1,7 @@
+local f = io.open("input.json","r")
+local t = f:read("*a")
+f:close()
+local n = tonumber(t:match("%d+"))
+local o = io.open("lua.json","w")
+o:write('{ "lua": ' .. (n - 1) .. ' }')
+o:close()
