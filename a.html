@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Chaos Web Analyzer</title>
+<style>
+body{background:#0b0b0b;color:#0f0;font-family:monospace}
+#box{width:90%;margin:20px auto;padding:20px;border:2px solid #0f0}
+input{width:80%;padding:10px;background:black;color:#0f0;border:1px solid #0f0}
+button{padding:10px;background:#0f0;color:black;font-weight:bold}
+pre{white-space:pre-wrap}
+</style>
+</head>
+<body>
+<div id="box">
+<h1>Chaos Web Analyzer</h1>
+<input id="url" placeholder="https://example.com">
+<button onclick="scan()">SCAN</button>
+<pre id="out"></pre>
+</div>
+
+<script>
+function scan(){
+ let u=document.getElementById("url").value;
+ document.getElementById("out").textContent="Scanning...";
+ fetch("b.php?u="+encodeURIComponent(u))
+ .then(r=>r.text())
+ .then(t=>document.getElementById("out").textContent=t)
+ .catch(e=>document.getElementById("out").textContent=e);
+}
+</script>
+</body>
+</html>
