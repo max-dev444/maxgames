@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Hehe</title>
+<style>
+body {
+  background:red;
+  color:#00ff00;
+  font-family:monospace;
+}
+</style>
+</head>
+<body>
+
+<h2>Hehe</h2>
+<pre id="log"></pre>
+
+<!-- hidden download link -->
+<a id="dl" href="hi.html" download style="display:none;"></a>
+
+<script>
+let log = document.getElementById("log");
+let lines = [
+  "Hello",
+  "Your Info Has Been Comprimised",
+  "Goodbye",
+  "Why are you still here?",
+  "You are hacked",
+  "Virus Detected on your device",
+];
+
+let i = 0;
+let interval = setInterval(() => {
+  if (i < lines.length) {
+    log.textContent += lines[i] + "\n";
+    i++;
+  } else {
+    clearInterval(interval);
+    // start download after the fake messages finish
+    document.getElementById("dl").click();
+  }
+}, 500);
+</script>
+
+</body>
+</html>
