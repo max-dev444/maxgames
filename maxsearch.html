@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MaxSearch</title>
+<style>
+  body { font-family: sans-serif; margin: 20px; background: #f0f0f0; }
+  header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+  input[type=text] { flex: 1; padding: 8px; font-size: 16px; }
+  button { padding: 8px 12px; font-size: 16px; cursor: pointer; }
+  #results { background: #fff; padding: 15px; border-radius: 8px; min-height: 50px; }
+  .result-item { margin-bottom: 10px; }
+</style>
+</head>
+<body>
+
+<header>
+  <!-- Button to reload MaxSearch homepage -->
+  <button onclick="goHome()">Home</button>
+
+  <!-- Button to go back to main site -->
+  <button onclick="goHub()">Back to Hub</button>
+
+  <input type="text" id="searchInput" placeholder="Search...">
+  <button id="searchBtn">Search</button>
+</header>
+
+<div id="results">Type something to search!</div>
+
+<script>
+// --------------------------
+// 1. DATA SECTION
+// --------------------------
+const data = {
+    "apples": "A sweet fruit that grows on trees.",
+    "bananas": "A yellow fruit that monkeys love.",
+    "carrots": "An orange vegetable that's good for eyes.",
+    // ADD MORE ENTRIES HERE: "keyword": "Definition"
+}
+
+// --------------------------
+// 2. BUTTON FUNCTIONS
+// --------------------------
+function goHome() {
+    // Reloads the maxsearch homepage
+    window.location.href = "maxsearch.html";
+}
+
+function goHub() {
+    // Goes back to main site index.html
+    window.location.href = "index.html";
+}
+
+// --------------------------
+// 3. HELPER FUNCTIONS
+// --------------------------
+function getQuery() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("search") || "";
+}
+
+// Fuzzy search function
+function fuzzySearch(query) {
+    const results = [];
+    const q = query.toLowerCase();
+    for (const key in data) {
+        if (key.toLowerCase().includes(q)) {
+            results.push({key, value: data[key]});
+        }
+    }
+    return results;
+}
+
+// Display results
+function showResult(query) {
+    const resultsDiv = document.getElementById("results");
+    const searchResults = fuzzySearch(query);
+    if (searchResults.length > 0) {
+        resultsDiv.innerHTML = searchResults.map(r => 
+            `<div class="result-item"><strong>${r.key}</strong>: ${r.value}</div>`
+        ).join("");
+    } else {
+        resultsDiv.innerHTML = `You searched for "<strong>${query}</strong>" and it doesn't seem to have any results.`;
+    }
+}
+
+// --------------------------
+// 4. INITIAL SEARCH ON PAGE LOAD
+// --------------------------
+const query = getQuery();
+if (query) {
+    document.getElementById("searchInput").value = query;
+    showResult(query);
+}
+
+// --------------------------
+// 5. SEARCH BUTTON & ENTER KEY
+// --------------------------
+document.getElementById("searchBtn").addEventListener("click", () => {
+    const input = document.getElementById("searchInput").value.trim();
+    if (input) {
+        const newURL = window.location.pathname + "?search=" + encodeURIComponent(input);
+        history.pushState(null, "", newURL);
+        showResult(input);
+    }
+});
+
+document.getElementById("searchInput").addEventListener("keydown", (e) => {
+    if(e.key === "Enter") document.getElementById("searchBtn").click();
+});
+
+// --------------------------
+// 6. ADDING DATA INSTRUCTIONS
+// --------------------------
+// 1. Find the "data" object near the top of the script.
+// 2. Each entry is: "keyword": "Definition here",
+// 3. Add a comma after each entry except the last one.
+// 4. Keywords are not case-sensitive because the search converts everything to lowercase.
+// 5. You can add thousands of entries here; performance is fine for 8000+.
+// --------------------------
+</script>
+
+</body>
+</html>
