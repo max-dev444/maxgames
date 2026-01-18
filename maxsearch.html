@@ -21,28 +21,35 @@
   <button id="searchBtn">Search</button>
 </header>
 
-<div id="results">Type something to search!</div>
+<div id="results">Loading data… please wait.</div>
 
 <script>
 // --------------------------
 // 1. DATA SECTION
 // --------------------------
-let data = new Map(); // empty Map
+let data = new Map();
+let isDataLoaded = false;
 
-// Load data from external JSON
+// Load your JSON file
 fetch("data.json")
-    .then(response => response.json())
+    .then(res => res.json())
     .then(obj => {
         data = new Map(Object.entries(obj));
+        isDataLoaded = true;
 
-        // Run initial search after data is loaded
+        // Run initial search after data loads
         const query = getQuery();
         if (query) {
             document.getElementById("searchInput").value = query;
             showResult(query);
+        } else {
+            document.getElementById("results").textContent = "Type something to search!";
         }
     })
-    .catch(err => console.error("Failed to load data:", err));
+    .catch(err => {
+        console.error("Failed to load data:", err);
+        document.getElementById("results").textContent = "Failed to load data.json!";
+    });
 
 // --------------------------
 // 2. BUTTON FUNCTIONS
@@ -63,8 +70,9 @@ function getQuery() {
 }
 
 function fuzzySearch(query) {
-    const results = [];
+    if (!isDataLoaded) return [];
     const q = query.toLowerCase();
+    const results = [];
     for (const [key, value] of data) {
         if (key.toLowerCase().includes(q)) {
             results.push({ key, value });
@@ -75,9 +83,16 @@ function fuzzySearch(query) {
 
 function showResult(query) {
     const resultsDiv = document.getElementById("results");
-    const searchResults = fuzzySearch(query);
-    if (searchResults.length > 0) {
-        resultsDiv.innerHTML = searchResults.map(r =>
+
+    if (!isDataLoaded) {
+        resultsDiv.innerHTML = "Loading data… please wait.";
+        return;
+    }
+
+    const results = fuzzySearch(query);
+
+    if (results.length > 0) {
+        resultsDiv.innerHTML = results.map(r =>
             `<div class="result-item"><strong>${r.key}</strong>: ${r.value}</div>`
         ).join("");
     } else {
@@ -90,15 +105,14 @@ function showResult(query) {
 // --------------------------
 document.getElementById("searchBtn").addEventListener("click", () => {
     const input = document.getElementById("searchInput").value.trim();
-    if (input) {
-        const newURL = window.location.pathname + "?search=" + encodeURIComponent(input);
-        history.pushState(null, "", newURL);
-        showResult(input);
-    }
+    if (!input) return;
+    const newURL = window.location.pathname + "?search=" + encodeURIComponent(input);
+    history.pushState(null, "", newURL);
+    showResult(input);
 });
 
 document.getElementById("searchInput").addEventListener("keydown", (e) => {
-    if(e.key === "Enter") document.getElementById("searchBtn").click();
+    if (e.key === "Enter") document.getElementById("searchBtn").click();
 });
 </script>
 
