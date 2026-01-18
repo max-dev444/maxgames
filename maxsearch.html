@@ -30,8 +30,8 @@
 let data = new Map();
 let isDataLoaded = false;
 
-// Load your JSON file
-fetch("data.json")
+// Fetch your JSON from the live site
+fetch("www.maxgames.org/data.json")
     .then(res => res.json())
     .then(obj => {
         data = new Map(Object.entries(obj));
@@ -47,7 +47,7 @@ fetch("data.json")
         }
     })
     .catch(err => {
-        console.error("Failed to load data:", err);
+        console.error("Failed to load data.json:", err);
         document.getElementById("results").textContent = "Failed to load data.json!";
     });
 
@@ -74,9 +74,7 @@ function fuzzySearch(query) {
     const q = query.toLowerCase();
     const results = [];
     for (const [key, value] of data) {
-        if (key.toLowerCase().includes(q)) {
-            results.push({ key, value });
-        }
+        if (key.toLowerCase().includes(q)) results.push({ key, value });
     }
     return results;
 }
