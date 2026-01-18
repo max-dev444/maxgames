@@ -823,8 +823,7 @@
     "khandvi": "Savory rolled snack from chickpea flour.",
     "thepla": "Spiced flatbread from Gujarat.",
     "patra": "Steamed rolled snack from colocasia leaves.",
-    "handvo": "Savory vegetable cake from Gujarat."
-    // Remaining elements
+    "handvo": "Savory vegetable cake from Gujarat.",
     "hydrogen": "Lightest element, gas at room temperature.",
     "helium": "Inert gas used in balloons.",
     "beryllium": "Light metal used in aerospace.",
@@ -856,7 +855,6 @@
     "silver": "Already included.",
     "cadmium": "Toxic metal used in batteries.",
     "indium": "Metal used in touchscreens.",
-    "tin": "Already included.",
     "antimony": "Metalloid used in alloys.",
     "tellurium": "Metalloid used in semiconductors.",
     "iodine": "Purple solid used as disinfectant.",
@@ -884,11 +882,7 @@
     "rhenium": "Rare metal used in jet engines.",
     "osmium": "Densest naturally occurring element.",
     "iridium": "Dense, corrosion-resistant metal.",
-    "platinum": "Already included.",
-    "gold": "Already included.",
-    "mercury": "Already included.",
     "thallium": "Toxic metal.",
-    "lead": "Already included.",
     "bismuth": "Heavy metal with low toxicity.",
     "polonium": "Radioactive metal.",
     "astatine": "Rare radioactive halogen.",
@@ -925,8 +919,6 @@
     "livermorium": "Synthetic element.",
     "tennessine": "Synthetic element.",
     "oganesson": "Synthetic noble gas.",
-    
-    // Drinks
     "coffee": "Brewed drink from roasted coffee beans.",
     "tea": "Brewed drink from tea leaves.",
     "hot chocolate": "Sweet chocolate-flavored hot drink.",
@@ -951,8 +943,6 @@
     "ginger ale": "Carbonated ginger-flavored soda.",
     "sparkling water": "Carbonated water.",
     "mineral water": "Naturally sourced water with minerals.",
-    
-    // Hobbies
     "painting": "Creating art with paint.",
     "drawing": "Creating art with pencils or pens.",
     "sculpting": "Shaping materials into art.",
@@ -969,8 +959,6 @@
     "cycling": "Riding a bicycle for sport or leisure.",
     "running": "Jogging or sprinting as exercise.",
     "swimming": "Moving through water using body movements.",
-    
-    // Animals
     "lion": "Large wild cat, king of the jungle.",
     "tiger": "Striped big cat.",
     "elephant": "Large herbivore with trunk.",
@@ -990,8 +978,6 @@
     "eagle": "Bird of prey with sharp vision.",
     "owl": "Nocturnal bird of prey.",
     "parrot": "Colorful talking bird.",
-    
-    // Miscellaneous Objects
     "lamp": "Device for providing light.",
     "chair": "Furniture for sitting.",
     "table": "Furniture for placing items.",
