@@ -27,13 +27,20 @@
 // --------------------------
 // 1. DATA SECTION
 // --------------------------
-let data = new Map(); // empty map
+let data = new Map(); // empty Map
 
-// Load data from external JSON file
+// Load data from external JSON
 fetch("data.json")
     .then(response => response.json())
     .then(obj => {
         data = new Map(Object.entries(obj));
+
+        // Run initial search after data is loaded
+        const query = getQuery();
+        if (query) {
+            document.getElementById("searchInput").value = query;
+            showResult(query);
+        }
     })
     .catch(err => console.error("Failed to load data:", err));
 
@@ -79,16 +86,7 @@ function showResult(query) {
 }
 
 // --------------------------
-// 4. INITIAL SEARCH ON PAGE LOAD
-// --------------------------
-const query = getQuery();
-if (query) {
-    document.getElementById("searchInput").value = query;
-    showResult(query);
-}
-
-// --------------------------
-// 5. SEARCH BUTTON & ENTER KEY
+// 4. SEARCH BUTTON & ENTER KEY
 // --------------------------
 document.getElementById("searchBtn").addEventListener("click", () => {
     const input = document.getElementById("searchInput").value.trim();
