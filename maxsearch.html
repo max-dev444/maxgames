@@ -25,19 +25,18 @@
 
 <script>
 // --------------------------
-// 1. DATA SECTION
+// 1. DATA
 // --------------------------
 let data = new Map();
 let isDataLoaded = false;
 
-// Fetch your JSON from the live site
-fetch("www.maxgames.org/data.json")
+// Fetch JSON from same folder
+fetch("data.json")
     .then(res => res.json())
     .then(obj => {
         data = new Map(Object.entries(obj));
         isDataLoaded = true;
 
-        // Run initial search after data loads
         const query = getQuery();
         if (query) {
             document.getElementById("searchInput").value = query;
@@ -48,18 +47,14 @@ fetch("www.maxgames.org/data.json")
     })
     .catch(err => {
         console.error("Failed to load data.json:", err);
-        document.getElementById("results").textContent = "Failed to load data.json!";
+        document.getElementById("results").textContent = "Failed to load data.json! Make sure the file is in the same folder and valid JSON.";
     });
 
 // --------------------------
-// 2. BUTTON FUNCTIONS
+// 2. BUTTONS
 // --------------------------
-function goHome() {
-    window.location.href = "maxsearch.html";
-}
-function goHub() {
-    window.location.href = "index.html";
-}
+function goHome() { window.location.href = "maxsearch.html"; }
+function goHub() { window.location.href = "index.html"; }
 
 // --------------------------
 // 3. HELPER FUNCTIONS
@@ -81,14 +76,11 @@ function fuzzySearch(query) {
 
 function showResult(query) {
     const resultsDiv = document.getElementById("results");
-
     if (!isDataLoaded) {
         resultsDiv.innerHTML = "Loading data… please wait.";
         return;
     }
-
     const results = fuzzySearch(query);
-
     if (results.length > 0) {
         resultsDiv.innerHTML = results.map(r =>
             `<div class="result-item"><strong>${r.key}</strong>: ${r.value}</div>`
@@ -99,7 +91,7 @@ function showResult(query) {
 }
 
 // --------------------------
-// 4. SEARCH BUTTON & ENTER KEY
+// 4. SEARCH BUTTON + ENTER KEY
 // --------------------------
 document.getElementById("searchBtn").addEventListener("click", () => {
     const input = document.getElementById("searchInput").value.trim();
