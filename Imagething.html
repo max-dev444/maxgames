@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Image Chaos + Infinite Translator</title>
+<style>
+body {
+    background:#0a0a0a;
+    color:#0f0;
+    font-family: monospace;
+    text-align:center;
+}
+button,input {
+    background:#111;
+    color:#0f0;
+    border:1px solid #0f0;
+    padding:8px;
+    margin:5px;
+}
+canvas { border:2px solid #0f0; margin-top:10px; }
+textarea {
+    width:80%;
+    height:80px;
+    background:#000;
+    color:#0f0;
+}
+</style>
+</head>
+<body>
+
+<h2>IMAGE CHAOS ENGINE</h2>
+<input type="file" id="imgInput">
+<br>
+<button onclick="run(10)">RUN 10</button>
+<button onclick="run(100)">RUN 100</button>
+<button onclick="run(1000)">RUN 1000</button>
+<br>
+<canvas id="canvas"></canvas>
+
+<hr>
+
+<h2>INFINITE TRANSLATOR</h2>
+<textarea id="phrase" placeholder="Enter phrase..."></textarea><br>
+<input id="count" placeholder="Times (e.g. 1000000, 1e12)">
+<br>
+<button onclick="translate()">TRANSLATE</button>
+<br>
+<textarea id="output" placeholder="Result..."></textarea>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+let img = new Image();
+
+document.getElementById("imgInput").onchange = e=>{
+    const file = e.target.files[0];
+    img.src = URL.createObjectURL(file);
+    img.onload = ()=>{
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img,0,0);
+    }
+}
+
+function blurSharpen(){
+    ctx.filter="blur(1px)";
+    ctx.drawImage(canvas,0,0);
+    ctx.filter="contrast(120%)";
+    ctx.drawImage(canvas,0,0);
+    ctx.filter="none";
+}
+
+function run(times){
+    let i=0;
+    function loop(){
+        for(let j=0;j<10 && i<times;j++,i++){
+            blurSharpen();
+        }
+        if(i<times) requestAnimationFrame(loop);
+    }
+    loop();
+}
+
+/* Translator – fast chunked generation */
+function translate(){
+    const phrase = document.getElementById("phrase").value;
+    let count = document.getElementById("count").value;
+    count = Number(count);
+    const out = document.getElementById("output");
+    out.value="";
+
+    if(!phrase || !count || count<1) return;
+
+    let done=0;
+    const CHUNK=1000;
+
+    function build(){
+        let chunk="";
+        for(let i=0;i<CHUNK && done<count;i++,done++){
+            chunk+=phrase+" ";
+        }
+        out.value+=chunk;
+        if(done<count) requestAnimationFrame(build);
+    }
+    build();
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Labubus Smart Calculator</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; }
+  table { border-collapse: collapse; margin-bottom: 20px; }
+  th, td { border: 1px solid #aaa; padding: 5px 10px; text-align: center; }
+  input { width: 60px; }
+  button { margin: 2px; }
+</style>
+</head>
+<body>
+
+<h1>Labubus Smart Tier & Money Calculator</h1>
+
+<table>
+  <tr>
+    <th>Tier</th>
+    <th>Goal</th>
+    <th>Have</th>
+    <th>Adjust Have</th>
+    <th>Still Needed</th>
+  </tr>
+</table>
+
+<h2>Total Tier 1s Needed: <span id="totalNeeded">0</span></h2>
+
+<h2>Money Calculator</h2>
+<p>
+  Your Money ($): <input type="number" id="money" value="46000000">
+  <button onclick="calculateWithMoney()">Use Money</button>
+</p>
+<p>Tier 1s you can buy: <span id="maxTier1s">0</span></p>
+<p>Total Money Used: $<span id="totalCost">0</span></p>
+
+<script>
+const maxTier = 23;
+const table = document.querySelector('table');
+const priceIncrease = 1.2; // 20% increase per Tier 1
+
+// Create table dynamically
+for (let i = 1; i <= maxTier; i++) {
+  const row = document.createElement('tr');
+  row.innerHTML = `
+    <td>${i}</td>
+    <td><input type="number" id="goal-${i}" value="0" min="0"></td>
+    <td><input type="number" id="have-${i}" value="0" min="0"></td>
+    <td>
+      <button onclick="addHave(${i},1)">+1</button>
+      <button onclick="addHave(${i},-1)">-1</button>
+    </td>
+    <td id="needed-${i}">0</td>
+  `;
+  table.appendChild(row);
+}
+
+// Convert a tier to Tier 1s
+function tierToTier1(tier) {
+  return Math.pow(3, tier - 1);
+}
+
+// Adjust have
+function addHave(tier, amount) {
+  const input = document.getElementById(`have-${tier}`);
+  let val = parseInt(input.value) || 0;
+  val += amount;
+  if(val < 0) val = 0;
+  input.value = val;
+  calculateTotal();
+}
+
+// Calculate total Tier 1s needed and per tier still needed
+function calculateTotal() {
+  let goalTier1 = 0;
+  let haveTier1 = 0;
+
+  for (let i = 1; i <= maxTier; i++) {
+    const goal = parseInt(document.getElementById(`goal-${i}`).value) || 0;
+    const have = parseInt(document.getElementById(`have-${i}`).value) || 0;
+
+    goalTier1 += goal * tierToTier1(i);
+    haveTier1 += have * tierToTier1(i);
+  }
+
+  let remainingTier1s = Math.max(goalTier1 - haveTier1, 0);
+  document.getElementById('totalNeeded').innerText = remainingTier1s;
+
+  // Calculate per tier still needed
+  let leftover = remainingTier1s;
+  for (let i = maxTier; i >= 1; i--) {
+    const tierValue = tierToTier1(i);
+    const needed = Math.floor(leftover / tierValue);
+    document.getElementById(`needed-${i}`).innerText = needed;
+    leftover -= needed * tierValue;
+  }
+
+  return remainingTier1s;
+}
+
+// Money calculator with 20% increase
+function calculateWithMoney() {
+  let remainingTier1s = calculateTotal();
+  let money = parseFloat(document.getElementById('money').value);
+  let price = 1;
+  let bought = 0;
+  let totalSpent = 0;
+
+  while (money >= price && remainingTier1s > 0) {
+    money -= price;
+    totalSpent += price;
+    price *= priceIncrease;
+    bought++;
+    remainingTier1s--;
+  }
+
+  document.getElementById('maxTier1s').innerText = bought;
+  document.getElementById('totalCost').innerText = totalSpent.toFixed(2);
+
+  // Recalculate remaining tiers after spending money
+  let leftover = remainingTier1s;
+  for (let i = maxTier; i >= 1; i--) {
+    const tierValue = tierToTier1(i);
+    const needed = Math.floor(leftover / tierValue);
+    document.getElementById(`needed-${i}`).innerText = needed;
+    leftover -= needed * tierValue;
+  }
+  document.getElementById('totalNeeded').innerText = remainingTier1s;
+}
+
+// Add event listeners
+for (let i = 1; i <= maxTier; i++) {
+  document.getElementById(`goal-${i}`).addEventListener('input', calculateTotal);
+  document.getElementById(`have-${i}`).addEventListener('input', calculateTotal);
+}
+
+// Initial calculation
+calculateTotal();
+</script>
+
+</body>
+</html>

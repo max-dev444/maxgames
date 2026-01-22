@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>‽ MARK — Authority Console</title>
+
+<style>
+html, body {
+    margin: 0;
+    height: 100%;
+    background: #050507;
+    color: #00ffcc;
+    font-family: monospace;
+    overflow: hidden;
+}
+
+#logo {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 80px;
+    color: #00ffcc;
+    text-shadow: 0 0 30px currentColor;
+    user-select: none;
+}
+
+#terminal {
+    position: absolute;
+    top: 120px;
+    bottom: 60px;
+    left: 20px;
+    right: 20px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+}
+
+#input {
+    position: absolute;
+    bottom: 10px;
+    left: 20px;
+    right: 20px;
+    height: 40px;
+    background: #000;
+    border: 1px solid #00ffcc;
+    color: #00ffcc;
+    padding: 8px;
+    font-size: 18px;
+    outline: none;
+}
+
+.glitch {
+    animation: glitch 0.1s infinite;
+}
+
+@keyframes glitch {
+    0% { transform: translate(1px, -1px); }
+    50% { transform: translate(-1px, 1px); }
+    100% { transform: translate(1px, 1px); }
+}
+
+.box {
+    width: 60px;
+    height: 60px;
+    background: currentColor;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    animation: float 3s infinite ease-in-out;
+}
+
+@keyframes float {
+    0% { transform: translate(-50%,-50%) translateY(0); }
+    50% { transform: translate(-50%,-50%) translateY(-30px); }
+    100% { transform: translate(-50%,-50%) translateY(0); }
+}
+</style>
+</head>
+
+<body>
+
+<div id="logo">‽</div>
+<div id="terminal"></div>
+<input id="input" autocomplete="off" placeholder="‽ enter authority">
+
+<script>
+const terminal = document.getElementById("terminal");
+const input = document.getElementById("input");
+const logo = document.getElementById("logo");
+let box = null;
+
+function print(text) {
+    terminal.innerHTML += text + "\n";
+    terminal.scrollTop = terminal.scrollHeight;
+}
+
+print("MARK AUTHORITY CONSOLE");
+print("Type ‽help");
+
+const commands = {
+
+"help": () => print(
+`Commands:
+‽help
+‽clear
+‽color <name>
+‽bg <name>
+‽logo <name>
+‽glow <name>
+‽reset
+‽time
+‽date
+‽echo <text>
+‽random
+‽invert
+‽glitch
+‽noglitch
+‽summon
+‽dismiss
+‽size <number>
+‽spin
+‽stop
+‽opacity <0-1>
+‽border <color>
+‽rainbow
+‽authority
+‽count
+‽shake`
+),
+
+"clear": () => terminal.innerHTML = "",
+"time": () => print(new Date().toLocaleTimeString()),
+"date": () => print(new Date().toDateString()),
+"random": () => print(Math.random()),
+"invert": () => document.body.style.filter = "invert(1)",
+"reset": () => {
+    document.body.style = "";
+    logo.style = "";
+    input.style = "";
+    if (box) { box.remove(); box=null; }
+    print("System reset.");
+},
+
+"glitch": () => document.body.classList.add("glitch"),
+"noglitch": () => document.body.classList.remove("glitch"),
+
+"summon": () => {
+    if (!box) {
+        box = document.createElement("div");
+        box.className = "box";
+        document.body.appendChild(box);
+        print("Object summoned.");
+    }
+},
+
+"dismiss": () => {
+    if (box) {
+        box.remove();
+        box=null;
+        print("Object dismissed.");
+    }
+},
+
+"spin": () => logo.style.animation = "spin 2s linear infinite",
+"stop": () => logo.style.animation = "",
+
+"authority": () => print("‽ The mark controls all systems."),
+"count": () => print("Lines: " + terminal.innerText.split("\n").length),
+"shake": () => logo.classList.toggle("glitch")
+};
+
+input.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+        let val = input.value.trim();
+        input.value = "";
+
+        if (!val.startsWith("‽")) {
+            print("INVALID — missing authority mark");
+            return;
+        }
+
+        print("> " + val);
+        val = val.slice(1);
+
+        let parts = val.split(" ");
+        let cmd = parts[0].toLowerCase();
+        let arg = parts.slice(1).join(" ");
+
+        if (commands[cmd]) {
+            commands[cmd](arg);
+        } else if (cmd === "color") {
+            document.body.style.color = arg;
+        } else if (cmd === "bg") {
+            document.body.style.background = arg;
+        } else if (cmd === "logo") {
+            logo.style.color = arg;
+        } else if (cmd === "glow") {
+            logo.style.textShadow = "0 0 30px " + arg;
+        } else if (cmd === "border") {
+            input.style.borderColor = arg;
+        } else if (cmd === "size") {
+            logo.style.fontSize = arg + "px";
+        } else if (cmd === "opacity") {
+            logo.style.opacity = arg;
+        } else if (cmd === "echo") {
+            print(arg);
+        } else if (cmd === "rainbow") {
+            document.body.style.background = "linear-gradient(45deg, red, orange, yellow, green, cyan, blue, violet)";
+        } else {
+            print("Unknown command.");
+        }
+    }
+});
+
+</script>
+
+</body>
+</html>

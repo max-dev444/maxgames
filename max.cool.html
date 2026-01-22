@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Crosher</title>
+<style>
+body{
+  background:#0b0f14;
+  color:#d0d7e2;
+  font-family:monospace;
+  margin:20px;
+}
+h1{margin-bottom:5px}
+textarea{
+  width:100%;
+  height:140px;
+  background:#05070a;
+  color:#e6edf3;
+  border:1px solid #222;
+  padding:8px;
+}
+select{
+  background:#05070a;
+  color:#e6edf3;
+  border:1px solid #222;
+  margin-right:6px;
+}
+button{
+  background:#111;
+  color:#fff;
+  border:1px solid #333;
+  padding:6px 12px;
+  cursor:pointer;
+}
+#out div{
+  padding:6px;
+  margin-bottom:4px;
+  border-left:4px solid #333;
+}
+.warn{
+  font-weight:bold;
+}
+.key span{
+  display:inline-block;
+  margin-right:12px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Crosher</h1>
+<div>Paste Crosh output (help / help_advanced)</div>
+
+<textarea id="input" placeholder="Paste Crosh output here..."></textarea><br><br>
+
+<select id="cat">
+  <option value="all">All Categories</option>
+  <option value="student">Student</option>
+  <option value="dev">Dev</option>
+  <option value="engineer">Engineer</option>
+  <option value="linux">Linux</option>
+</select>
+
+<select id="tier">
+  <option value="all">All Tiers</option>
+  <option value="f">F</option>
+  <option value="c">C</option>
+  <option value="b">B</option>
+  <option value="a">A</option>
+  <option value="s">S</option>
+</select>
+
+<button onclick="scan()">Scan</button>
+
+<hr>
+
+<div class="key">
+<b>Key:</b>
+<span style="color:#aaa">F = Safe</span>
+<span style="color:#0f0">C = Common</span>
+<span style="color:#0ff">B = Advanced</span>
+<span style="color:#09f">A = Dangerous</span>
+<span style="color:#f0f">S = Extreme</span>
+<span style="color:#f00">⚠ High Risk</span>
+</div>
+
+<hr>
+
+<div id="out"></div>
+
+<script>
+/* =====================================================
+   CRESHER COMMAND DATABASE
+   → PASTE THE 350-COMMAND PACK HERE
+===================================================== */
+const db = {
+// ===== STUDENT / SAFE =====
+help:{tier:"f",category:"student",danger:"none",desc:"Lists Crosh commands",ex:"help"},
+help_advanced:{tier:"f",category:"student",danger:"none",desc:"Hidden commands",ex:"help_advanced"},
+version:{tier:"f",category:"student",danger:"none",desc:"ChromeOS version",ex:"version"},
+uptime:{tier:"f",category:"student",danger:"none",desc:"System uptime",ex:"uptime"},
+time:{tier:"f",category:"student",danger:"none",desc:"Current time",ex:"time"},
+top:{tier:"f",category:"student",danger:"none",desc:"CPU & RAM monitor",ex:"top"},
+meminfo:{tier:"f",category:"student",danger:"none",desc:"Memory info",ex:"meminfo"},
+cpuinfo:{tier:"f",category:"student",danger:"none",desc:"CPU info",ex:"cpuinfo"},
+battery_test:{tier:"f",category:"student",danger:"none",desc:"Battery test",ex:"battery_test 60"},
+battery_firmware:{tier:"f",category:"student",danger:"none",desc:"Battery firmware",ex:"battery_firmware"},
+power_supply_info:{tier:"f",category:"student",danger:"none",desc:"Power system info",ex:"power_supply_info"},
+storage_status:{tier:"f",category:"student",danger:"none",desc:"Storage status",ex:"storage_status"},
+storage_info:{tier:"f",category:"student",danger:"none",desc:"Disk information",ex:"storage_info"},
+audio_test:{tier:"f",category:"student",danger:"none",desc:"Test speakers & mic",ex:"audio_test"},
+camera_test:{tier:"f",category:"student",danger:"none",desc:"Test webcam",ex:"camera_test"},
+keyboard_test:{tier:"f",category:"student",danger:"none",desc:"Keyboard tester",ex:"keyboard_test"},
+touchpad_test:{tier:"f",category:"student",danger:"none",desc:"Touchpad tester",ex:"touchpad_test"},
+brightness_test:{tier:"f",category:"student",danger:"none",desc:"Screen brightness test",ex:"brightness_test"},
+volume_test:{tier:"f",category:"student",danger:"none",desc:"Speaker volume test",ex:"volume_test"},
+
+// ===== NETWORK =====
+ping:{tier:"c",category:"student",danger:"none",desc:"Test internet connection",ex:"ping google.com"},
+tracepath:{tier:"c",category:"student",danger:"none",desc:"Network route",ex:"tracepath youtube.com"},
+ifconfig:{tier:"c",category:"student",danger:"none",desc:"Network interfaces",ex:"ifconfig"},
+ipaddrs:{tier:"c",category:"student",danger:"none",desc:"IP addresses",ex:"ipaddrs"},
+route:{tier:"c",category:"student",danger:"none",desc:"Routing table",ex:"route"},
+dns:{tier:"c",category:"student",danger:"none",desc:"DNS lookup",ex:"dns google.com"},
+proxy:{tier:"c",category:"student",danger:"none",desc:"Proxy settings",ex:"proxy"},
+connectivity:{tier:"c",category:"student",danger:"none",desc:"Internet diagnostics",ex:"connectivity"},
+network_diag:{tier:"c",category:"student",danger:"none",desc:"Network diagnostics",ex:"network_diag"},
+http:{tier:"c",category:"student",danger:"none",desc:"HTTP test",ex:"http https://google.com"},
+curl:{tier:"c",category:"student",danger:"medium",desc:"Download web content",ex:"curl https://example.com"},
+wget:{tier:"c",category:"student",danger:"medium",desc:"Download files",ex:"wget https://example.com/file"},
+ftp:{tier:"c",category:"student",danger:"medium",desc:"File transfer",ex:"ftp 192.168.1.5"},
+ssh:{tier:"s",category:"student",danger:"high",desc:"Remote login",ex:"ssh user@host"},
+
+// ===== LINUX / VM =====
+vmc:{tier:"b",category:"linux",danger:"medium",desc:"VM controller",ex:"vmc"},
+vmc_list:{tier:"b",category:"linux",danger:"medium",desc:"List VMs",ex:"vmc list"},
+vmc_start:{tier:"b",category:"linux",danger:"medium",desc:"Start VM",ex:"vmc start termina"},
+vmc_stop:{tier:"b",category:"linux",danger:"medium",desc:"Stop VM",ex:"vmc stop termina"},
+vmc_export:{tier:"b",category:"linux",danger:"medium",desc:"Export VM",ex:"vmc export termina"},
+vmc_import:{tier:"b",category:"linux",danger:"medium",desc:"Import VM",ex:"vmc import"},
+vmc_destroy:{tier:"a",category:"linux",danger:"high",desc:"Delete VM",ex:"vmc destroy termina"},
+vsh:{tier:"b",category:"linux",danger:"medium",desc:"VM shell",ex:"vsh termina"},
+
+// ===== ENGINEER / SYSTEM =====
+enroll_status:{tier:"a",category:"engineer",danger:"medium",desc:"Enrollment state",ex:"enroll_status"},
+enterprise_enrollment_status:{tier:"a",category:"engineer",danger:"medium",desc:"Enterprise status",ex:"enterprise_enrollment_status"},
+device_status:{tier:"a",category:"engineer",danger:"medium",desc:"Device ownership",ex:"device_status"},
+policy:{tier:"a",category:"engineer",danger:"medium",desc:"Admin policies",ex:"policy"},
+tpm_status:{tier:"a",category:"engineer",danger:"medium",desc:"TPM chip status",ex:"tpm_status"},
+cryptohome_status:{tier:"a",category:"engineer",danger:"medium",desc:"User encryption",ex:"cryptohome_status"},
+modem:{tier:"c",category:"engineer",danger:"none",desc:"Cellular modem",ex:"modem status"},
+cellular:{tier:"c",category:"engineer",danger:"none",desc:"Cellular status",ex:"cellular status"},
+bluetooth:{tier:"c",category:"engineer",danger:"none",desc:"Bluetooth control",ex:"bluetooth"},
+bluetooth_scan:{tier:"c",category:"engineer",danger:"none",desc:"Scan Bluetooth",ex:"bluetooth scan"},
+tcpdump:{tier:"s",category:"engineer",danger:"high",desc:"Raw packet capture",ex:"tcpdump -i wlan0"},
+packet_capture:{tier:"s",category:"engineer",danger:"high",desc:"Network traffic capture",ex:"packet_capture wlan0"},
+
+// ===== DEV / FUN SCARY-SOUNDING =====
+rollback:{tier:"a",category:"dev",danger:"high",desc:"Rollback OS version",ex:"rollback"},
+update_engine_client:{tier:"a",category:"dev",danger:"high",desc:"Update system control",ex:"update_engine_client"},
+wipe:{tier:"s",category:"dev",danger:"high",desc:"Device wipe command (restricted)",ex:"wipe"},
+powerwash:{tier:"s",category:"dev",danger:"high",desc:"Factory reset (restricted)",ex:"powerwash"},
+debug:{tier:"b",category:"dev",danger:"medium",desc:"Debug mode",ex:"debug"},
+sysinfo:{tier:"b",category:"dev",danger:"medium",desc:"System info",ex:"sysinfo"}
+
+};
+
+function scan(){
+  const out=document.getElementById("out");
+  out.innerHTML="";
+
+  const lines=input.value
+    .toLowerCase()
+    .split(/\n/)
+    .map(l=>l.trim())
+    .filter(Boolean);
+
+  const found=new Set();
+
+  for(const line of lines){
+    const cmd=line.split(/\s+/)[0];
+    if(db[cmd]) found.add(cmd);
+  }
+
+  for(const cmd of [...found]){
+    const d=db[cmd];
+    if(cat.value!=="all" && d.category!==cat.value) continue;
+    if(tier.value!=="all" && d.tier!==tier.value) continue;
+
+    const div=document.createElement("div");
+    div.style.borderLeftColor=color(d);
+
+    div.innerHTML=
+      `<b>${cmd}</b>
+       [${d.category}]
+       [${d.tier.toUpperCase()}]
+       ${d.danger==="high" ? "<span class='warn'>⚠</span>" : ""}
+       <br>${d.desc}<br>
+       <i>${d.ex}</i>`;
+
+    if(d.danger==="high") div.style.color="#f55";
+    out.appendChild(div);
+  }
+}
+
+function color(d){
+  if(d.danger==="high") return "#f00";
+  if(d.tier==="s") return "#f0f";
+  if(d.tier==="a") return "#09f";
+  if(d.tier==="b") return "#0ff";
+  if(d.tier==="c") return "#0f0";
+  return "#777";
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+		<meta http-equiv="X-UA-Compatible" content="ie=edge">
+		<title>ScreenRec HTML5 Player</title>
+                <link href="qrc:///assets/css/player.css?v=d3d8033fd38168c87e0ecb05585c29bef5861078" rel="stylesheet">
+		<style>
+			* {
+				outline: none!important;
+			}
+
+			html, body, #holder {
+				width: 100%;
+				height: 100%;
+				padding: 0;
+				margin: 0;
+				overflow: hidden;
+				position: relative;
+				background: #000;
+			}
+
+			.video-js {
+				width: 100%;
+				height: 100%;
+				position: absolute;
+				top: 0;
+				left: 0;
+			}
+		</style>
+	</head>
+	<body>
+		<svg style="position: absolute; width: 0; height: 0; overflow: hidden;" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+			<defs>
+				<symbol id="svp-play" viewBox="0 0 39 39">
+					<path fill="#8DB640" d="M20.113,5.321c4.524,0.166,8.509,2.438,11.003,5.866l4.628-2.671C32.309,3.503,26.606,0.174,20.113,0V5.321z"/>
+					<path fill="#F6A120" d="M33.84,19.567c0,2.295-0.545,4.46-1.506,6.38l4.613,2.663c1.412-2.705,2.215-5.779,2.215-9.043s-0.803-6.338-2.215-9.043l-4.613,2.664C33.295,15.108,33.84,17.274,33.84,19.567z"/>
+					<path fill="#0D646D" d="M31.116,27.948c-2.494,3.428-6.479,5.699-11.003,5.866v5.321c6.493-0.174,12.196-3.504,15.631-8.517L31.116,27.948z"/>
+					<path fill="#FFFFFF" d="M17.772,33.71c-7.021-0.89-12.451-6.88-12.451-14.143c0-7.262,5.43-13.252,12.451-14.142V0.073C7.806,0.986,0,9.364,0,19.567c0,10.204,7.806,18.582,17.772,19.494V33.71z"/>
+				</symbol>
+			</defs>
+		</svg>
+		<div id="holder"></div>
+
+		<!-- <script src="https://cdn.ravenjs.com/3.21.0/raven.min.js" crossorigin="anonymous"></script> -->
+		<script>
+			window.release = 'd3d8033fd38168c87e0ecb05585c29bef5861078';
+		</script>
+
+		<script>window.VIDEOJS_NO_DYNAMIC_STYLE = true;</script>
+		<script src="qrc:///assets/js/player.js?v=d3d8033fd38168c87e0ecb05585c29bef5861078" async></script>
+	</body>
+</html>

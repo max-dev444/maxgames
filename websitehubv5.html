@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WELCOME to this WEBSITE</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Verdana, sans-serif;
+    background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
+    color: white;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+    position: relative;
+}
+
+h1 {
+    margin-top: 50px;
+    font-size: 3em;
+    color: #ff4444;
+    text-shadow: 3px 3px #000;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { text-shadow: 2px 2px #000; }
+    50% { text-shadow: 5px 5px #ff0000; }
+    100% { text-shadow: 2px 2px #000; }
+}
+
+.subtitle {
+    font-size: 1.4em;
+    color: #ff7777;
+    margin-bottom: 40px;
+    text-align: center;
+    max-width: 650px;
+}
+
+.buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    width: 320px;
+}
+
+button {
+    padding: 20px;
+    font-size: 1.3em;
+    background: #222;
+    color: white;
+    border: 3px solid #ff4444;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.25s;
+    box-shadow: 0 0 12px #ff0000;
+}
+
+button:hover {
+    background: #ff4444;
+    color: black;
+    transform: scale(1.07);
+    box-shadow: 0 0 25px #ff4444;
+}
+
+footer {
+    margin-top: auto;
+    margin-bottom: 20px;
+    color: #888;
+}
+
+/* RED SPARKLES */
+.sparkle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #ff3333;
+    border-radius: 50%;
+    animation: sparkle 3s infinite ease-in-out;
+}
+
+@keyframes sparkle {
+    0% { opacity: 1; transform: translateY(0); }
+    50% { opacity: 0.4; transform: translateY(-15px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+
+<body>
+
+<h1>WELCOME to this WEBSITE</h1>
+
+<div class="subtitle">
+Created by MAX — play TMS, Element OS, Gamers Hub, and more.
+</div>
+
+<div class="buttons">
+    <button onclick="window.open('website/Element OS/Element OS.html','_blank')">Element OS</button>
+    <button onclick="window.open('website/Gamers Hub/Gamers Hub V4.html','_blank')">Gamers Hub</button>
+    <button onclick="window.open('website/TMSswitcher.html','_blank')">TMS Version Selector</button>
+</div>
+
+<footer>
+© 2025 Max — Friends-only gaming hub
+</footer>
+
+<script>
+for (let i = 0; i < 30; i++) {
+    const s = document.createElement("div");
+    s.className = "sparkle";
+    s.style.left = Math.random() * window.innerWidth + "px";
+    s.style.top = Math.random() * window.innerHeight + "px";
+    s.style.width = s.style.height = (2 + Math.random() * 4) + "px";
+    document.body.appendChild(s);
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Function Lab</title>
+<style>
+body { background:#0d0d0d; color:#0f0; font-family:monospace; }
+h1 { color:#0ff; }
+#console { height:200px; overflow-y:auto; background:#000; padding:10px; border:2px solid #0f0; }
+#input { width:70%; background:#111; color:#0f0; border:1px solid #0f0; }
+#editor { width:100%; height:200px; background:#000; color:#0f0; border:2px solid #0f0; }
+button { background:#111; color:#0f0; border:1px solid #0f0; margin:3px; cursor:pointer; }
+#files button.active { background:#0f0; color:#000; }
+#helpBox { display:none; background:#000; border:2px solid #0ff; padding:10px; margin-top:10px; }
+</style>
+</head>
+<body>
+
+<h1>🧠 FUNCTION LAB</h1>
+
+<div id="console"></div>
+<input id="input">
+<button onclick="run()">Run</button>
+<button onclick="clearConsole()">Clear</button>
+<button onclick="exportData()">Export</button>
+<button onclick="toggleHelp()">Help</button>
+
+<h2>Files</h2>
+<div id="files"></div>
+<button onclick="newFile()">New File</button>
+
+<h2>Code Editor</h2>
+<textarea id="editor"></textarea>
+<br>
+<button onclick="save()">Save File</button>
+
+<div id="helpBox">
+<h2>How This Works</h2>
+<p>This system is a mini programming environment that lives entirely inside one HTML file. It lets you write your own custom functions using a simple language and then run them through a console, just like a real coding terminal. Everything you do — your code, your files, and even your console history — is saved inside your browser automatically, so when you reload the page, your work is still there.</p>
+<p>Your language is based on the keyword <b>define</b>. You create a function by writing something like <b>define add(x,y)=x+y</b>. The left side declares the function name and parameters, while the right side is the logic. When you press Save, every function in that file becomes usable inside the console.</p>
+<p>The console lets you call functions like <b>add(5,10)</b> or <b>greet("Max")</b>. The system replaces the variables with the values you give and then safely runs the result. This means you can create math systems, generators, text tools, games, or even logic engines inside this one page.</p>
+<p>The file system lets you separate code into different “programs.” Each file can hold dozens of functions. You can switch between files, edit them, and load their functions whenever you want. This is how real programming projects work, just simplified and visual.</p>
+<p>Because everything is saved using browser storage, this becomes your personal coding world. You can build languages, experiments, simulations, and whole universes of logic that persist across sessions. This is not just a toy — it’s a programmable engine you control.</p>
+</div>
+
+<script>
+let functions = JSON.parse(localStorage.getItem("functions")||"{}");
+let files = JSON.parse(localStorage.getItem("files")||'{"main":""}');
+let current = localStorage.getItem("current")||"main";
+let consoleLog = JSON.parse(localStorage.getItem("consoleLog")||"[]");
+
+function log(t){
+  consoleLog.push(t);
+  localStorage.setItem("consoleLog",JSON.stringify(consoleLog));
+  renderConsole();
+}
+function renderConsole(){
+  const c=document.getElementById("console");
+  c.innerHTML=consoleLog.join("<br>");
+  c.scrollTop=c.scrollHeight;
+}
+
+function renderFiles(){
+  const f=document.getElementById("files");
+  f.innerHTML="";
+  for(let k in files){
+    let b=document.createElement("button");
+    b.textContent=k;
+    if(k===current) b.classList.add("active");
+    b.onclick=()=>switchFile(k);
+    f.appendChild(b);
+  }
+}
+
+function switchFile(n){
+  files[current]=document.getElementById("editor").value;
+  current=n;
+  localStorage.setItem("current",current);
+  document.getElementById("editor").value=files[current];
+  renderFiles();
+}
+
+function newFile(){
+  let n="file"+(Object.keys(files).length+1);
+  files[n]="";
+  switchFile(n);
+}
+
+function save(){
+  files[current]=document.getElementById("editor").value;
+  localStorage.setItem("files",JSON.stringify(files));
+  loadFunctions();
+  log("Saved "+current);
+}
+
+function loadFunctions(){
+  functions={};
+  for(let k in files){
+    files[k].split("\n").forEach(l=>{
+      let m=l.match(/^define (\w+)\(([\w,]*)\)=(.*)$/);
+      if(m){
+        functions[m[1]]={p:m[2].split(",").filter(x=>x),b:m[3]};
+      }
+    });
+  }
+  localStorage.setItem("functions",JSON.stringify(functions));
+}
+
+function run(){
+  let input=document.getElementById("input").value;
+  document.getElementById("input").value="";
+  let m=input.match(/^(\w+)\((.*)\)$/);
+  if(!m){ log("Invalid command"); return;}
+  let f=functions[m[1]];
+  if(!f){ log("Function not found"); return;}
+  let args=m[2].split(",").map(a=>eval(a));
+  let body=f.b;
+  f.p.forEach((p,i)=>body=body.replaceAll(p,args[i]));
+  try{ log(eval(body)); }catch(e){ log("Error"); }
+}
+
+function clearConsole(){
+  consoleLog=[];
+  localStorage.setItem("consoleLog","[]");
+  renderConsole();
+}
+
+function exportData(){
+  let data={files,functions,consoleLog};
+  navigator.clipboard.writeText(JSON.stringify(data,null,2));
+  log("Exported to clipboard");
+}
+
+function toggleHelp(){
+  let h=document.getElementById("helpBox");
+  h.style.display=h.style.display==="none"?"block":"none";
+}
+
+document.getElementById("editor").value=files[current];
+renderFiles();
+renderConsole();
+loadFunctions();
+</script>
+</body>
+</html>

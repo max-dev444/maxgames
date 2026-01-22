@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Boba Crafting Game</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #fdf6e3;
+    padding: 20px;
+}
+h1 { color: #8b3e96; }
+button {
+    margin: 5px;
+    padding: 8px 15px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 5px;
+    border: none;
+    background-color: #f48fb1;
+    color: white;
+    transition: 0.3s;
+}
+button:hover { background-color: #ec407a; }
+select {
+    padding: 5px;
+    font-size: 14px;
+}
+#store, #inventory, #bobas {
+    margin: 20px auto;
+    width: 80%;
+    text-align: left;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #fff;
+}
+.boba-item {
+    display: inline-block;
+    margin: 5px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #ffe0f0;
+}
+.boba-item.galaxy { background-color: #c3b3ff; }
+.boba-item.diamond { background-color: #a6fff0; }
+</style>
+</head>
+<body>
+
+<h1>Boba Crafting Game</h1>
+<p>Money: $<span id="money">0</span></p>
+
+<h2>Ingredients Store</h2>
+<div id="store"></div>
+
+<h2>Craft a Boba</h2>
+<select id="ingredient1"></select>
+<select id="ingredient2"></select>
+<button onclick="craftBoba()">Craft Boba</button>
+
+<h2>Your Bobas</h2>
+<div id="bobas"></div>
+
+<script>
+// --- Game Data ---
+let money = parseFloat(localStorage.getItem("money")) || 500;
+
+let ingredients = JSON.parse(localStorage.getItem("ingredients")) || [
+    {name: "Classic Tapioca", price: 10, amount: 0},
+    {name: "Brown Sugar Pearls", price: 50, amount: 0},
+    {name: "Strawberry Jelly", price: 100, amount: 0},
+    {name: "Mango Popping", price: 500, amount: 0},
+    {name: "Lychee Cubes", price: 1000, amount: 0},
+    {name: "Matcha Pearls", price: 5000, amount: 0},
+    {name: "Chocolate Chips", price: 10000, amount: 0},
+    {name: "Caramel Drops", price: 50000, amount: 0},
+    {name: "Galaxy Glitter", price: 100000, amount: 0},
+    {name: "Rainbow Pearls", price: 500000, amount: 0},
+    {name: "Blueberry Cubes", price: 1000000, amount: 0},
+    {name: "Golden Pearls", price: 5000000, amount: 0},
+    {name: "Diamond Dust", price: 100000000, amount: 0},
+    {name: "Coconut Jelly", price: 10000000, amount: 0},
+    {name: "Peach Pearls", price: 50000000, amount: 0},
+    {name: "Cherry Bits", price: 500000000, amount: 0},
+    {name: "Plum Cubes", price: 1000000000, amount: 0},
+    {name: "Mystic Pearls", price: 10000000000, amount: 0},
+    {name: "Dragon Fruit Cubes", price: 50000000000, amount: 0},
+    {name: "Legendary Pearls", price: 100000000000, amount: 0}
+];
+
+let bobas = JSON.parse(localStorage.getItem("bobas")) || [];
+
+// --- Update Displays ---
+function updateMoney() {
+    document.getElementById("money").textContent = money.toLocaleString();
+    localStorage.setItem("money", money);
+}
+
+function updateStore() {
+    const storeDiv = document.getElementById("store");
+    storeDiv.innerHTML = "";
+    let ingOptions = "";
+    for(const ing of ingredients){
+        storeDiv.innerHTML += `${ing.name}: $${ing.price.toLocaleString()} (You have: ${ing.amount}) <button onclick="buyIngredient('${ing.name}')">Buy</button><br>`;
+        ingOptions += `<option value="${ing.name}">${ing.name}</option>`;
+    }
+    document.getElementById("ingredient1").innerHTML = ingOptions;
+    document.getElementById("ingredient2").innerHTML = ingOptions;
+    localStorage.setItem("ingredients", JSON.stringify(ingredients));
+}
+
+// --- Buy Ingredient ---
+function buyIngredient(name){
+    const ing = ingredients.find(i => i.name === name);
+    if(money >= ing.price){
+        money -= ing.price;
+        ing.amount++;
+        updateMoney();
+        updateStore();
+    } else {
+        alert("Not enough money!");
+    }
+}
+
+// --- Craft Boba ---
+function craftBoba() {
+    const ing1Name = document.getElementById("ingredient1").value;
+    const ing2Name = document.getElementById("ingredient2").value;
+
+    if(ing1Name === ing2Name){
+        alert("Select two different ingredients!");
+        return;
+    }
+
+    const ing1 = ingredients.find(i => i.name === ing1Name);
+    const ing2 = ingredients.find(i => i.name === ing2Name);
+
+    if(ing1.amount < 1 || ing2.amount < 1){
+        alert("You don't have enough of those ingredients!");
+        return;
+    }
+
+    // Remove ingredients
+    ing1.amount--;
+    ing2.amount--;
+
+    // Base price
+    let price = (ing1.price + ing2.price) * 1.25;
+    let type = "Normal";
+
+    // Random bonus
+    let rand = Math.random();
+    if(rand < 0.01){
+        price *= 100;
+        type = "Diamond";
+    } else if(rand < 0.31){
+        price *= 1.5;
+        type = "Galaxy";
+    }
+
+    // Save recipe as combined ingredient names
+    const bobaName = `${ing1.name} + ${ing2.name}`;
+    bobas.push({type: type, price: price, recipe: [ing1.name, ing2.name], name: bobaName});
+    updateBobas();
+    updateStore();
+    localStorage.setItem("bobas", JSON.stringify(bobas));
+}
+
+// --- Update Boba List ---
+function updateBobas() {
+    const bobasDiv = document.getElementById("bobas");
+    if(bobas.length === 0){
+        bobasDiv.innerHTML = "No bobas crafted yet.";
+        return;
+    }
+    bobasDiv.innerHTML = "";
+    bobas.forEach((b,i)=>{
+        const div = document.createElement("div");
+        div.className = "boba-item";
+        if(b.type === "Galaxy") div.classList.add("galaxy");
+        if(b.type === "Diamond") div.classList.add("diamond");
+        div.innerHTML = `${b.name} (${b.type}) - $${b.price.toLocaleString()} 
+                         <button onclick="sellSingleBoba(${i})">Sell</button>
+                         <button onclick="autoChooseRecipe(${i})">Auto Choose Recipe</button>`;
+        bobasDiv.appendChild(div);
+    });
+}
+
+// --- Sell Single Boba ---
+function sellSingleBoba(index){
+    const boba = bobas[index];
+    money += boba.price;
+    bobas.splice(index,1);
+    updateMoney();
+    updateBobas();
+    localStorage.setItem("bobas", JSON.stringify(bobas));
+}
+
+// --- Auto Choose Recipe ---
+function autoChooseRecipe(index){
+    const boba = bobas[index];
+    document.getElementById("ingredient1").value = boba.recipe[0];
+    document.getElementById("ingredient2").value = boba.recipe[1];
+    alert(`Auto-selected recipe: ${boba.recipe[0]} + ${boba.recipe[1]}`);
+}
+
+// --- Initialize ---
+updateMoney();
+updateStore();
+updateBobas();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+.box {
+    width: 35px;
+    height: 35px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: blue;
+}
+
+.highlight {
+    color: red;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.random {
+    color: brown;
+    font-size: 13px;
+    font-weight: bold;
+}
+</style>
+</head>
+<body>
+
+<p>idk what this is lol</p>
+<h1>this is a h1 thing.</h1>
+<h2>getting smaller :D</h2>
+<h3>getting even smaller...</h3>
+<h4>WHATTT</h4>
+<h5>read the ???</h5>
+
+<h1>my favorite candys!</h1>
+<ul>
+<li>chocolate (duh)</li>
+<li>junior mints</li>
+<li>snickers</li>
+<li>PEANUT BUTTER CUPS :DDD</li>
+</ul>
+
+<a href="https://google.com">Go to google</a>
+<button onclick="alert('you clicked this haha')">button that does like nothing</button>
+<p class="highlight">this text will have COLOR</p>
+<p class="random">this will look really WEIRD</p>
+
+<script>
+// Arrays to store boxes, positions, and speeds
+let boxes = [];
+let positions = [];
+let speeds = [];
+
+// Create 10 boxes
+for (let i = 0; i < 10; i++) {
+    let div = document.createElement("div");
+    div.classList.add("box");
+    div.style.backgroundColor = getRandomColor(); // random color for each box
+    document.body.appendChild(div);
+
+    boxes.push(div);
+    positions.push({
+        x: Math.random() * (window.innerWidth - 35),
+        y: Math.random() * (window.innerHeight - 35)
+    });
+    speeds.push({
+        x: Math.random() * 4 + 1,
+        y: Math.random() * 4 + 1
+    });
+}
+
+// Function to move all boxes
+function moveBoxes() {
+    for (let i = 0; i < boxes.length; i++) {
+        positions[i].x += speeds[i].x;
+        positions[i].y += speeds[i].y;
+
+        // Bounce off edges
+        if (positions[i].x + 35 > window.innerWidth || positions[i].x < 0) speeds[i].x *= -1;
+        if (positions[i].y + 35 > window.innerHeight || positions[i].y < 0) speeds[i].y *= -1;
+
+        boxes[i].style.left = positions[i].x + "px";
+        boxes[i].style.top = positions[i].y + "px";
+    }
+
+    requestAnimationFrame(moveBoxes);
+}
+
+// Generate random color for each box
+function getRandomColor() {
+    return "#" + Math.floor(Math.random()*16777215).toString(16);
+}
+
+// Start moving boxes
+moveBoxes();
+</script>
+
+</body>
+</html>

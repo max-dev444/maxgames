@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Brain Cell Tycoon</title>
+  <style>
+    body {
+      background: #0b0b0b;
+      color: #eaffea;
+      font-family: monospace;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 48px;
+    }
+
+    button {
+      font-size: 18px;
+      padding: 10px 20px;
+      margin: 6px;
+      cursor: pointer;
+      background: #1e1e1e;
+      color: #eaffea;
+      border: 2px solid #44ff44;
+    }
+
+    button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .box {
+      border: 2px solid #44ff44;
+      padding: 15px;
+      margin: 15px auto;
+      width: 420px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🧠 Brain Cell Tycoon</h1>
+
+<div class="box">
+  <p>🧠 Brain Cells: <span id="bc">0</span></p>
+  <p>👴 Age: <span id="age">0</span></p>
+  <p>✨ Wisdom (Rebirths): <span id="wisdom">0</span></p>
+</div>
+
+<button onclick="think()">THINK</button>
+
+<div class="box">
+  <h2>🛒 Upgrades</h2>
+
+  <button onclick="buyUpgrade('power')">
+    Strong Thoughts (+1 BC/click) – Cost: <span id="powerCost">10</span>
+  </button><br>
+
+  <button onclick="buyUpgrade('auto')">
+    Daydreaming (+1 BC/sec) – Cost: <span id="autoCost">25</span>
+  </button><br>
+
+  <button onclick="buyUpgrade('overthink')">
+    Overthinking (x1.2 THINK) – Cost: <span id="overthinkCost">50</span>
+  </button><br>
+
+  <button onclick="buyUpgrade('compress')">
+    Brain Compression (Age slower) – Cost: <span id="compressCost">80</span>
+  </button><br>
+
+  <button onclick="buyUpgrade('exist')">
+    Existential Crisis (Random bonus) – Cost: <span id="existCost">120</span>
+  </button>
+</div>
+
+<div class="box">
+  <h2>🔁 Rebirth</h2>
+  <p>Requires Age 20</p>
+  <button onclick="rebirth()">REBIRTH</button>
+</div>
+
+<script>
+let brainCells = 0;
+let wisdom = 0;
+
+let upgrades = {
+  power: { level: 0, cost: 10 },
+  auto: { level: 0, cost: 25 },
+  overthink: { level: 0, cost: 50 },
+  compress: { level: 0, cost: 80 },
+  exist: { level: 0, cost: 120 }
+};
+
+function getAge() {
+  let slow = 1 + upgrades.compress.level * 0.3;
+  return Math.floor(brainCells / (5 * slow));
+}
+
+function think() {
+  let gain = 1 + upgrades.power.level;
+  gain *= (1 + upgrades.overthink.level * 0.2);
+  gain *= (1 + wisdom * 0.05);
+
+  brainCells += gain;
+  update();
+}
+
+function buyUpgrade(type) {
+  let u = upgrades[type];
+  if (brainCells >= u.cost) {
+    brainCells -= u.cost;
+    u.level++;
+    u.cost = Math.floor(u.cost * 1.6);
+    update();
+  }
+}
+
+function rebirth() {
+  if (getAge() >= 20) {
+    wisdom++;
+    brainCells = 0;
+    for (let u in upgrades) {
+      upgrades[u].level = 0;
+      upgrades[u].cost = Math.floor(upgrades[u].cost / 2 + 10);
+    }
+    update();
+  }
+}
+
+function update() {
+  document.getElementById("bc").textContent = Math.floor(brainCells);
+  document.getElementById("age").textContent = getAge();
+  document.getElementById("wisdom").textContent = wisdom;
+
+  for (let u in upgrades) {
+    document.getElementById(u + "Cost").textContent = upgrades[u].cost;
+  }
+}
+
+// Passive income
+setInterval(() => {
+  brainCells += upgrades.auto.level * (1 + wisdom * 0.1);
+  update();
+}, 1000);
+</script>
+
+</body>
+</html>

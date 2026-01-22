@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Noah — The Last Purchase</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root{
+  --paper:#f6f1e8;
+  --ink:#2b2b2b;
+  --muted:#666;
+  --accent:#7a6cff;
+  --sidebar:#eee6db;
+  --shadow:rgba(0,0,0,.15);
+  --font:18px;
+}
+body.dark{
+  --paper:#1b1b1b;
+  --ink:#eaeaea;
+  --muted:#aaa;
+  --sidebar:#111;
+}
+body{
+  margin:0;
+  font-family:Georgia,serif;
+  background:linear-gradient(180deg,#e6dfd6,#f6f1e8);
+}
+.app{
+  display:grid;
+  grid-template-columns:1fr 300px;
+  min-height:100vh;
+}
+.reader{
+  padding:40px;
+  display:flex;
+  justify-content:center;
+}
+.paper{
+  background:var(--paper);
+  color:var(--ink);
+  max-width:900px;
+  width:100%;
+  padding:60px;
+  border-radius:18px;
+  box-shadow:0 20px 60px var(--shadow);
+  animation:fade .4s ease;
+}
+@keyframes fade{
+  from{opacity:0;transform:translateX(40px)}
+  to{opacity:1;transform:none}
+}
+h1,h2{font-family:"Palatino Linotype",Palatino,serif}
+p{
+  font-size:var(--font);
+  line-height:1.8;
+  margin:14px 0;
+}
+.sidebar{
+  background:var(--sidebar);
+  padding:20px;
+  border-left:1px solid #ccc;
+}
+button{
+  width:100%;
+  padding:12px;
+  margin:6px 0;
+  border:none;
+  border-radius:10px;
+  background:#fff;
+  cursor:pointer;
+  box-shadow:0 4px 12px var(--shadow);
+}
+button.active{
+  background:var(--accent);
+  color:white;
+}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="reader">
+<div class="paper" id="content"></div>
+</div>
+<div class="sidebar">
+<h3>Books</h3>
+<button onclick="load(0)">📘 Book I</button>
+<button onclick="load(1)">📕 Book II</button>
+
+<h3>Reading</h3>
+<button onclick="font(1)">A+</button>
+<button onclick="font(-1)">A-</button>
+<button onclick="dark()">Light / Dark</button>
+</div>
+</div>
+
+<script>
+let size=18;
+function font(d){size+=d;document.documentElement.style.setProperty("--font",size+"px");}
+function dark(){document.body.classList.toggle("dark");}
+
+const books = [
+`<h1>Book I — The Last Purchase</h1>
+<h2>Chapter One</h2>
+<p>Noah didn’t mean to spend it. He wasn’t trying to be bad. He wasn’t trying to steal. He was just tired — tired of being the kid nobody noticed, tired of being the gray avatar in a glowing world.</p>
+<p>At school, people passed him like he wasn’t there. At home, his mom was always working, always worrying. Roblox was the only place where Noah felt like he could be someone else.</p>
+<p>That night, his mom fell asleep on the couch, her phone glowing softly. A bank app was still open. Noah didn’t look at the number. He didn’t want to.</p>
+<p>Back in his room, Roblox lit up the screen with colors brighter than real life. A banner appeared: <em>LIMITED — STARFALL ANGEL WINGS</em>.</p>
+<p>They were beautiful. They looked like something someone important would wear.</p>
+<p>Noah clicked Buy.</p>
+<p>Then again.</p>
+<p>And again.</p>
+<p>With every purchase, his avatar became more powerful — and his chest felt heavier.</p>
+<p>Then he heard something from the kitchen.</p>
+<p>His mom was crying.</p>
+<p>“That money was for rent,” she said quietly.</p>
+<p>Noah returned to his room and removed every item from his avatar — the wings, the crown, the light. Until all that was left was a small, plain character standing alone.</p>
+<p>The Robux didn’t come back.</p>
+<p>And neither did the peace.</p>`,
+
+`<h1>Book II — The Light After the Last Purchase</h1>
+<h2>Chapter One</h2>
+<p>Noah didn’t log into Roblox for days. Instead he watched his mom do math on scraps of paper, erasing hope over and over.</p>
+<p>He had one dollar.</p>
+<p>Outside, the real world felt strange — quiet and huge. In a store window, a sign read: <strong>LOTTERY — DREAM BIG</strong>.</p>
+<p>He bought a ticket.</p>
+<p>When the numbers matched, his hands shook.</p>
+<p>$100,000.</p>
+<p>His mom cried, not from sadness, but from relief.</p>
+<p>Noah gave her 80%. For rent. For food. For peace.</p>
+<p>The rest he used for Robux — but this time, without guilt.</p>
+<p>When he returned to Roblox, his avatar glowed again — but now Noah knew he didn’t need it to matter.</p>
+<p>This time, the light was real.</p>`
+];
+
+function load(i){document.getElementById("content").innerHTML = books[i];}
+load(0);
+</script>
+</body>
+</html>

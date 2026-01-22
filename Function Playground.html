@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Function Creator & Console</title>
+<style>
+  body { font-family: monospace; background: #111; color: #eee; padding: 20px; }
+  #console { width: 100%; height: 200px; background: #222; overflow-y: auto; padding: 10px; border: 1px solid #555; margin-bottom: 10px; }
+  #input { width: 70%; }
+  button { padding: 5px 10px; margin-left: 5px; }
+  #editor { width: 100%; height: 150px; background: #222; color: #eee; padding: 10px; border: 1px solid #555; margin-bottom: 10px; }
+  #files { margin-bottom: 10px; }
+  .file-btn { padding: 3px 8px; margin-right: 5px; background: #333; color: #eee; border: none; cursor: pointer; }
+  .file-btn.active { background: #555; }
+</style>
+</head>
+<body>
+
+<h1>Function Creator & Console</h1>
+
+<div id="console"></div>
+<input id="input" placeholder="Type command here...">
+<button onclick="runCommand()">Run</button>
+
+<h2>Function Editor</h2>
+<div id="files"></div>
+<textarea id="editor" placeholder="Write your functions here..."></textarea>
+<br>
+<button onclick="saveFunctions()">Save Functions</button>
+<button onclick="newFile()">New File</button>
+
+<script>
+// -------------------- Data --------------------
+const userFunctions = {}; // all functions
+let files = { 'main': '' }; // code blocks
+let currentFile = 'main';
+
+// -------------------- Console --------------------
+function log(text) {
+    const consoleDiv = document.getElementById('console');
+    consoleDiv.innerHTML += text + '<br>';
+    consoleDiv.scrollTop = consoleDiv.scrollHeight;
+}
+
+// -------------------- File Handling --------------------
+function updateFileButtons() {
+    const container = document.getElementById('files');
+    container.innerHTML = '';
+    for (let fname in files) {
+        const btn = document.createElement('button');
+        btn.textContent = fname;
+        btn.className = 'file-btn' + (fname===currentFile?' active':'');
+        btn.onclick = () => { switchFile(fname); };
+        container.appendChild(btn);
+    }
+}
+
+function switchFile(fname) {
+    files[currentFile] = document.getElementById('editor').value;
+    currentFile = fname;
+    document.getElementById('editor').value = files[currentFile];
+    updateFileButtons();
+}
+
+function newFile() {
+    const fname = 'file' + (Object.keys(files).length + 1);
+    files[fname] = '';
+    switchFile(fname);
+}
+
+// -------------------- Functions --------------------
+function saveFunctions() {
+    const code = document.getElementById('editor').value;
+    files[currentFile] = code;
+    const lines = code.split('\n');
+    lines.forEach(line => {
+        const match = line.match(/^define (\w+)\(([\w,]*)\)=(.*)$/);
+        if (match) {
+            const [, name, params, body] = match;
+            userFunctions[name] = { params: params.split(',').map(p => p.trim()), body };
+        }
+    });
+    log(`Functions from "${currentFile}" saved!`);
+}
+
+// -------------------- Command Interpreter --------------------
+function runCommand() {
+    const input = document.getElementById('input').value;
+    document.getElementById('input').value = '';
+
+    // define inline
+    if (input.startsWith('define ')) {
+        const match = input.match(/^define (\w+)\(([\w,]*)\)=(.*)$/);
+        if (!match) { log('Error: Invalid function definition'); return; }
+        const [, name, params, body] = match;
+        userFunctions[name] = { params: params.split(',').map(p => p.trim()), body };
+        log(`Function '${name}' defined!`);
+        return;
+    }
+
+    // call function
+    const callMatch = input.match(/^(\w+)\((.*)\)$/);
+    if (callMatch) {
+        const [_, name, args] = callMatch;
+        if (!userFunctions[name]) { log(`Error: function '${name}' not found`); return; }
+        const func = userFunctions[name];
+        const argValues = args.split(',').map(a => eval(a.trim()));
+        let result = func.body;
+        func.params.forEach((p, i) => { result = result.replaceAll(p, argValues[i]); });
+        try { result = eval(result); log(result); } 
+        catch(e) { log('Error in function execution: ' + e); }
+        return;
+    }
+
+    log('Command not recognized');
+}
+
+// -------------------- Initialize --------------------
+document.getElementById('editor').value = files[currentFile];
+updateFileButtons();
+</script>
+
+</body>
+</html>

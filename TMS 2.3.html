@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>TMS 2.2 FIXED</title>
+<style>
+body{
+  background:#000;
+  color:#ddd;
+  font-family:Consolas,monospace;
+  display:flex;
+  margin:20px;
+}
+#left{width:55%;}
+#right{width:45%; padding-left:20px; border-left:1px solid #222;}
+input,button{
+  background:#111; color:#eee; border:1px solid #333;
+  padding:6px; margin:4px 0;
+}
+#steps{
+  border:1px solid #222;
+  padding:8px;
+  margin-top:10px;
+  max-height:500px;
+  overflow-y:auto;
+  font-size:12px;
+}
+</style>
+</head>
+<body>
+
+<div id="left">
+<h1>TMS 2.2</h1>
+
+<input id="start" type="number" placeholder="Start number">
+<button onclick="runTMS()">Run TMS</button>
+
+<p id="out"></p>
+<p id="rec"></p>
+<p id="seed"></p>
+
+<div id="steps"></div>
+</div>
+
+<div id="right">
+<h2>Target Finder</h2>
+
+<input id="target" type="number" placeholder="Target result">
+<input id="tstart" type="number" placeholder="Start number">
+<button onclick="findTarget()">Start Search</button>
+
+<p id="tstatus"></p>
+<p id="tresult"></p>
+</div>
+
+<script>
+function rng(seed){
+  seed=(seed*1664525+1013904223)>>>0;
+  return [seed, seed/4294967296];
+}
+
+function firstTwoNZ(x){
+  if(x<=0) return 0;
+  let f=x-Math.floor(x), s="";
+  while(s.length<2 && f>0){
+    f*=10;
+    let d=Math.floor(f);
+    f-=d;
+    if(d!==0) s+=d;
+  }
+  return s?Number("0."+s):0;
+}
+
+/* ===== NORMAL TMS ===== */
+function runTMS(){
+  let n=Number(start.value);
+  let seedVal=Math.floor(Math.random()*1e9);
+  let seed=seedVal;
+  let rec=0, steps=[];
+  let guard=0;
+
+  while(guard<5000){
+    guard++;
+
+    let div=n/100000000;
+    let dig=firstTwoNZ(div);
+    let out=(dig*4)/3;
+
+    steps.push(
+      `R${rec}: ${n} → ${out.toFixed(2)}`
+    );
+
+    if(out!==0){
+      document.getElementById("out").textContent=
+        "Result: "+out.toFixed(2);
+      document.getElementById("rec").textContent=
+        "Recursions: "+rec;
+      document.getElementById("seed").textContent=
+        "Seed: "+seedVal;
+      document.getElementById("steps").innerHTML=
+        steps.join("<br>");
+      return;
+    }
+
+    rec++;
+
+    let r1,r2;
+    [seed,r1]=rng(seed);
+    [seed,r2]=rng(seed);
+
+    let add=Math.floor(r1*100)+1;
+    let mul=Math.floor(r2*3)+1; // NEVER 0
+
+    n=(n+add)*mul % 10000000;
+  }
+}
+
+/* ===== TARGET FINDER (SEPARATE) ===== */
+let searching=false;
+
+function findTarget(){
+  if(searching) return;
+  searching=true;
+
+  let target=Number(document.getElementById("target").value);
+  let startNum=Number(document.getElementById("tstart").value);
+
+  let seed=0, attempts=0;
+
+  function chunk(){
+    for(let i=0;i<200;i++){
+      attempts++;
+      let res=runSilent(startNum, seed, target);
+      if(res){
+        searching=false;
+        tstatus.textContent=
+          "Found after "+attempts+" attempts";
+        tresult.textContent=
+          `Seed ${seed}, Recursions ${res.rec}, Result ${res.out.toFixed(2)}`;
+        return;
+      }
+      seed++;
+    }
+    tstatus.textContent="Searching... "+attempts;
+    setTimeout(chunk,0);
+  }
+  chunk();
+}
+
+function runSilent(start, seedVal, target){
+  let n=start, seed=seedVal, rec=0;
+  for(let g=0;g<5000;g++){
+    let out=(firstTwoNZ(n/100000000)*4)/3;
+    if(out===target) return {rec,out};
+
+    let r1,r2;
+    [seed,r1]=rng(seed);
+    [seed,r2]=rng(seed);
+    n=(n+(Math.floor(r1*100)+1))*(Math.floor(r2*3)+1)%10000000;
+    rec++;
+  }
+  return null;
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Element Combiner</title>
+<style>
+body {
+    background:#111;
+    color:white;
+    font-family:Arial;
+    text-align:center;
+}
+#elements {
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:10px;
+    margin-top:20px;
+}
+.element {
+    padding:10px 16px;
+    border:2px solid white;
+    border-radius:10px;
+    cursor:pointer;
+    user-select:none;
+}
+.selected {
+    background:gold;
+    color:black;
+}
+button {
+    margin:15px;
+    padding:10px 25px;
+    font-size:18px;
+    cursor:pointer;
+}
+#log {
+    margin-top:20px;
+    min-height:30px;
+}
+</style>
+</head>
+
+<body>
+<h1>⚛️ Element Combiner</h1>
+<p>Pick 2 elements, then press Combine</p>
+
+<div id="elements"></div>
+
+<button onclick="combine()">Combine</button>
+
+<div id="log"></div>
+
+<script>
+let discovered = ["Water","Fire","Earth","Air" ];
+let selected = [];
+const recipes = {
+
+// --- Tier 1: Basic Combos ---
+"Water+Fire":"Steam",
+"Water+Earth":"Mud",
+"Water+Air":"Mist",
+"Fire+Air":"Smoke",
+"Fire+Earth":"Lava",
+"Air+Earth":"Dust",
+
+// --- Tier 2: Derived from Tier 1 ---
+"Steam+Air":"Cloud",
+"Mud+Water":"Clay",
+"Mist+Air":"Fog",
+"Smoke+Air":"Smog",
+"Lava+Water":"Stone",
+"Dust+Water":"Mud",
+"Steam+Water":"BoilingWater",
+
+// --- Tier 3: Weather & Natural Elements ---
+"Cloud+Water":"Rain",
+"Fog+Air":"Wind",
+"Smog+Water":"AcidRain",
+"Mud+Plant":"Swamp",
+"Clay+Fire":"Brick",
+"Stone+Fire":"Obsidian",
+
+// --- Tier 4: Plants & Life ---
+"Rain+Earth":"Plant",
+"Plant+Water":"Tree",
+"Tree+Fire":"Ash",
+"Tree+Air":"Pollen",
+"Tree+Earth":"Fruit",
+"Plant+Earth":"Garden",
+"Tree+Water":"Forest",
+
+// --- Tier 5: Metals & Materials ---
+"Stone+Metal":"Ore",
+"Ore+Fire":"Metal",
+"Metal+Energy":"Machine",
+"Clay+Water":"Pottery",
+"Brick+Stone":"Wall",
+"Metal+Fire":"Forge",
+
+// --- Tier 6: Animals & Creatures ---
+"Water+Life":"Fish",
+"Air+Life":"Bird",
+"Fire+Life":"Phoenix",
+"Earth+Life":"Golem",
+"Plant+Life":"Animal",
+"Tree+Life":"Elf",
+"Swamp+Life":"Monster",
+
+// --- Tier 7: Humans & Civilizations ---
+"Plant+Human":"Farmer",
+"Tree+Human":"Lumberjack",
+"Water+Human":"Swimmer",
+"Fire+Human":"Warrior",
+"Earth+Human":"Miner",
+"Human+Energy":"Cyborg",
+"Machine+Human":"Robot",
+"Robot+Energy":"AI",
+
+// --- Tier 8: Magic & Spirit ---
+"Life+Energy":"Spirit",
+"Spirit+Fire":"Ghost",
+"Spirit+Water":"Mermaid",
+"Spirit+Air":"Fairy",
+"Spirit+Earth":"Dwarf",
+"Light+Dark":"Balance",
+"Life+Light":"Angel",
+"Life+Dark":"Undead",
+
+// --- Tier 9: Advanced Tools & Tech ---
+"Metal+Machine":"Mech",
+"Energy+Machine":"Generator",
+"Metal+Stone":"Tools",
+"Brick+Tool":"Building",
+"Tree+Tool":"Bow",
+"Plant+Tool":"Basket",
+"Human+Tool":"Builder",
+
+// --- Tier 10: Extreme / Mythical ---
+"Energy+Fire":"Plasma",
+"Energy+Water":"SteamEngine",
+"Energy+Air":"WindTurbine",
+"Energy+Earth":"Earthquake",
+"Energy+Metal":"Laser",
+"AI+Energy":"Singularity",
+"Singularity+Time":"BlackHole",
+"BlackHole+Energy":"Universe",
+"Universe+Energy":"Multiverse",
+"Phoenix+Fire":"Inferno",
+"Dragon+Air":"StormDragon",
+"Dragon+Fire":"FireDragon",
+"Dragon+Water":"SeaDragon",
+"Dragon+Earth":"RockDragon",
+
+// --- Tier 11: Optional Fun Combos ---
+"Cloud+Fire":"Lightning",
+"Rain+Energy":"Thunder",
+"Forest+Fire":"Wildfire",
+"Swamp+Dark":"Poison",
+"Fog+Dark":"ShadowMist",
+"Spirit+Dark":"Wraith",
+"Phoenix+Energy":"SolarPhoenix",
+"Tree+Energy":"WorldTree",
+"Animal+Energy":"Beast",
+"Beast+Energy":"Monster",
+
+// --- Tier 12: Rounding to 100+ elements ---
+"Human+Spirit":"Shaman",
+"Elf+Energy":"Archmage",
+"Dwarf+Energy":"Engineer",
+"Fairy+Energy":"MagicWand",
+"AI+Machine":"SuperRobot",
+"Mermaid+Water":"SeaKing",
+"Undead+Energy":"Lich",
+"Monster+Energy":"Titan",
+"Dragon+Energy":"ElderDragon",
+"Multiverse+Energy":"Omniverse"
+};
+
+
+
+
+
+
+function draw(){
+    const div = document.getElementById("elements");
+    div.innerHTML="";
+    discovered.forEach(el=>{
+        let d=document.createElement("div");
+        d.className="element";
+        d.textContent=el;
+        d.onclick=()=>select(el,d);
+        div.appendChild(d);
+    });
+}
+
+function select(el,div){
+    if(selected.includes(el)) return;
+    if(selected.length==2) return;
+    selected.push(el);
+    div.classList.add("selected");
+}
+
+function combine(){
+    if(selected.length<2) return;
+
+    let key = selected[0]+"+"+selected[1];
+
+    if(recipes[key]){
+        let result = recipes[key];
+        if(!discovered.includes(result)){
+            discovered.push(result);
+            document.getElementById("log").innerText="Discovered: "+result+"!";
+        } else {
+            document.getElementById("log").innerText="You already have "+result;
+        }
+    } else {
+        document.getElementById("log").innerText="Nothing happened...";
+    }
+
+    selected=[];
+    draw();
+}
+
+draw();
+</script>
+</body>
+</html>

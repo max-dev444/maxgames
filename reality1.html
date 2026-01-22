@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>⹋ Reality Engine</title>
+<style>
+body{
+margin:0;
+background:black;
+color:white;
+font-family:monospace;
+overflow:hidden;
+transition:0.4s;
+}
+#world{
+position:absolute;
+top:0;
+left:0;
+right:0;
+bottom:60px;
+overflow-y:auto;
+padding:15px;
+}
+#input{
+position:absolute;
+bottom:0;
+width:100%;
+height:60px;
+background:#050505;
+border:none;
+color:white;
+font-size:18px;
+padding:10px;
+box-sizing:border-box;
+outline:none;
+}
+.layer{margin-bottom:10px;opacity:.85}
+.alt{filter:blur(1px)}
+.shake{animation:shake .1s infinite}
+@keyframes shake{
+0%{transform:translate(0,0)}
+50%{transform:translate(2px,-2px)}
+100%{transform:translate(-2px,2px)}
+}
+</style>
+</head>
+<body>
+<div id="world"></div>
+<textarea id="input" placeholder="Write. Use ⹋ to fracture reality."></textarea>
+
+<script>
+const world=document.getElementById("world");
+const input=document.getElementById("input");
+let chaos=0;
+
+input.addEventListener("keydown",e=>{
+if(e.key==="Enter"){e.preventDefault();process(input.value);input.value="";}
+});
+
+function add(t,c="",cl="layer"){
+const d=document.createElement("div");
+d.textContent=t;
+d.className=cl;
+d.style.color=c;
+world.appendChild(d);
+world.scrollTop=world.scrollHeight;
+}
+
+function process(t){
+if(!t.trim())return;
+chaos++;
+
+let hue=Math.random()*360;
+let mood=1;
+
+if(t.includes("sad")||t.includes("cry")) mood=-1;
+if(t.includes("love")||t.includes("happy")) mood=2;
+if(/[0-9]/.test(t)) document.body.style.filter="hue-rotate("+chaos*20+"deg)";
+if(t.length<10) document.body.style.opacity=0.8;
+if(t.length>80) document.body.style.transform="scale(1.01)";
+if(/[A-Z]{5,}/.test(t)) document.body.classList.add("shake"); else document.body.classList.remove("shake");
+
+if(t.includes("!")) flash();
+if(t.includes("?")) echo(t);
+
+if(t.includes("⹋")){
+let p=t.split("⹋");
+fracture(p[0],p[1]);
+return;
+}
+
+add(t,`hsl(${hue},80%,${mood>0?70:40}%)`);
+document.body.style.background=`hsl(${(chaos*25)%360},40%,${mood>0?10:5}%)`;
+}
+
+function fracture(a,b){
+add(a,`hsl(${Math.random()*360},90%,70%)`);
+add(b,`hsl(${Math.random()*360},90%,50%)`,"layer alt");
+document.body.style.transform=`translate(${Math.sin(chaos)*3}px,${Math.cos(chaos)*3}px)`;
+}
+
+function flash(){
+document.body.style.background="white";
+setTimeout(()=>document.body.style.background="black",50);
+}
+
+function echo(t){
+add(t,"#555","layer alt");
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TMS 2.2</title>
+<style>
+body {
+    background:#0b0b0b;
+    color:#d0d0d0;
+    font-family:Consolas, monospace;
+    margin:20px;
+    display:flex;
+}
+#main { flex:1; max-width:760px; }
+#side { width:300px; margin-left:20px; border-left:1px solid #222; padding-left:15px; }
+input,button {
+    background:#111;
+    color:#ddd;
+    border:1px solid #333;
+    padding:5px;
+    margin:4px 0;
+}
+button:hover { background:#1b1b1b; }
+#steps {
+    margin-top:10px;
+    max-height:520px;
+    overflow-y:auto;
+    font-size:12px;
+    border:1px solid #222;
+    padding:8px;
+}
+h1,h3 { color:#f0f0f0; }
+</style>
+</head>
+<body>
+
+<div id="main">
+<h1>Maximumonical Switch — TMS 2.2</h1>
+
+<input id="startNum" type="number" placeholder="Start Number">
+<input id="targetNum" type="number" placeholder="Target (optional)">
+<button onclick="runTMS()">Run</button>
+
+<p id="status"></p>
+<p id="attempts"></p>
+<p id="recursions"></p>
+<p id="seedOut"></p>
+
+<div id="steps"></div>
+</div>
+
+<div id="side">
+<h3>Info</h3>
+<p>
+• Target finder restored<br>
+• Attempts counted<br>
+• No lag / chunked search<br>
+• Only final result shown
+</p>
+</div>
+
+<script>
+/* ========= RNG ========= */
+function seededRandom(seed){
+    seed = (seed * 1664525 + 1013904223) >>> 0;
+    return seed / 4294967296;
+}
+
+/* ========= Helpers ========= */
+function firstTwoNonZeroDigits(x){
+    if(x<=0) return 0;
+    let f=x-Math.floor(x), d="";
+    while(d.length<2 && f>0){
+        f*=10;
+        let n=Math.floor(f);
+        f-=n;
+        if(n!==0) d+=n;
+    }
+    return d ? Number("0."+d) : 0;
+}
+
+/* ========= Core ========= */
+let running=false, attemptCount=0;
+
+function runTMS(){
+    if(running) return;
+    running=true;
+    document.getElementById("steps").innerHTML="";
+    document.getElementById("status").textContent="Searching...";
+    attemptCount=0;
+
+    const start=Number(startNum.value);
+    const target=targetNum.value ? Number(targetNum.value) : null;
+
+    let seed=Math.floor(Math.random()*1e9);
+
+    function searchChunk(){
+        let localRuns=0;
+
+        while(localRuns<120){
+            localRuns++;
+            attemptCount++;
+            let result=runSingle(start, seed, target);
+            if(result){
+                finish(result);
+                return;
+            }
+            seed++;
+        }
+        setTimeout(searchChunk,0);
+    }
+
+    searchChunk();
+}
+
+/* ========= Single Run ========= */
+function runSingle(start, seed, target){
+    let steps=[], rec=0, n=start, rngI=0, last=null, repeat=0;
+
+    function rng(){
+        rngI++;
+        return seededRandom(seed+rngI);
+    }
+
+    while(rec<5000){
+        let div=n/100000000;
+        let dig=firstTwoNonZeroDigits(div);
+        let out=(dig*4)/3;
+
+        steps.push(`R${rec}: ${n} → ${out.toFixed(2)}`);
+
+        if(target!==null){
+            if(Number(out.toFixed(2))===target){
+                return {steps, rec, seed, out};
+            }
+        } else {
+            if(out.toFixed(2)!=="0.00"){
+                return {steps, rec, seed, out};
+            }
+        }
+
+        rec++;
+
+        if(n===last) repeat++; else repeat=0;
+        last=n;
+
+        let add=Math.floor(rng()*100)+1;
+        let mul=Math.floor(rng()*3);
+        if(repeat>=6 && mul===0) mul=1;
+
+        n=Math.abs((n+add)*mul)%10000000;
+        if(!Number.isFinite(n)) return null;
+    }
+    return null;
+}
+
+/* ========= Finish ========= */
+function finish(res){
+    running=false;
+    document.getElementById("status").textContent=`Result: ${res.out.toFixed(2)}`;
+    document.getElementById("attempts").textContent=`Attempts: ${attemptCount}`;
+    document.getElementById("recursions").textContent=`Recursions: ${res.rec}`;
+    document.getElementById("seedOut").textContent=`Seed: ${res.seed}`;
+    document.getElementById("steps").innerHTML=res.steps.join("<br>");
+}
+</script>
+
+</body>
+</html>

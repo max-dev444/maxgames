@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SongSmith AI - Pro Version 2.0</title>
+<style>
+body { font-family: Arial, sans-serif; display:flex; margin:0; height:100vh; background:#111; color:#eee; }
+#controls { width:320px; padding:20px; background:#222; box-shadow:2px 0 10px #000; overflow-y:auto;}
+#output { flex:1; padding:20px; overflow-y:auto;}
+h1,h2{margin:10px 0;}
+label { display:block; margin-top:15px;}
+select, input[type=number], input[type=text], input[type=range] { width:100%; padding:5px; margin-top:5px; }
+button { margin-top:15px; padding:10px; width:100%; background:#444; color:#eee; border:none; cursor:pointer;}
+button:hover { background:#666;}
+#lyrics { white-space:pre-wrap; margin-top:10px; line-height:1.4em;}
+</style>
+</head>
+<body>
+
+<div id="controls">
+  <h1>SongSmith AI 2.0</h1>
+  
+  <label>Mood:
+    <select id="mood">
+      <option>happy</option>
+      <option>sad</option>
+      <option>angry</option>
+      <option>chill</option>
+      <option>random</option>
+    </select>
+  </label>
+  
+  <label>Genre:
+    <select id="genre">
+      <option>pop</option>
+      <option>rock</option>
+      <option>rap</option>
+      <option>lofi</option>
+      <option>indie</option>
+    </select>
+  </label>
+  
+  <label>Length:
+    <select id="length">
+      <option value="short">short</option>
+      <option value="medium" selected>medium</option>
+      <option value="long">long</option>
+    </select>
+  </label>
+  
+  <label>Number of Verses:
+    <input type="number" id="verses" min="1" max="6" value="3">
+  </label>
+  
+  <label>Chorus:
+    <select id="chorus">
+      <option value="no">No</option>
+      <option value="yes" selected>Yes</option>
+    </select>
+  </label>
+  
+  <label>Chorus Placement:
+    <select id="chorusRule">
+      <option value="afterEvery">After every verse</option>
+      <option value="once">Only once</option>
+      <option value="startEnd">Start & End</option>
+    </select>
+  </label>
+  
+  <label>Bridge:
+    <select id="bridge">
+      <option value="no">No</option>
+      <option value="yes">Yes</option>
+    </select>
+  </label>
+  
+  <label>Topic/Theme:
+    <input type="text" id="topic" placeholder="Enter your song topic">
+  </label>
+  
+  <label>Creativity Slider:
+    <input type="range" id="aiLevel" min="0" max="10" value="5">
+  </label>
+  
+  <button onclick="generateSong()">Generate Song</button>
+  <button onclick="copyLyrics()">Copy Lyrics</button>
+</div>
+
+<div id="output">
+  <h2 id="title">Your Song Title</h2>
+  <div id="lyrics"></div>
+</div>
+
+<script>
+// Expanded word banks
+const moodWords = {
+  happy:["bright","laughing","golden","alive","sunny","sparkle","smile","glow","dancing","joy","cheerful","shimmer","light"],
+  sad:["empty","cold","quiet","falling","tears","lonely","broken","dark","lost","sorrow","rain","melancholy","shadow"],
+  angry:["burning","broken","screaming","wild","storm","clash","rage","fight","fire","shout","smash","chaos","stormy"],
+  chill:["drifting","slow","soft","late","calm","cloud","breeze","relax","peace","mellow","serene","gentle","smooth"],
+  random:["blorp","quantumtoast","spaghetti","LED tears","zigzag","flop","plop","fizzle","zap","quack","sproing","boop","snarf"]
+};
+
+const genreWords = {
+  pop:["love","heart","shine","dance","night","light","dream","star","music","sing","sparkle","rhythm","glow"],
+  rock:["fire","storm","crash","shadow","fight","edge","break","louder","guitar","scream","wild","roar","thunder"],
+  rap:["flow","beat","hustle","grind","mic","verse","rhythm","street","story","bars","freestyle","rhyme","track"],
+  lofi:["sleep","dream","rain","coffee","drift","calm","soft","chill","echo","mellow","lazy","relax","cloud"],
+  indie:["wander","sky","road","whisper","echo","fade","journey","moon","wind","horizon","vibe","forest","story"]
+};
+
+// Template system with optional rhyme
+const templates = [
+  "I [verb] the [topic] in the [mood] [noun]",
+  "The [noun] [verb]s as [topic] fades",
+  "And now I [verb] my [mood] [noun]",
+  "In the [topic], I [verb] and [verb] all night"
+];
+
+const verbs = ["see","feel","watch","hold","chase","follow","run","dream","sing","call","catch","rise"];
+const nouns = ["light","shadow","heart","sky","road","wind","rain","star","fire","dream","echo","wave"];
+
+function getRandom(arr){return arr[Math.floor(Math.random()*arr.length)];}
+
+// Generate a line based on template
+function generateLine(mood, genre, topic, aiLevel){
+  let tpl = getRandom(templates);
+  // Replace placeholders
+  tpl = tpl.replace(/\[verb\]/g, ()=>getRandom(verbs));
+  tpl = tpl.replace(/\[noun\]/g, ()=>getRandom(nouns.concat(moodWords[mood], genreWords[genre])));
+  tpl = tpl.replace(/\[mood\]/g, ()=>getRandom(moodWords[mood]));
+  tpl = tpl.replace(/\[topic\]/g, ()=>topic || getRandom(genreWords[genre]));
+
+  // AI creativity simulation: minor word shuffles
+  if(aiLevel>5 && Math.random()<0.4){
+    let words = tpl.split(" ");
+    words = words.sort(()=>Math.random()-0.5);
+    tpl = words.join(" ");
+  }
+  return tpl;
+}
+
+function generateSong(){
+  const mood = document.getElementById("mood").value;
+  const genre = document.getElementById("genre").value;
+  const length = document.getElementById("length").value;
+  const versesCount = parseInt(document.getElementById("verses").value);
+  const chorus = document.getElementById("chorus").value === "yes";
+  const chorusRule = document.getElementById("chorusRule").value;
+  const bridge = document.getElementById("bridge").value === "yes";
+  const topic = document.getElementById("topic").value;
+  const aiLevel = parseInt(document.getElementById("aiLevel").value);
+
+  // Generate title
+  const title = topic?topic+" - "+genre+" Song":mood+" "+genre+" Song";
+  document.getElementById("title").innerText = title;
+
+  let lyrics = "";
+
+  function addChorus(){
+    let linesPerChorus = length==="short"?2:length==="medium"?3:4;
+    lyrics+="\n[Chorus]\n";
+    for(let i=0;i<linesPerChorus;i++){
+      lyrics+=generateLine(mood, genre, topic, aiLevel)+"\n";
+    }
+  }
+
+  for(let i=0;i<versesCount;i++){
+    lyrics+="\n[Verse "+(i+1)+"]\n";
+    let linesPerVerse = length==="short"?2:length==="medium"?4:6;
+    for(let j=0;j<linesPerVerse;j++){
+      lyrics+=generateLine(mood, genre, topic, aiLevel)+"\n";
+    }
+    if(chorus && chorusRule==="afterEvery") addChorus();
+  }
+
+  if(chorus && chorusRule==="once") addChorus();
+  if(chorus && chorusRule==="startEnd") {
+    addChorus(); // start
+    addChorus(); // end
+  }
+
+  if(bridge){
+    lyrics+="\n[Bridge]\n";
+    let bridgeLines = length==="short"?2:3;
+    for(let i=0;i<bridgeLines;i++){
+      lyrics+=generateLine(mood, genre, topic, aiLevel)+"\n";
+    }
+  }
+
+  document.getElementById("lyrics").innerText = lyrics;
+}
+
+function copyLyrics(){
+  const lyrics = document.getElementById("lyrics").innerText;
+  navigator.clipboard.writeText(lyrics);
+  alert("Lyrics copied to clipboard!");
+}
+</script>
+
+</body>
+</html>

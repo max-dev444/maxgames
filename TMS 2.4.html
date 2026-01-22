@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>TMS 2.2 REAL FIX</title>
+<style>
+body{
+  background:#000;
+  color:#ddd;
+  font-family:Consolas,monospace;
+  display:flex;
+  gap:20px;
+  padding:20px;
+}
+#main{width:55%;}
+#side{width:45%; border-left:1px solid #222; padding-left:20px;}
+input,button{
+  background:#111; color:#eee;
+  border:1px solid #333;
+  padding:6px;
+  margin:4px 0;
+}
+#steps{
+  border:1px solid #222;
+  padding:8px;
+  margin-top:10px;
+  max-height:420px;
+  overflow:auto;
+  font-size:12px;
+}
+.small{font-size:12px; color:#aaa;}
+</style>
+</head>
+<body>
+
+<div id="main">
+<h2>Maximumonical Switch (TMS 2.2)</h2>
+
+<input id="start" type="number" placeholder="Start number">
+<button onclick="runTMS()">Run TMS</button>
+
+<p id="out"></p>
+<p id="rec"></p>
+<p id="seed"></p>
+
+<div id="steps"></div>
+</div>
+
+<div id="side">
+<h3>Recursion Chances</h3>
+<pre class="small">
+1   = 50%
+2   = 25%
+3   = 12.5%
+4   = 6.25%
+5   = 3.12%
+6   = 1.56%
+7   = 0.78%
+8   = 0.39%
+9   = 0.20%
+10  = 0.10%
+11  = 0.05%
+12  = 0.03%
+13  = 0.02%
+14  = 0.01%
+15  = 0.005%
+16  = 0.002%
+32  = <0.001%
+64  = <0.001%
+128 = <0.001%
+256 = <0.001%
+</pre>
+
+<h3>Target Recursion Finder</h3>
+<input id="targetRec" type="number" placeholder="Target recursions">
+<input id="tstart" type="number" placeholder="Start number">
+<button onclick="findTarget()">Start</button>
+
+<p id="tstatus"></p>
+<p id="tresult"></p>
+</div>
+
+<script>
+function rng(seed){
+  seed=(seed*1664525+1013904223)>>>0;
+  return [seed, seed/4294967296];
+}
+
+function firstTwoNZ(x){
+  if(x<=0) return 0;
+  let f=x-Math.floor(x), s="";
+  while(s.length<2 && f>0){
+    f*=10;
+    let d=Math.floor(f);
+    f-=d;
+    if(d!==0) s+=d;
+  }
+  return s?Number("0."+s):0;
+}
+
+/* ===== NORMAL TMS ===== */
+function runTMS(){
+  let n=Number(start.value);
+  let seed0=Math.floor(Math.random()*1e9);
+  let seed=seed0;
+  let rec=0;
+  let steps=[];
+
+  for(let guard=0; guard<2000; guard++){
+    let div=n/100000000;
+    let processed=firstTwoNZ(div);
+    let out=(processed*4)/3;
+
+    steps.push(
+      `R${rec}: ${n} → processed ${processed.toFixed(2)} → ${out.toFixed(2)}`
+    );
+
+    if(processed!==0){
+      outEl(out,rec,seed0,steps);
+      return;
+    }
+
+    rec++;
+
+    let r1,r2;
+    [seed,r1]=rng(seed);
+    [seed,r2]=rng(seed);
+
+    let add=Math.floor(r1*100)+1;
+    let mul=Math.floor(r2*2)+1; // 1–2 only
+
+    n=((n+add)*mul)%10000000;
+  }
+
+  outEl(0,rec,seed0,steps);
+}
+
+function outEl(out,rec,seed,steps){
+  out.textContent="Result: "+out.toFixed(2);
+  recEl.textContent="Recursions: "+rec;
+  seedEl.textContent="Seed: "+seed;
+  stepsDiv.innerHTML=steps.join("<br>");
+}
+
+const out=document.getElementById("out");
+const recEl=document.getElementById("rec");
+const seedEl=document.getElementById("seed");
+const stepsDiv=document.getElementById("steps");
+
+/* ===== TARGET FINDER ===== */
+let searching=false;
+
+function findTarget(){
+  if(searching) return;
+  searching=true;
+
+  let target=Number(targetRec.value);
+  let startN=Number(tstart.value);
+  let seed=0;
+  let attempts=0;
+
+  function batch(){
+    for(let i=0;i<300;i++){
+      attempts++;
+      let r=runSilent(startN,seed);
+      if(r===target){
+        searching=false;
+        tstatus.textContent="Found after "+attempts+" attempts";
+        tresult.textContent="Seed "+seed;
+        return;
+      }
+      seed++;
+    }
+    tstatus.textContent="Searching... "+attempts;
+    setTimeout(batch,0);
+  }
+  batch();
+}
+
+function runSilent(n,seed){
+  let rec=0;
+  for(let g=0; g<2000; g++){
+    let processed=firstTwoNZ(n/100000000);
+    if(processed!==0) return rec;
+
+    let r1,r2;
+    [seed,r1]=rng(seed);
+    [seed,r2]=rng(seed);
+
+    n=((n+(Math.floor(r1*100)+1))*(Math.floor(r2*2)+1))%10000000;
+    rec++;
+  }
+  return rec;
+}
+</script>
+</body>
+</html>

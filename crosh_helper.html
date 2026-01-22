@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Crosh Encyclopedia Builder v3</title>
+<style>
+body{background:#0a0a0a;color:#00ffcc;font-family:monospace;padding:20px}
+h1,h2{color:#00ffff}
+.step{border:1px solid #00ffcc;padding:15px;margin:15px 0;border-radius:8px;background:#000}
+pre{background:#111;padding:10px;overflow:auto}
+textarea{width:100%;height:180px;background:#111;color:#00ffcc;border:1px solid #00ffcc}
+button{padding:10px;background:#00ffcc;color:#000;font-weight:bold;border:none;cursor:pointer}
+</style>
+</head>
+<body>
+
+<h1>🚀 Crosh Encyclopedia Builder — v3 (No Linux)</h1>
+
+<div class="step">
+<h2>Step 1 — Open Crosh</h2>
+<pre>Ctrl + Alt + T</pre>
+</div>
+
+<div class="step">
+<h2>Step 2 — Run these commands</h2>
+<pre>
+help
+help_advanced
+vmc help
+ssh -h
+</pre>
+
+When each command runs, it prints a list.  
+Copy the output from each one.
+</div>
+
+<div class="step">
+<h2>Step 3 — Paste the results</h2>
+
+Paste <b>help</b> here:
+<textarea id="a"></textarea>
+
+Paste <b>help_advanced</b> here:
+<textarea id="b"></textarea>
+
+Paste <b>vmc help</b> here:
+<textarea id="c"></textarea>
+
+Paste <b>ssh -h</b> here:
+<textarea id="d"></textarea>
+</div>
+
+<div class="step">
+<h2>Step 4 — Build your real command database</h2>
+<button onclick="build()">Build Command List</button>
+<pre id="out"></pre>
+</div>
+
+<script>
+function build(){
+ let t = a.value + b.value + c.value + d.value;
+ let lines = t.split("\n");
+ let cmds = [];
+
+ for(let l of lines){
+   l=l.trim();
+   if(l && !l.includes("Usage") && !l.includes("Options") && !l.includes("--")){
+     let p=l.split(" ")[0];
+     if(p.length<20) cmds.push(p);
+   }
+ }
+
+ cmds=[...new Set(cmds)].sort();
+ out.textContent = cmds.join("\n");
+}
+</script>
+
+</body>
+</html>

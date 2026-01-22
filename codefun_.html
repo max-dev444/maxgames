@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Chaos Collage Machine</title>
+<style>
+body {
+  margin: 0;
+  background: #0b0b0b;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+}
+#toolbar {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 9999;
+}
+button {
+  background: black;
+  color: white;
+  border: 1px solid #555;
+  padding: 8px 12px;
+  margin-right: 5px;
+  cursor: pointer;
+}
+.item {
+  position: absolute;
+  user-select: none;
+  cursor: grab;
+  animation: float 10s linear infinite;
+}
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-30px); }
+  100% { transform: translateY(0px); }
+}
+</style>
+</head>
+<body>
+
+<div id="toolbar">
+  <button onclick="spawn()">Generate Chaos</button>
+  <button onclick="clearAll()">Clear</button>
+</div>
+
+<script>
+const words = [
+  "STATIC", "MEMORY", "EMOJI", "BROKEN", "PIXEL", "DREAM",
+  "NEVER", "ALWAYS", "GLITCH", "ECHO", "VOID", "LOFI",
+  "CHAOS", "HEART", "NOISE", "LIGHT", "DARK"
+]
+
+const albums = [
+  "Twilight Mist", "Digital Tears", "Neon Bathroom",
+  "Lofi Kitty", "Falling Off", "Cosmic Glue",
+  "Always Never", "Pixel Heart", "LED Dreams"
+]
+
+const emojis = ["💿","🧃","🌙","🔥","🧠","🎧","📼","⭐","💔","🌀"]
+
+function rand(a) {
+  return a[Math.floor(Math.random()*a.length)]
+}
+
+function spawn() {
+  for(let i=0;i<20;i++){
+    const div = document.createElement("div")
+    div.className = "item"
+    div.innerText = Math.random() < 0.5 
+      ? rand(words) + " " + rand(emojis)
+      : rand(albums)
+
+    div.style.left = Math.random()*window.innerWidth + "px"
+    div.style.top = Math.random()*window.innerHeight + "px"
+    div.style.fontSize = (20 + Math.random()*60) + "px"
+    div.style.color = `hsl(${Math.random()*360},80%,70%)`
+    div.style.opacity = 0.3 + Math.random()*0.7
+    div.style.transform = `rotate(${Math.random()*60-30}deg)`
+
+    makeDraggable(div)
+    document.body.appendChild(div)
+  }
+}
+
+function clearAll() {
+  document.querySelectorAll(".item").forEach(e => e.remove())
+}
+
+function makeDraggable(el){
+  let isDown = false, ox=0, oy=0
+  el.onmousedown = e => {
+    isDown = true
+    ox = e.offsetX
+    oy = e.offsetY
+  }
+  window.onmouseup = ()=> isDown=false
+  window.onmousemove = e => {
+    if(!isDown) return
+    el.style.left = (e.pageX - ox) + "px"
+    el.style.top = (e.pageY - oy) + "px"
+  }
+}
+</script>
+
+</body>
+</html>

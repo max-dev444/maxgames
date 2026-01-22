@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Mlooket</title>
+<style>
+body{
+  margin:0;
+  background:#0b0c14;
+  color:white;
+  font-family:Arial;
+  display:flex;
+  height:100vh;
+}
+#maker,#player{
+  flex:1;
+  padding:15px;
+  overflow:auto;
+}
+h1{color:#6cf;text-align:center;}
+input,textarea,button,select{
+  width:100%;
+  margin:6px 0;
+  padding:8px;
+  background:#111;
+  color:white;
+  border:1px solid #444;
+}
+button{cursor:pointer;}
+.quizCard{
+  border:1px solid #444;
+  padding:8px;
+  margin:5px 0;
+  cursor:pointer;
+}
+.quizCard:hover{background:#222;}
+.answerBtn{
+  background:#1b1b2d;
+  margin:5px 0;
+  border:1px solid #444;
+}
+.answerBtn:hover{background:#2a2a44;}
+.correct{background:#145214!important;}
+.wrong{background:#6b1c1c!important;}
+</style>
+</head>
+<body>
+
+<div id="maker">
+  <h1>🧠 Mlooket Maker</h1>
+  <input id="quizName" placeholder="Quiz name">
+
+  <textarea id="question" placeholder="Question"></textarea>
+  <input id="a1" placeholder="Answer 1">
+  <input id="a2" placeholder="Answer 2">
+  <input id="a3" placeholder="Answer 3">
+  <input id="a4" placeholder="Answer 4">
+  <select id="correct">
+    <option value="0">Answer 1 is correct</option>
+    <option value="1">Answer 2 is correct</option>
+    <option value="2">Answer 3 is correct</option>
+    <option value="3">Answer 4 is correct</option>
+  </select>
+
+  <button onclick="addQuestion()">Add Question</button>
+  <button onclick="saveQuiz()">Save Quiz</button>
+
+  <h3>Your Quizzes</h3>
+  <div id="quizList"></div>
+</div>
+
+<div id="player">
+  <h1>🎮 Mlooket Play</h1>
+  <div id="playArea">Pick a quiz to play.</div>
+</div>
+
+<script>
+let currentQuiz = []
+let quizzes = JSON.parse(localStorage.getItem("mlooket")) || {}
+
+function addQuestion(){
+  const q = document.getElementById("question").value
+  const a = [
+    a1.value,a2.value,a3.value,a4.value
+  ]
+  const c = correct.value
+  if(!q || a.includes("")) return alert("Fill everything")
+  currentQuiz.push({q,a,c})
+  question.value=a1.value=a2.value=a3.value=a4.value=""
+}
+
+function saveQuiz(){
+  const name = quizName.value
+  if(!name || currentQuiz.length==0) return alert("Name & questions needed")
+  quizzes[name] = currentQuiz
+  localStorage.setItem("mlooket",JSON.stringify(quizzes))
+  currentQuiz=[]
+  quizName.value=""
+  updateList()
+}
+
+function updateList(){
+  quizList.innerHTML=""
+  for(let q in quizzes){
+    const d=document.createElement("div")
+    d.className="quizCard"
+    d.innerText=q
+    d.onclick=()=>playQuiz(q)
+    quizList.appendChild(d)
+  }
+}
+updateList()
+
+let playData, index, score
+
+function playQuiz(name){
+  playData = quizzes[name]
+  index=0
+  score=0
+  showQuestion()
+}
+
+function showQuestion(){
+  if(index>=playData.length){
+    playArea.innerHTML = `<h2>Finished!</h2><p>Score: ${score}/${playData.length}</p>`
+    return
+  }
+  const q = playData[index]
+  let html = `<h2>${q.q}</h2>`
+  q.a.forEach((ans,i)=>{
+    html += `<button class="answerBtn" onclick="answer(${i})">${ans}</button>`
+  })
+  playArea.innerHTML = html
+}
+
+function answer(i){
+  if(i==playData[index].c) score++
+  index++
+  showQuestion()
+}
+</script>
+
+</body>
+</html>

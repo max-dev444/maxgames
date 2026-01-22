@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>JSON Cleaner</title>
+<style>
+  body { font-family: sans-serif; padding: 20px; background: #f0f0f0; }
+  textarea { width: 100%; height: 300px; font-family: monospace; margin-bottom: 10px; }
+  button { padding: 8px 12px; font-size: 16px; cursor: pointer; margin-bottom: 10px; }
+  #output { white-space: pre-wrap; background: #fff; padding: 10px; border-radius: 6px; }
+</style>
+</head>
+<body>
+
+<h2>MaxSearch JSON Cleaner</h2>
+<p>Paste your raw JSON in the box below and click "Clean JSON".</p>
+
+<textarea id="inputJSON" placeholder='Paste your JSON here...'></textarea>
+<br>
+<button onclick="cleanJSON()">Clean JSON</button>
+
+<h3>Clean JSON Output:</h3>
+<div id="output">Your clean JSON will appear here.</div>
+
+<script>
+function cleanJSON() {
+    let raw = document.getElementById("inputJSON").value;
+
+    // 1. Remove BOM if present
+    raw = raw.replace(/^\uFEFF/, '');
+
+    // 2. Remove trailing commas before closing braces/brackets
+    raw = raw.replace(/,\s*([\]}])/g, '$1');
+
+    try {
+        // 3. Parse to verify valid JSON
+        const obj = JSON.parse(raw);
+
+        // 4. Pretty-print cleaned JSON
+        const clean = JSON.stringify(obj, null, 2);
+        document.getElementById("output").textContent = clean;
+
+        alert("JSON cleaned successfully! Copy the output for MaxSearch.");
+    } catch (err) {
+        document.getElementById("output").textContent = "ERROR: " + err.message;
+        alert("JSON still invalid! Check the output for error details.");
+    }
+}
+</script>
+
+</body>
+</html>

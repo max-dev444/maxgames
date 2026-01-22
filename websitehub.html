@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Welcome to the Website</title>
+<style>
+    /* Global Styles */
+    body {
+        margin: 0;
+        font-family: 'Verdana', sans-serif;
+        background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        overflow-x: hidden;
+    }
+
+    h1 {
+        margin-top: 50px;
+        font-size: 3em;
+        color: #ff4444;
+        text-shadow: 2px 2px #000;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { text-shadow: 2px 2px #000; }
+        50% { text-shadow: 4px 4px #ff4444; }
+        100% { text-shadow: 2px 2px #000; }
+    }
+
+    .subtitle {
+        font-size: 1.5em;
+        margin-bottom: 40px;
+        color: #ff6666;
+        text-align: center;
+        max-width: 600px;
+    }
+
+    .button-container {
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+        margin-top: 20px;
+        width: 320px;
+    }
+
+    button {
+        padding: 20px;
+        font-size: 1.3em;
+        background-color: #222;
+        color: #fff;
+        border: 3px solid #ff4444;
+        border-radius: 15px;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 2px 2px 10px #ff0000;
+    }
+
+    button:hover {
+        background-color: #ff4444;
+        color: #111;
+        box-shadow: 4px 4px 20px #ff4444;
+        transform: scale(1.05);
+    }
+
+    footer {
+        margin-top: auto;
+        margin-bottom: 20px;
+        font-size: 1em;
+        color: #888;
+        text-align: center;
+    }
+
+    /* Floating decorative sparkles */
+    .sparkle {
+        position: absolute;
+        width: 5px;
+        height: 5px;
+        background: #ff4444;
+        border-radius: 50%;
+        animation: sparkleAnim 3s infinite;
+    }
+
+    @keyframes sparkleAnim {
+        0% { transform: translateY(0px); opacity: 1; }
+        50% { transform: translateY(-15px); opacity: 0.5; }
+        100% { transform: translateY(0px); opacity: 1; }
+    }
+</style>
+</head>
+<body>
+
+<h1>WELCOME to this WEBSITE</h1>
+<div class="subtitle">
+    Created by MAX — Explore TMS, Element OS, Gamers Hub, and more!  
+    Enjoy the chaos, the systems, and the fun.
+</div>
+
+<div class="button-container">
+    <button onclick="window.open('Element OS/Element OS.html', '_blank')">Element OS</button>
+    <button onclick="window.open('Gamers Hub/Gamers Hub V4.html', '_blank')">Gamers Hub</button>
+    <button onclick="window.open('TMSswitcher.html', '_blank')">TMS Version Selector</button>
+    <button onclick="window.open('info.html', '_blank')">Info Page</button>
+</div>
+
+<footer>
+    &copy; 2025 Max's Website — All Rights.. uh.. i have no idea
+</footer>
+
+<script>
+    // Create decorative sparkles
+    for (let i = 0; i < 25; i++) {
+        let sparkle = document.createElement('div');
+        sparkle.className = 'sparkle';
+        sparkle.style.left = Math.random() * window.innerWidth + 'px';
+        sparkle.style.top = Math.random() * window.innerHeight + 'px';
+        sparkle.style.width = sparkle.style.height = (2 + Math.random() * 4) + 'px';
+        document.body.appendChild(sparkle);
+    }
+</script>
+
+</body>
+</html>

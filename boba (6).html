@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Boba Crafting Tycoon</title>
+
+<style>
+body {
+  font-family: system-ui, sans-serif;
+  background: linear-gradient(#fff7fb, #ede7f6);
+  text-align: center;
+  padding: 15px;
+}
+h1 { color:#7b1fa2; }
+
+.money {
+  font-size:26px;
+  font-weight:bold;
+  color:#2e7d32;
+  margin-bottom:10px;
+}
+
+section {
+  background:white;
+  border-radius:14px;
+  padding:15px;
+  margin:12px auto;
+  max-width:900px;
+  box-shadow:0 6px 20px rgba(0,0,0,0.1);
+}
+
+button {
+  padding:6px 12px;
+  margin:4px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  background:#ba68c8;
+  color:white;
+}
+button:hover { background:#9c27b0; }
+
+.shopBox {
+  max-height:300px;
+  overflow-y:auto;
+  border:1px solid #eee;
+  border-radius:10px;
+}
+
+.ing {
+  border-bottom:1px solid #eee;
+  padding:8px;
+}
+
+.diamondText {
+  color:#00bcd4;
+  font-weight:bold;
+}
+
+.boba {
+  display:inline-block;
+  width:190px;
+  padding:10px;
+  margin:8px;
+  border-radius:12px;
+  background:#fafafa;
+  border:2px solid #ddd;
+}
+.boba.galaxy {
+  border-color:#7c4dff;
+  background:#ede7f6;
+}
+.boba.diamond {
+  border-color:#00e5ff;
+  background:#e0f7fa;
+}
+
+.small { font-size:12px; opacity:0.7; }
+</style>
+</head>
+
+<body>
+
+<h1>🧋 Boba Crafting Tycoon</h1>
+<div class="money">$<span id="money">0</span></div>
+
+<!-- CRAFTING FIRST -->
+<section>
+<h2>🧪 Craft a Boba</h2>
+<select id="ingA"></select>
+<select id="ingB"></select><br><br>
+<button onclick="craftBoba()">Craft</button>
+<p class="small">💎 Diamond = ×100 · 🌌 Galaxy = ×1.5</p>
+</section>
+
+<section>
+<h2>🛒 Ingredient Shop</h2>
+<div class="shopBox" id="shop"></div>
+</section>
+
+<section>
+<h2>📦 Your Bobas</h2>
+<div id="bobas"></div>
+</section>
+
+<script>
+let money = +localStorage.getItem("money") || 500;
+
+// INGREDIENT LOAD + AUTO FIX
+let ingredients = (() => {
+  let saved = JSON.parse(localStorage.getItem("ingredients"));
+  if (!saved || !Array.isArray(saved)) {
+    let list=[], price=10;
+    for(let i=1;i<=50;i++){
+      list.push({name:`Ingredient ${i}`,base:Math.floor(price),amount:0,diamondAmount:0});
+      price*=1.6;
+    }
+    return list;
+  }
+  return saved.map((ing,i)=>({
+    name: ing.name || `Ingredient ${i+1}`,
+    base: Number(ing.base ?? ing.price ?? 10),
+    amount: Number(ing.amount ?? 0),
+    diamondAmount: Number(ing.diamondAmount ?? 0)
+  }));
+})();
+localStorage.setItem("ingredients", JSON.stringify(ingredients));
+
+let bobas = JSON.parse(localStorage.getItem("bobas")) || [];
+
+function save(){
+  localStorage.setItem("money",money);
+  localStorage.setItem("ingredients",JSON.stringify(ingredients));
+  localStorage.setItem("bobas",JSON.stringify(bobas));
+}
+
+const moneyEl = document.getElementById("money");
+const shopEl = document.getElementById("shop");
+const bobasEl = document.getElementById("bobas");
+const ingA = document.getElementById("ingA");
+const ingB = document.getElementById("ingB");
+
+function updateMoney(){ moneyEl.textContent = money.toLocaleString(); }
+
+function updateShop(){
+  shopEl.innerHTML="";
+  ingA.innerHTML="";
+  ingB.innerHTML="";
+  ingredients.forEach((ing,i)=>{
+    let dPrice = ing.base * 10000;
+    shopEl.innerHTML += `
+<div class="ing">
+<b>${ing.name}</b><br>
+Normal: $${ing.base} (${ing.amount})
+<button onclick="buy(${i},0)">Buy</button><br>
+<span class="diamondText">Diamond:</span>
+$${dPrice.toLocaleString()} (${ing.diamondAmount})
+<button onclick="buy(${i},1)">Buy 💎</button>
+</div>`;
+    ingA.innerHTML += `<option value="${i}">${ing.name}</option>`;
+    ingB.innerHTML += `<option value="${i}">${ing.name}</option>`;
+  });
+}
+
+function buy(i,d){
+  let ing=ingredients[i];
+  let cost=d?ing.base*10000:ing.base;
+  if(money<cost) return;
+  money-=cost;
+  d?ing.diamondAmount++:ing.amount++;
+  save();updateMoney();updateShop();
+}
+
+function craftBoba(){
+  if(ingA.value===ingB.value) return;
+  let A=ingredients[ingA.value], B=ingredients[ingB.value];
+  if(A.amount+A.diamondAmount<1||B.amount+B.diamondAmount<1) return;
+
+  let dA=A.diamondAmount>0, dB=B.diamondAmount>0;
+  dA?A.diamondAmount--:A.amount--;
+  dB?B.diamondAmount--:B.amount--;
+
+  let value=(A.base+B.base)*1.25;
+  if(dA) value*=5;
+  if(dB) value*=5;
+
+  let type="normal";
+  let r=Math.random();
+  if(r<0.01){type="diamond";value*=100;}
+  else if(r<0.31){type="galaxy";value*=1.5;}
+
+  bobas.push({name:`${A.name} + ${B.name}`,price:Math.floor(value),type});
+  save();updateMoney();updateShop();updateBobas();
+}
+
+function updateBobas(){
+  bobasEl.innerHTML="";
+  bobas.forEach((b,i)=>{
+    bobasEl.innerHTML+=`
+<div class="boba ${b.type}">
+<b>${b.name}</b><br>
+${b.type.toUpperCase()}<br>
+$${b.price.toLocaleString()}<br>
+<button onclick="sell(${i})">Sell</button>
+</div>`;
+  });
+}
+
+function sell(i){
+  money+=bobas[i].price;
+  bobas.splice(i,1);
+  save();updateMoney();updateBobas();
+}
+
+updateMoney();updateShop();updateBobas();
+</script>
+
+</body>
+</html>

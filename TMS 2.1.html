@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Maximumonical Switch (TMS) 2.1</title>
+<style>
+body {
+    background: #0b0b0b;
+    color: #d0d0d0;
+    font-family: Consolas, monospace;
+    margin: 20px;
+    display: flex;
+}
+#main {
+    flex: 1;
+    max-width: 750px;
+}
+#right {
+    width: 300px;
+    margin-left: 20px;
+    border-left: 1px solid #222;
+    padding-left: 15px;
+}
+input, button {
+    background: #111;
+    color: #ddd;
+    border: 1px solid #333;
+    padding: 5px;
+    margin: 4px 0;
+}
+button:hover {
+    background: #1b1b1b;
+}
+#steps {
+    margin-top: 10px;
+    max-height: 500px;
+    overflow-y: auto;
+    font-size: 12px;
+    border: 1px solid #222;
+    padding: 8px;
+}
+h1, h3 {
+    color: #f0f0f0;
+}
+</style>
+</head>
+<body>
+
+<div id="main">
+<h1>Maximumonical Switch — TMS 2.1</h1>
+
+<input id="inputNumber" type="number" placeholder="Start Number">
+<input id="seedInput" type="number" placeholder="Seed (optional)">
+<button onclick="startTMS()">Run TMS</button>
+
+<p id="result"></p>
+<p id="recursions"></p>
+<p id="seedDisplay"></p>
+
+<div id="steps"></div>
+</div>
+
+<div id="right">
+<h3>Notes</h3>
+<p>
+• Chunked execution<br>
+• No NaN collapse<br>
+• Recursion wells detected<br>
+• Dark mode
+</p>
+</div>
+
+<script>
+/* ========= RNG ========= */
+function seededRandom(seed) {
+    seed = (seed * 1664525 + 1013904223) >>> 0;
+    return seed / 4294967296;
+}
+
+/* ========= Helpers ========= */
+function firstTwoNonZeroDigits(x) {
+    if (x <= 0) return 0;
+    let frac = x - Math.floor(x);
+    let digits = "";
+    while (digits.length < 2 && frac > 0) {
+        frac *= 10;
+        let d = Math.floor(frac);
+        frac -= d;
+        if (d !== 0) digits += d;
+    }
+    return digits ? Number("0." + digits) : 0;
+}
+
+/* ========= State ========= */
+let steps = [];
+let recursionCount = 0;
+let currentNumber = 0;
+let seed = 0;
+let rngCounter = 0;
+let running = false;
+let repeatCounter = 0;
+let lastNumber = null;
+
+/* ========= RNG wrapper ========= */
+function rng() {
+    rngCounter++;
+    return seededRandom(seed + rngCounter);
+}
+
+/* ========= Engine ========= */
+function startTMS() {
+    if (running) return;
+
+    steps = [];
+    recursionCount = 0;
+    repeatCounter = 0;
+    lastNumber = null;
+
+    currentNumber = Number(inputNumber.value);
+    seed = seedInput.value ? Number(seedInput.value) : Math.floor(Math.random() * 1e9);
+    rngCounter = 0;
+    running = true;
+
+    steps.push(`Seed: ${seed}`);
+    processChunk();
+}
+
+function processChunk() {
+    let iterations = 0;
+
+    while (iterations < 60 && running) {
+        iterations++;
+
+        if (!Number.isFinite(currentNumber)) {
+            finishTMS(NaN);
+            return;
+        }
+
+        let divided = currentNumber / 100000000;
+        steps.push(`Divide → ${divided}`);
+
+        let processed = firstTwoNonZeroDigits(divided);
+        steps.push(`Digits → ${processed}`);
+
+        let result = (processed * 4) / 3;
+        steps.push(`×4 ÷3 → ${result.toFixed(2)}`);
+
+        if (result.toFixed(2) !== "0.00") {
+            finishTMS(result);
+            return;
+        }
+
+        recursionCount++;
+
+        // Recursion well detection
+        if (currentNumber === lastNumber) {
+            repeatCounter++;
+        } else {
+            repeatCounter = 0;
+        }
+        lastNumber = currentNumber;
+
+        let add = Math.floor(rng() * 100) + 1;
+        let mul = Math.floor(rng() * 3);
+
+        // Escape shallow wells only
+        if (repeatCounter >= 6 && mul === 0) {
+            mul = 1;
+            steps.push(`⚠ Well detected → forced escape`);
+        }
+
+        steps.push(`Boost +${add}, ×${mul}`);
+
+        currentNumber = Math.abs(Math.floor(add * mul + currentNumber)) % 10000000;
+        steps.push(`New number → ${currentNumber}`);
+    }
+
+    setTimeout(processChunk, 0);
+}
+
+function finishTMS(finalResult) {
+    running = false;
+    result.textContent = `Result: ${finalResult.toFixed(2)}`;
+    recursions.textContent = `Recursions: ${recursionCount}`;
+    seedDisplay.textContent = `Seed: ${seed}`;
+    document.getElementById("steps").innerHTML = steps.join("<br>");
+}
+</script>
+
+</body>
+</html>

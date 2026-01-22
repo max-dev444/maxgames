@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Brain Cell Tycoon: Absurd Edition</title>
+  <style>
+    body {
+      background: radial-gradient(#000, #050505);
+      color: #d7ffd7;
+      font-family: monospace;
+      text-align: center;
+    }
+    h1 { font-size: 44px; }
+    button {
+      padding: 10px;
+      margin: 4px;
+      font-size: 15px;
+      background: #111;
+      color: #d7ffd7;
+      border: 2px solid #44ff44;
+      cursor: pointer;
+    }
+    button:disabled { opacity: 0.35; }
+    .box {
+      border: 2px solid #44ff44;
+      margin: 12px auto;
+      padding: 10px;
+      width: 480px;
+    }
+    .small { font-size: 12px; opacity: 0.8; }
+  </style>
+</head>
+<body>
+
+<h1>🧠 Brain Cell Tycoon</h1>
+<p class="small">Nothing here is balanced.</p>
+
+<div class="box">
+  🧠 Brain Cells: <span id="bc">0</span><br>
+  👴 Age: <span id="age">0</span><br>
+  ✨ Wisdom: <span id="wisdom">0</span><br>
+  🧿 Enlightenment: <span id="enlight">0</span><br>
+  🧨 Brain Damage: <span id="damage">0</span>
+</div>
+
+<button onclick="think()">THINK</button>
+<button onclick="panic()">PANIC</button>
+<button onclick="doNothing()">DO NOTHING</button>
+
+<div class="box">
+<h3>🛒 Upgrades (why)</h3>
+<div id="upgrades"></div>
+</div>
+
+<div class="box">
+<h3>🔁 Rebirth Stuff</h3>
+<button onclick="rebirth()">REBIRTH (Age ≥ 25)</button><br>
+<button onclick="enlighten()">ENLIGHTEN (Wisdom ≥ 5)</button>
+</div>
+
+<div class="box">
+<h3>🎲 Brain State</h3>
+<p id="state">Normal-ish</p>
+</div>
+
+<script>
+let brainCells = 0;
+let wisdom = 0;
+let enlightenment = 0;
+let brainDamage = 0;
+
+let upgrades = {
+  power: { name: "Think Harder", lvl: 0, cost: 10, desc:"+1 BC per click" },
+  auto: { name: "Background Thoughts", lvl: 0, cost: 25, desc:"+1 BC/sec" },
+  doubt: { name: "Self Doubt", lvl: 0, cost: 40, desc:"Sometimes doubles, sometimes halves" },
+  chaos: { name: "Chaotic Neurons", lvl: 0, cost: 60, desc:"Random multipliers" },
+  rot: { name: "Brain Rot", lvl: 0, cost: 80, desc:"More BC, more damage" },
+  memory: { name: "False Memories", lvl: 0, cost: 100, desc:"Random free upgrades" },
+  ego: { name: "Massive Ego", lvl: 0, cost: 150, desc:"BC scales with age" },
+  collapse: { name: "Impending Collapse", lvl: 0, cost: 200, desc:"Unlocks ???" }
+};
+
+function renderUpgrades() {
+  let html = "";
+  for (let k in upgrades) {
+    let u = upgrades[k];
+    html += `<button onclick="buy('${k}')">
+      ${u.name} [${u.lvl}] – ${u.cost}<br>
+      <span class="small">${u.desc}</span>
+    </button><br>`;
+  }
+  document.getElementById("upgrades").innerHTML = html;
+}
+
+function getAge() {
+  return Math.floor(brainCells / 5);
+}
+
+function think() {
+  let gain = 1 + upgrades.power.lvl;
+  gain += upgrades.auto.lvl * 0.2;
+  gain *= (1 + wisdom * 0.1);
+  gain *= (1 + enlightenment * 0.3);
+  gain *= (1 + upgrades.ego.lvl * getAge() * 0.01);
+
+  if (Math.random() < upgrades.doubt.lvl * 0.1) gain *= Math.random() < 0.5 ? 0.5 : 2;
+  if (Math.random() < upgrades.chaos.lvl * 0.05) gain *= Math.random() * 5;
+
+  brainCells += gain;
+
+  if (upgrades.rot.lvl > 0 && Math.random() < 0.3)
+    brainDamage += upgrades.rot.lvl;
+
+  update();
+}
+
+function panic() {
+  brainCells *= 0.9;
+  brainDamage += 1;
+  update();
+}
+
+function doNothing() {
+  if (Math.random() < 0.2) brainCells += 10;
+  update();
+}
+
+function buy(k) {
+  let u = upgrades[k];
+  if (brainCells >= u.cost) {
+    brainCells -= u.cost;
+    u.lvl++;
+    u.cost = Math.floor(u.cost * (1.5 + Math.random()));
+    if (k === "memory" && Math.random() < 0.4) {
+      let keys = Object.keys(upgrades);
+      upgrades[keys[Math.floor(Math.random()*keys.length)]].lvl++;
+    }
+    update();
+  }
+}
+
+function rebirth() {
+  if (getAge() >= 25) {
+    wisdom++;
+    brainCells = 0;
+    brainDamage = 0;
+    for (let k in upgrades) upgrades[k].lvl = 0;
+    update();
+  }
+}
+
+function enlighten() {
+  if (wisdom >= 5) {
+    wisdom -= 5;
+    enlightenment++;
+    update();
+  }
+}
+
+function randomEvent() {
+  let r = Math.random();
+  if (r < 0.25) brainCells += 50;
+  else if (r < 0.4) brainCells *= 1.2;
+  else if (r < 0.55) brainDamage++;
+  else if (r < 0.65) upgrades.power.lvl++;
+  else if (r < 0.7) brainCells = Math.max(0, brainCells - 100);
+}
+
+function updateState() {
+  let states = [
+    "Focused",
+    "Confused",
+    "Enlightened?",
+    "Rotting",
+    "Too Aware",
+    "NPC Mode",
+    "Cosmic"
+  ];
+  document.getElementById("state").textContent =
+    states[Math.floor(Math.random()*states.length)];
+}
+
+function update() {
+  document.getElementById("bc").textContent = Math.floor(brainCells);
+  document.getElementById("age").textContent = getAge();
+  document.getElementById("wisdom").textContent = wisdom;
+  document.getElementById("enlight").textContent = enlightenment;
+  document.getElementById("damage").textContent = brainDamage;
+}
+
+renderUpgrades();
+update();
+
+setInterval(() => {
+  brainCells += upgrades.auto.lvl;
+  if (Math.random() < 0.3) randomEvent();
+  updateState();
+  update();
+}, 1000);
+</script>
+
+</body>
+</html>

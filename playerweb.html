@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+	<head></head>
+	<body>
+		<div id="video_placeholder" style="width: 100%; height: 100%;"></div>
+	</body>
+</html>
+<script type="text/javascript" src="qrc:///qtwebchannel/qwebchannel.js"></script>
+<script type="text/javascript">
+	var playerReady = false;
+	var customUrl = null;
+	var customPoster = null;
+	var playerIframe = null;
+
+	document.addEventListener('DOMContentLoaded', onDomContentLoaded);
+
+	function onDomContentLoaded() {
+		new QWebChannel(qt.webChannelTransport, qWebChannelCallback);
+	}
+
+	function qWebChannelCallback(channel) {
+		var api = channel.objects.api;
+		var playerApi = channel.objects.player;
+		var fileId = playerApi.readFileId;
+
+		api.invokeGalleryInfoItems([fileId], onGetFileInfo.bind(this, api));
+	}
+
+	function onGetFileInfo(api, response) {
+		var file = JSON.parse(response)[0];
+		var url = api.readFilesPathStringValue;
+
+		if(file.file_preview_gif === 'true') {
+			customPoster = url + '/' + file.file_preview.slice(0, -3) + 'gif';
+		}
+		else {
+			customPoster = url + '/' + file.file_preview;
+		}
+
+		customUrl = url + '/' + file.file_name;
+
+		playerInit();
+	}
+
+	function playerInit() {
+		if(playerReady === false || customUrl === null) {
+			return;
+		}
+
+		sendMessage('init', {
+			customUrl: customUrl,
+			customPoster: customPoster,
+			colorBase: '#250864',
+			colorText: '#ffffff',
+			colorHover: '#7f54f8',
+			threeColorsMode: true,
+			playButton: true,
+			playButtonStyle: 'pulsing'
+		});
+	}
+
+	function onMessage(event) {
+		if(event.source !== playerIframe.contentWindow) {
+			return;
+		}
+
+		var key = event.message ? 'message' : 'data';
+		var details = event[key];
+		var message = details.message;
+
+		if(message === 'init') {
+			playerReady = true;
+
+			playerInit();
+		}
+	}
+
+	function sendMessage(message, data) {
+		playerIframe.contentWindow.postMessage({
+			message: message,
+			data: data
+		}, '*');
+	}
+
+	function buildPlayer() {
+		playerIframe = document.createElement('iframe');
+
+		playerIframe.setAttribute('src', 'html5.html');
+		playerIframe.setAttribute('style', 'width: 100%; height: 100%; position: absolute; left: 0; top: 0;');
+		playerIframe.setAttribute('allowfullscreen', true);
+		playerIframe.setAttribute('allowtransparency', true);
+		playerIframe.setAttribute('frameborder', 0);
+
+		document.getElementById('video_placeholder').appendChild(playerIframe);
+	}
+
+	window.addEventListener('message', onMessage, false);
+
+	buildPlayer();
+</script>

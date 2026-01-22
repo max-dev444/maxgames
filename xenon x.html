@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>XENONX</title>
+
+<style>
+body {
+  font-family: system-ui, sans-serif;
+  background: radial-gradient(circle at top, #0b0f2b, #000);
+  color: #e6e6ff;
+  text-align: center;
+  padding: 30px;
+}
+h1 {
+  font-size: 48px;
+  letter-spacing: 4px;
+}
+input {
+  padding: 10px;
+  width: 300px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+}
+button {
+  padding: 10px 16px;
+  margin-left: 6px;
+  border-radius: 8px;
+  border: none;
+  background: #6a5acd;
+  color: white;
+  cursor: pointer;
+}
+button:hover { background: #7b68ee; }
+
+.panel {
+  background: rgba(255,255,255,0.07);
+  border-radius: 16px;
+  padding: 20px;
+  margin: 25px auto;
+  max-width: 700px;
+  box-shadow: 0 0 40px rgba(106,90,205,0.3);
+}
+
+.stat {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.label { opacity: 0.7; }
+.value { font-weight: bold; }
+
+.tag {
+  display:inline-block;
+  padding:4px 10px;
+  border-radius:20px;
+  background:#00e5ff;
+  color:black;
+  font-size:12px;
+  margin:4px;
+}
+
+.bad { background:#ff5252; color:white; }
+.mid { background:#ffd54f; color:black; }
+.good { background:#69f0ae; color:black; }
+
+.small { font-size:12px; opacity:0.6; }
+</style>
+</head>
+
+<body>
+
+<h1>XENONX</h1>
+<p class="small">Cities • Planets • Moons • Exoplanets • Stars</p>
+
+<input id="query" placeholder="Tokyo / Europa / Jupiter / HD 189733 b">
+<button onclick="scan()">Scan</button>
+
+<div id="output"></div>
+
+<script>
+// ================= CELESTIAL DATABASE =================
+const spaceDB = {
+  sun: {
+    type: "Star",
+    starType: "G-type (Yellow Dwarf)",
+    temp: "5,500°C surface / 15,000,000°C core",
+    habit: "No",
+    moons: [],
+    notes: "Main-sequence star"
+  },
+
+  jupiter: {
+    type: "Planet",
+    starType: "Orbits Sun (G-type)",
+    temp: "-145°C",
+    habit: "No",
+    moons: ["Europa", "Io", "Ganymede", "Callisto"],
+    notes: "Gas giant"
+  },
+
+  europa: {
+    type: "Moon",
+    parent: "Jupiter",
+    temp: "-160°C surface / warm ocean below",
+    habit: "Possible",
+    notes: "Subsurface ocean"
+  },
+
+  titan: {
+    type: "Moon",
+    parent: "Saturn",
+    temp: "-179°C",
+    habit: "Possible",
+    notes: "Methane lakes"
+  },
+
+  mars: {
+    type: "Planet",
+    starType: "Orbits Sun (G-type)",
+    temp: "-63°C avg",
+    habit: "Past Possible",
+    moons: ["Phobos", "Deimos"],
+    notes: "Dust storms"
+  },
+
+  "hd 189733 b": {
+    type: "Exoplanet",
+    starType: "K-type",
+    temp: "1,200°C",
+    habit: "No",
+    moons: "Unknown",
+    notes: "Rains molten glass"
+  },
+
+  "kepler-22b": {
+    type: "Exoplanet",
+    starType: "G-type",
+    temp: "22°C (estimated)",
+    habit: "Possible",
+    moons: "Unknown",
+    notes: "Possible ocean world"
+  },
+
+  "wasp-12b": {
+    type: "Exoplanet",
+    starType: "G-type",
+    temp: "2,600°C",
+    habit: "No",
+    moons: "None",
+    notes: "Atmosphere being stripped"
+  }
+};
+
+// ================= MAIN =================
+async function scan() {
+  const q = query.value.trim().toLowerCase();
+  if (!q) return;
+
+  output.innerHTML = "Scanning…";
+
+  // SPACE OBJECT
+  if (spaceDB[q]) {
+    const o = spaceDB[q];
+
+    output.innerHTML = `
+<div class="panel">
+<h2>${q.toUpperCase()}</h2>
+<div class="stat"><div class="label">Type</div><div class="value">${o.type}</div></div>
+<div class="stat"><div class="label">Star Type</div><div class="value">${o.starType || "—"}</div></div>
+<div class="stat"><div class="label">Temperature</div><div class="value">${o.temp}</div></div>
+<div class="stat"><div class="label">Habitability</div>
+<div class="value">
+<span class="tag ${habitColor(o.habit)}">${o.habit}</span>
+</div></div>
+<div class="stat"><div class="label">Moons</div><div class="value">${Array.isArray(o.moons)?o.moons.join(", "):o.moons}</div></div>
+<div class="stat"><div class="label">Notes</div><div class="value">${o.notes}</div></div>
+</div>`;
+    return;
+  }
+
+  // 🌍 CITY WEATHER (OPEN-METEO)
+  try {
+    const geo = await fetch(
+      `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}`
+    ).then(r => r.json());
+
+    if (!geo.results) throw "No city";
+
+    const { latitude, longitude, name, country } = geo.results[0];
+
+    const weather = await fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,wind_speed_10m,precipitation_probability`
+    ).then(r => r.json());
+
+    const c = weather.current;
+
+    output.innerHTML = `
+<div class="panel">
+<h2>${name}, ${country}</h2>
+<div class="stat"><div class="label">Planet</div><div class="value">Earth</div></div>
+<div class="stat"><div class="label">Temperature</div><div class="value">${c.temperature_2m}°C</div></div>
+<div class="stat"><div class="label">Wind Speed</div><div class="value">${c.wind_speed_10m} km/h</div></div>
+<div class="stat"><div class="label">Precipitation Chance</div><div class="value">${c.precipitation_probability}%</div></div>
+<div class="stat"><div class="label">Habitability</div>
+<div class="value"><span class="tag good">Yes</span></div></div>
+</div>`;
+  } catch {
+    output.innerHTML = `<div class="panel">❌ Unknown location or object</div>`;
+  }
+}
+
+function habitColor(h) {
+  if (h.includes("No")) return "bad";
+  if (h.includes("Possible")) return "mid";
+  return "good";
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link href="assets/css/fonts.css" rel="stylesheet">
+		<link rel="stylesheet" href="assets/css/animation.css">
+		<link rel="stylesheet" href="assets/css/icons.css">
+		<link rel="stylesheet" href="assets/css/alertify.min.css">
+		<link rel="stylesheet" href="assets/css/alertify_style.css">
+		<link rel="stylesheet" href="assets/css/galleryweb.css">
+	</head>
+	<body>
+		<div class="initial holder-loading">
+			<div class="loading"></div>
+		</div>
+		<section class="header-filters">
+			<div id="filters">
+				<div id="search">
+					<span class="glyph icon_search"></span>
+					<input class="" type="search" placeholder="Search by name">
+					<span class="clear-search hover-effect">X</span>
+					<div class="border-bottom"></div>
+				</div>
+				<div class="container-media-types">
+					<div id="media-types">
+						<div type="-1" class="all-count selected">All: <span></span></div>
+						<div type="0" class="images-count">Images: <span></span></div>
+						<div type="1" class="videos-count">Videos: <span></span></div>
+					</div>
+					<div id="select-all">
+						<div class="checkbox-container">
+							<i class="glyph icon_check"></i>
+						</div>
+						<span>Select All</span>
+					</div>
+				</div>
+				<div class="right-actions">
+					<div id="sort-by-filter">
+						<span>Sort by:</span>
+						<div class="select-holder sort">
+							<div class="container-text-selected">
+								<span class="text-selected">Date</span>
+								<i class="glyph icon_arrow_down"></i>
+							</div>
+							<ul class="dropdown">
+								<li type="0" class="selected">Date</li>
+								<li type="2">Name</li>
+								<li type="3">Size</li>
+							</ul>
+						</div>
+					</div>
+					<div id="order-by-filter">
+						<button title="Descending" class="hover-effect">
+							<i class="glyph icon_arrow_up_order invert"></i>
+						</button>
+					</div>
+				</div>
+			</div>
+			<div id="pagination-settings">
+				<div style="display: none">
+					<span class="current-count">0</span> - <span class="all-count">0</span>
+				</div>
+				<div class="inner">
+					<div>
+						<span class="current-selected">0</span>
+						<span>items selected</span>
+						<div>(or select all<span class="all-count">0</span>)</div>
+					</div>
+					<button id="mass-delete">
+						<i class="glyph icon_remove"></i>
+					</button>
+				</div>
+				<div class="close-settings">
+					<span class="hover-effect">X</span>
+				</div>
+			</div>
+		</section>
+		<section id="container"></section>
+	</body>
+</html>
+<script type="text/javascript" src="qrc:///qtwebchannel/qwebchannel.js"></script>
+<script type="text/javascript" src="assets/js/alertify.min.js"></script>
+<script type="text/javascript" src="assets/js/templates.js"></script>
+<script type="text/javascript" src="assets/js/app.js"></script>

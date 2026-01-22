@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Broken Clicker</title>
+<style>
+body {
+    background: linear-gradient(45deg, purple, black);
+    color: lime;
+    font-family: Comic Sans MS;
+    text-align: center;
+}
+#game {
+    margin-top: 50px;
+}
+button {
+    font-size: 24px;
+    padding: 20px;
+    background: hotpink;
+    border: 5px solid cyan;
+}
+</style>
+</head>
+
+<body>
+<h1>💥 Broken Clicker 💥</h1>
+<p>Try to get points… if you can.</p>
+
+<div id="game">
+    <div id="score">Score: 0</div>
+    <button onclick="clickGame()">CLICK ME</button>
+    <br><br>
+    <button onclick="buyUpgrade()">Buy Upgrade (10 points)</button>
+</div>
+
+<script>
+let score = 0
+let multiplier = 1
+
+// Missing semicolons (not fatal, but sloppy)
+function clickGame() {
+    score = score + 1 * multipliers   // WRONG VARIABLE NAME (should be multiplier)
+    updateScore()
+    playClickSound()                 // FUNCTION DOES NOT EXIST
+}
+
+function updateScore() {
+    document.getElementByID("score").innerHTML = "Score: " + score  
+    // getElementByID is spelled wrong (should be getElementById)
+}
+
+function buyUpgrade() {
+    if (score >= 10) {
+        score = score - 10
+        multipler = multipler + 1    // WRONG VARIABLE NAME twice
+        alert("Upgrade bought!")
+    } else {
+        alert("Not enough points!")
+    }
+    updateScore()
+}
+
+// This variable is never used
+let ghostPower = 9999
+
+// Infinite loop that freezes the game if uncommented
+// while(true) { score++ }
+
+// This runs immediately and breaks things
+setTimeout(breakGame, 3000)
+
+function breakGame() {
+    score = "A LOT"     // Score becomes a string instead of a number
+    updateScore()
+    console.log(unknownVariable) // This variable does not exist
+}
+</script>
+
+</body>
+</html>

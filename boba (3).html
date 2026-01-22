@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Boba Crafting Tycoon</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #fdf6e3;
+    text-align: center;
+    padding: 20px;
+}
+h1 { color: #8b3e96; }
+section {
+    background: white;
+    padding: 15px;
+    margin: 15px auto;
+    width: 95%;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+button {
+    margin: 4px;
+    padding: 6px 12px;
+    border-radius: 5px;
+    border: none;
+    background: #f48fb1;
+    color: white;
+    cursor: pointer;
+}
+button:hover { background: #ec407a; }
+select { padding: 5px; }
+.boba {
+    display: inline-block;
+    margin: 6px;
+    padding: 6px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+.galaxy { background: #c3b3ff; }
+.diamond { background: #a6fff0; }
+</style>
+</head>
+<body>
+
+<h1>Boba Crafting Tycoon</h1>
+<p>Money: $<span id="money">0</span></p>
+
+<section>
+<h2>Upgrades</h2>
+<div id="upgrades"></div>
+</section>
+
+<section>
+<h2>Ingredient Shop</h2>
+<div id="store"></div>
+</section>
+
+<section>
+<h2>Craft Boba</h2>
+<select id="ing1"></select>
+<select id="ing2"></select>
+<button onclick="craftBoba()">Craft</button>
+</section>
+
+<section>
+<h2>Your Bobas</h2>
+<div id="bobas"></div>
+</section>
+
+<script>
+// ================= SAVE =================
+let money = +localStorage.getItem("money") || 500;
+let bobas = JSON.parse(localStorage.getItem("bobas")) || [];
+
+let upgrades = JSON.parse(localStorage.getItem("upgrades")) || {
+    brew: 1,
+    galaxyLuck: 0,
+    diamondLuck: 0,
+    synergy: 0,
+    diamondPower: 1,
+    bulkSell: 0
+};
+
+let ingredients = JSON.parse(localStorage.getItem("ingredients")) || (() => {
+    let list = [];
+    let price = 10;
+    for (let i = 1; i <= 70; i++) {
+        list.push({
+            name: `Ingredient ${i}`,
+            price: Math.floor(price),
+            amount: 0,
+            diamond: false
+        });
+        price *= 1.75;
+    }
+    return list;
+})();
+
+function save() {
+    localStorage.setItem("money", money);
+    localStorage.setItem("bobas", JSON.stringify(bobas));
+    localStorage.setItem("ingredients", JSON.stringify(ingredients));
+    localStorage.setItem("upgrades", JSON.stringify(upgrades));
+}
+
+// ================= UI =================
+const moneySpan = document.getElementById("money");
+const upgradesDiv = document.getElementById("upgrades");
+const storeDiv = document.getElementById("store");
+const bobasDiv = document.getElementById("bobas");
+
+function updateMoney() {
+    moneySpan.textContent = money.toLocaleString();
+}
+
+function updateUpgrades() {
+    upgradesDiv.innerHTML = `
+Brew Efficiency (x${upgrades.brew.toFixed(2)})
+<button onclick="buyUp('brew')">$${Math.floor(1000 * upgrades.brew)}</button><br>
+
+Galaxy Luck (+${upgrades.galaxyLuck}%)
+<button onclick="buyUp('galaxy')">$${2000 * (upgrades.galaxyLuck + 1)}</button><br>
+
+Diamond Luck (+${upgrades.diamondLuck}%)
+<button onclick="buyUp('diamond')">$${15000 * (upgrades.diamondLuck + 1)}</button><br>
+
+Ingredient Synergy (+${upgrades.synergy}%)
+<button onclick="buyUp('synergy')">$${5000 * (upgrades.synergy + 1)}</button><br>
+
+Diamond Ingredient Power (x${upgrades.diamondPower})
+<button onclick="buyUp('diamondPower')">$${25000 * upgrades.diamondPower}</button><br>
+
+Bulk Sell Bonus (+${upgrades.bulkSell * 10}%)
+<button onclick="buyUp('bulk')">$${4000 * (upgrades.bulkSell + 1)}</button>
+`;
+}
+
+function updateStore() {
+    storeDiv.innerHTML = "";
+    ing1.innerHTML = "";
+    ing2.innerHTML = "";
+
+    ingredients.forEach((ing, i) => {
+        const cost = ing.diamond ? ing.price * 10000 : ing.price;
+        storeDiv.innerHTML += `
+${ing.name}${ing.diamond ? " 💎" : ""} 
+($${cost.toLocaleString()}) [${ing.amount}]
+<button onclick="buyIng(${i},false)">Buy</button>
+<button onclick="buyIng(${i},true)">Buy 💎</button><br>`;
+
+        ing1.innerHTML += `<option value="${i}">${ing.name}</option>`;
+        ing2.innerHTML += `<option value="${i}">${ing.name}</option>`;
+    });
+}
+
+function updateBobas() {
+    bobasDiv.innerHTML = "";
+    bobas.forEach((b,i)=>{
+        bobasDiv.innerHTML += `
+<div class="boba ${b.type}">
+<b>${b.name}</b><br>
+${b.type.toUpperCase()}<br>
+$${b.price.toLocaleString()}<br>
+<button onclick="sell(${i})">Sell</button>
+<button onclick="autoRecipe(${i})">Auto Recipe</button>
+</div>`;
+    });
+}
+
+// ================= ACTIONS =================
+function buyIng(i, diamond) {
+    const ing = ingredients[i];
+    const cost = diamond ? ing.price * 10000 : ing.price;
+    if (money < cost) return alert("Not enough money");
+    money -= cost;
+    ing.amount++;
+    if (diamond) ing.diamond = true;
+    save(); updateMoney(); updateStore();
+}
+
+function buyUp(type) {
+    const cost = {
+        brew: 1000 * upgrades.brew,
+        galaxy: 2000 * (upgrades.galaxyLuck + 1),
+        diamond: 15000 * (upgrades.diamondLuck + 1),
+        synergy: 5000 * (upgrades.synergy + 1),
+        diamondPower: 25000 * upgrades.diamondPower,
+        bulk: 4000 * (upgrades.bulkSell + 1)
+    }[type];
+
+    if (money < cost) return alert("Not enough money");
+    money -= cost;
+
+    if (type === "brew") upgrades.brew *= 1.2;
+    if (type === "galaxy") upgrades.galaxyLuck += 5;
+    if (type === "diamond") upgrades.diamondLuck += 0.25;
+    if (type === "synergy") upgrades.synergy += 5;
+    if (type === "diamondPower") upgrades.diamondPower *= 2;
+    if (type === "bulk") upgrades.bulkSell++;
+
+    save(); updateMoney(); updateUpgrades();
+}
+
+function craftBoba() {
+    const a = ingredients[ing1.value];
+    const b = ingredients[ing2.value];
+    if (ing1.value === ing2.value) return alert("Pick different ingredients");
+    if (a.amount < 1 || b.amount < 1) return alert("Not enough ingredients");
+
+    a.amount--; b.amount--;
+
+    let value = (a.price + b.price) * 1.25 * upgrades.brew;
+    value *= 1 + (Math.log10(a.price + b.price) * upgrades.synergy / 100);
+
+    let type = "normal";
+    let roll = Math.random() * 100;
+
+    if (roll < 1 + upgrades.diamondLuck) {
+        type = "diamond";
+        value *= 100; // 🔒 ALWAYS 100x
+    } else if (roll < 31 + upgrades.galaxyLuck) {
+        type = "galaxy";
+        value *= 1.5;
+    }
+
+    let d = (a.diamond ? 1 : 0) + (b.diamond ? 1 : 0);
+    if (d === 1) value *= 5 * upgrades.diamondPower;
+    if (d === 2) value *= 25 * upgrades.diamondPower;
+
+    bobas.push({
+        name: `${a.name} + ${b.name}`,
+        recipe: [ing1.value, ing2.value],
+        price: Math.floor(value),
+        type
+    });
+
+    save(); updateStore(); updateBobas();
+}
+
+function sell(i) {
+    money += Math.floor(bobas[i].price * (1 + upgrades.bulkSell * 0.1));
+    bobas.splice(i,1);
+    save(); updateMoney(); updateBobas();
+}
+
+function autoRecipe(i) {
+    ing1.value = bobas[i].recipe[0];
+    ing2.value = bobas[i].recipe[1];
+}
+
+// ================= INIT =================
+updateMoney();
+updateUpgrades();
+updateStore();
+updateBobas();
+</script>
+
+</body>
+</html>
