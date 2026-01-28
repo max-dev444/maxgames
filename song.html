@@ -2,95 +2,228 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>All Songs</title>
-
+<title>Max Albums</title>
 <style>
-body {
-  margin: 0;
-  padding: 60px 12%;
-  background: #0b0b0b;
-  color: #f5f5f5;
-  font-family: Georgia, "Times New Roman", serif;
-}
+  body {
+    margin: 0;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    background: #0d0d0d;
+    color: #eee;
+  }
+  #layout {
+    display: flex;
+    gap: 16px;
+  }
+  .panel {
+    background: #1a1a1a;
+    border-radius: 6px;
+    padding: 10px;
+    overflow-y: auto;
+    max-height: 85vh;
+  }
+  #albums { width: 260px; }
+  #songs { width: 260px; }
+  #lyrics { flex: 1; white-space: pre-wrap; }
 
-h1 {
-  font-size: 3.5rem;
-  margin-bottom: 10px;
-}
-
-.intro {
-  color: #aaa;
-  max-width: 800px;
-  margin-bottom: 80px;
-  font-size: 1.1rem;
-}
-
-.song {
-  margin-bottom: 120px;
-}
-
-.song h2 {
-  font-size: 2.2rem;
-  margin-bottom: 25px;
-  border-bottom: 1px solid #222;
-  padding-bottom: 10px;
-}
-
-.lyrics {
-  white-space: pre-line;
-  line-height: 1.7;
-  font-size: 1.05rem;
-}
+  button {
+    width: 100%;
+    padding: 6px;
+    margin-bottom: 6px;
+    background: #333;
+    color: #eee;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: left;
+  }
+  button:hover {
+    background: #555;
+  }
 </style>
 </head>
-
 <body>
 
-<h1>All Songs</h1>
-<p class="intro">
-This page contains every song I’ve written.
-No recordings. No performances.
-Just the writing.
-</p>
+<h1>My Discography</h1>
 
-<!-- SONG START -->
-<div class="song">
-  <h2>Help</h2>
-  <div class="lyrics">
-A scientist talks to you
-Promises a fortune
-
-You sit in the chair
-Headphones on
-Lights too bright
-
-He says it’s for progress
-He says it’s temporary
-He needs the money
-He always needs the money
-
-Help
-Help
-Help
-  </div>
+<div id="layout">
+  <div id="albums" class="panel"></div>
+  <div id="songs" class="panel"></div>
+  <div id="lyrics" class="panel">Select a song</div>
 </div>
-<!-- SONG END -->
 
-<!-- COPY EVERYTHING BELOW THIS LINE TO ADD A SONG -->
+<script>
+/* ===== EDIT HERE ONLY ===== */
+const library = {
 
-<div class="song">
-  <h2>Storm in Your Brain</h2>
-  <div class="lyrics">
-Thoughts crash into each other
-Faster than I can say them
+  "Album 6 – Small and Weary": {
+    "Say No More": "Say No More - 1
+(1 minute of loud, catchy guitar solo)
+[Chorus]
+Say no more!
+We did what you want,
+just no more!
+We did all you want,
+so say no more!
+say no more, today!
+[Verse 1]
+sing along, to this rhythm, baby!
+sing along, to it all, and go and,
+see the ways, of nature!
 
-Every idea screams
-Nothing waits its turn
+I found my ways,
+I find my pride,
+deep inside, 
+the end, of my mind.
+I say a prayer,
+deep in their,
+where nobody can watch and stare,
+all of them, should have the day to have,
+everything, they want!
+[Chorus]
+say no more!
+we did what you want,
+just no more!
+We did all you want,
+so say no more!
+say, no more!
 
-Silence feels louder
-Than the noise ever did
-  </div>
-</div>
+say no more!
+we did what you want,
+just no more!
+We did all the work,
+just no more!
+say,
+no more!
+
+[Bridge]
+1 foot high,
+2 foot branch,
+everyone's looking in the place for more,
+everyone's looking for more, of that cash!
+that cold hard cash,
+oh, that cold hard cash,
+oh, its everything, to some,
+its everything, for most of us,
+[Chorus]
+So,
+say no more!
+we did what you want,
+just no more!
+We did all you want,
+so say no more!
+say no more, today!
+
+say no more!
+we did what you want,
+just no more!
+We did all the work,
+just no more!
+say,
+say,
+say,
+no, more!
+
+",
+    "Tricksters!": "",
+    "Pretend": "",
+    "On the Clock": "",
+    "Help": "",
+    "Aftermath": "",
+    "Slow Deprive": "",
+    "It's Not the End": ""
+  },
+
+  "Album 5 – Neptune": {
+    "Dont Speak Out Loud": "",
+    "Sound Recursion": "",
+    "Falling": "",
+    "Falling Up": "",
+    "Shine Like a Sun (Pt. 1)": "",
+    "Ramblin'": "",
+    "Outside the Box": "",
+    "Shine Like a Sun (Pt. 2)": "",
+    "The End of Neptune": ""
+  },
+
+  "Album 4 – Kitty": {
+    "ITTY BITTY WITTY PRETTY KITTY": "",
+    "LITTERBOX STORIES": "",
+    "LOFI KITTY": "",
+    "LOFI KITTY WITH EARBUDS": "",
+    "LOFI KITTYS EARBUDS BROKE": "",
+    "LOFI KITTY GETS HEADPHONES": "",
+    "LOFI KITTY'S HEADPHONES GET WET": "",
+    "LOFI KITTY GETS JB": "",
+    "LOFI KITTY DIES OF SOUND OVERLOAD": "",
+    "LOFI KITTY ANGEL": "",
+    "KITTY": ""
+  },
+
+  "Album 3 – Light Sucks!": {
+    "PEAS, THE, BEST FOOD IN ME": "",
+    "PHOTOSYNTHESIS FOR IDIOTS": "",
+    "LIGHT IS BRIGHT": "",
+    "LED SERVANTS": "",
+    "LIGHTS!": "",
+    "STICKY GLUE LED": "",
+    "MAN, WHATS HAPPENING": "",
+    "SHE’S MADE OF DARKNESS": "",
+    "LIGHT SUCKS!": ""
+  },
+
+  "Album 2 – Twilight": {
+    "THE BEGINNING (OF THE END)": "",
+    "THIS IS A SEQUEL!": "",
+    "I WENT NUMBER 3": "",
+    "I AM A GLUESTICK, SHORT AND STOUT": "",
+    "hmm...": "",
+    "COSMIC BATHROOM": "",
+    "1234": "",
+    "Look Back in Anger": "",
+    "elmers glue is melted": "",
+    "TWILIGHT MIST": ""
+  },
+
+  "Album 1 – Falling Off": {
+    "BATHROOMS": "",
+    "CICADA ON A TOILET": "",
+    "I LIKE FEATHERS!": "",
+    "UNTITLED": "",
+    "VERY CHRISTMAS-Y SONG": "",
+    "Christmas II": "",
+    "Falling Off": ""
+  }
+
+};
+/* ========================= */
+
+const albumsDiv = document.getElementById("albums");
+const songsDiv = document.getElementById("songs");
+const lyricsDiv = document.getElementById("lyrics");
+
+for (const album in library) {
+  const btn = document.createElement("button");
+  btn.textContent = album;
+  btn.onclick = () => loadSongs(album);
+  albumsDiv.appendChild(btn);
+}
+
+function loadSongs(album) {
+  songsDiv.innerHTML = "";
+  lyricsDiv.textContent = "Select a song";
+
+  for (const song in library[album]) {
+    const btn = document.createElement("button");
+    btn.textContent = song;
+    btn.onclick = () => {
+      lyricsDiv.textContent =
+        library[album][song] || "(lyrics not added yet)";
+    };
+    songsDiv.appendChild(btn);
+  }
+}
+</script>
 
 </body>
 </html>
