@@ -4,27 +4,72 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MaxGames - Home</title>
-<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-firestore-compat.js"></script>
+<style>
+  body {
+    margin: 0;
+    font-family: 'Verdana', sans-serif;
+    background: linear-gradient(135deg, #1a1a1a, #0f0f0f);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+  }
+
+  h1 {
+    font-size: 3em;
+    margin-bottom: 50px;
+    text-shadow: 2px 2px #ff00ff;
+  }
+
+  button {
+    background: linear-gradient(45deg, #ff00ff, #00ffff);
+    border: none;
+    color: white;
+    padding: 20px 40px;
+    font-size: 1.2em;
+    margin: 15px;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px #00ffff;
+  }
+
+  #status {
+    margin-top: 30px;
+    font-size: 1.1em;
+    text-align: center;
+  }
+</style>
 </head>
 <body>
-<h1>Welcome to MaxGames!</h1>
+<h1>🎮 MaxGames 🎮</h1>
 
 <button id="createGameBtn">Create New Game</button>
-<button id="seeGamesBtn">See Other Games By Max</button>
+<button id="seeGamesBtn">See Other Games</button>
 
-<div id="status" style="margin-top:20px;"></div>
+<div id="status"></div>
+
+<!-- Firebase Scripts -->
+<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-firestore-compat.js"></script>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyCszc2NdA7hFwl8pWq8nBH9eelPWw2h8Hw",
-  authDomain: "maxgames-cf103.firebaseapp.com",
-  projectId: "maxgames-cf103",
-  storageBucket: "maxgames-cf103.firebasestorage.app",
-  messagingSenderId: "411242291332",
-  appId: "1:411242291332:web:3665dff46f9dc11434a2d1",
-  measurementId: "G-W4Q5XH3YQ6"
-};
+  // --- Firebase Config ---
+  const firebaseConfig = {
+    apiKey: "AIzaSyCszc2NdA7hFwl8pWq8nBH9eelPWw2h8Hw",
+    authDomain: "maxgames-cf103.firebaseapp.com",
+    projectId: "maxgames-cf103",
+    storageBucket: "maxgames-cf103.firebasestorage.app",
+    messagingSenderId: "411242291332",
+    appId: "1:411242291332:web:3665dff46f9dc11434a2d1",
+    measurementId: "G-W4Q5XH3YQ6"
+  };
 
   // Initialize Firebase
   const app = firebase.initializeApp(firebaseConfig);
@@ -41,7 +86,7 @@ const firebaseConfig = {
       await newGameRef.set({
         createdAt: new Date(),
         title: "Untitled Game",
-        objects: [] // placeholder for future objects
+        objects: []
       });
       statusDiv.innerHTML = `✅ Game created! ID: <b>${newGameRef.id}</b><br>Click "See Other Games" to play it.`;
     } catch (error) {
