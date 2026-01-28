@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MaxGames - Home</title>
+<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+<h1>Welcome to MaxGames!</h1>
+
+<button id="createGameBtn">Create New Game</button>
+<button id="seeGamesBtn">See Other Games By Max</button>
+
+<div id="status" style="margin-top:20px;"></div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCszc2NdA7hFwl8pWq8nBH9eelPWw2h8Hw",
+  authDomain: "maxgames-cf103.firebaseapp.com",
+  projectId: "maxgames-cf103",
+  storageBucket: "maxgames-cf103.firebasestorage.app",
+  messagingSenderId: "411242291332",
+  appId: "1:411242291332:web:3665dff46f9dc11434a2d1",
+  measurementId: "G-W4Q5XH3YQ6"
+};
+
+  // Initialize Firebase
+  const app = firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  const createGameBtn = document.getElementById("createGameBtn");
+  const seeGamesBtn = document.getElementById("seeGamesBtn");
+  const statusDiv = document.getElementById("status");
+
+  // --- Create Game ---
+  createGameBtn.addEventListener("click", async () => {
+    try {
+      const newGameRef = db.collection("games").doc();
+      await newGameRef.set({
+        createdAt: new Date(),
+        title: "Untitled Game",
+        objects: [] // placeholder for future objects
+      });
+      statusDiv.innerHTML = `✅ Game created! ID: <b>${newGameRef.id}</b><br>Click "See Other Games" to play it.`;
+    } catch (error) {
+      console.error(error);
+      statusDiv.textContent = "❌ Error creating game.";
+    }
+  });
+
+  // --- See Other Games ---
+  seeGamesBtn.addEventListener("click", () => {
+    window.location.href = "index2.html";
+  });
+</script>
+</body>
+</html>
