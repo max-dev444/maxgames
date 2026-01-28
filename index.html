@@ -14,12 +14,12 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100vh;
+    min-height: 100vh;
   }
 
   h1 {
     font-size: 3em;
-    margin-bottom: 50px;
+    margin-bottom: 40px;
     text-shadow: 2px 2px #ff00ff;
   }
 
@@ -27,9 +27,9 @@
     background: linear-gradient(45deg, #ff00ff, #00ffff);
     border: none;
     color: white;
-    padding: 20px 40px;
+    padding: 15px 35px;
     font-size: 1.2em;
-    margin: 15px;
+    margin: 10px;
     border-radius: 15px;
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
@@ -40,10 +40,17 @@
     box-shadow: 0 0 20px #00ffff;
   }
 
-  #status {
+  #status, #gamesList {
     margin-top: 30px;
     font-size: 1.1em;
     text-align: center;
+    max-width: 90%;
+  }
+
+  #gamesList button {
+    display: block;
+    margin: 5px auto;
+    width: 60%;
   }
 </style>
 </head>
@@ -52,10 +59,12 @@
 
 <button id="createGameBtn">Create New Game</button>
 <button id="seeGamesBtn">See Other Games</button>
+<button id="oldVersionBtn">Old Version</button>
 
 <div id="status"></div>
+<div id="gamesList"></div>
 
-<!-- Firebase Scripts (compat version) -->
+<!-- Firebase Scripts -->
 <script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-firestore-compat.js"></script>
 
@@ -78,8 +87,11 @@
   // --- Buttons ---
   const createGameBtn = document.getElementById("createGameBtn");
   const seeGamesBtn = document.getElementById("seeGamesBtn");
+  const oldVersionBtn = document.getElementById("oldVersionBtn");
   const statusDiv = document.getElementById("status");
+  const gamesListDiv = document.getElementById("gamesList");
 
+  // --- Create Game ---
   createGameBtn.addEventListener("click", async () => {
     try {
       const newGameRef = db.collection("games").doc();
@@ -88,14 +100,37 @@
         title: "Untitled Game",
         objects: []
       });
-      statusDiv.innerHTML = `✅ Game created! ID: <b>${newGameRef.id}</b><br>Click "See Other Games" to play it.`;
-    } catch (error) {
-      console.error(error);
+      statusDiv.innerHTML = `✅ Game created! ID: <b>${newGameRef.id}</b>`;
+    } catch (err) {
+      console.error(err);
       statusDiv.textContent = "❌ Error creating game.";
     }
   });
 
-  seeGamesBtn.addEventListener("click", () => {
+  // --- See Other Games (made by people) ---
+  seeGamesBtn.addEventListener("click", async () => {
+    gamesListDiv.innerHTML = "<b>Loading games...</b>";
+    try {
+      const snapshot = await db.collection("games").orderBy("createdAt", "desc").get();
+      if (snapshot.empty) {
+        gamesListDiv.innerHTML = "No games found!";
+        return;
+      }
+      gamesListDiv.innerHTML = "";
+      snapshot.forEach(doc => {
+        const btn = document.createElement("button");
+        btn.textContent = doc.data().title + " (ID: " + doc.id + ")";
+        btn.onclick = () => alert("You clicked game ID: " + doc.id);
+        gamesListDiv.appendChild(btn);
+      });
+    } catch (err) {
+      console.error(err);
+      gamesListDiv.innerHTML = "Error loading games.";
+    }
+  });
+
+  // --- Old Version ---
+  oldVersionBtn.addEventListener("click", () => {
     window.location.href = "index2.html";
   });
 </script>
