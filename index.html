@@ -55,7 +55,7 @@
 
 <div id="status"></div>
 
-<!-- Firebase Scripts -->
+<!-- Firebase Scripts (compat version) -->
 <script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-firestore-compat.js"></script>
 
@@ -71,15 +71,15 @@
     measurementId: "G-W4Q5XH3YQ6"
   };
 
-  // Initialize Firebase
+  // --- Initialize Firebase ---
   const app = firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
+  // --- Buttons ---
   const createGameBtn = document.getElementById("createGameBtn");
   const seeGamesBtn = document.getElementById("seeGamesBtn");
   const statusDiv = document.getElementById("status");
 
-  // --- Create Game ---
   createGameBtn.addEventListener("click", async () => {
     try {
       const newGameRef = db.collection("games").doc();
@@ -95,7 +95,6 @@
     }
   });
 
-  // --- See Other Games ---
   seeGamesBtn.addEventListener("click", () => {
     window.location.href = "index2.html";
   });
