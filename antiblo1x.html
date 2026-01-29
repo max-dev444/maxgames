@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MaxGames Builder</title>
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: white;
+  }
+  #overlay {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #panel {
+    background: #1c1c1c;
+    padding: 20px;
+    border-radius: 10px;
+    width: 300px;
+    text-align: center;
+  }
+  input, button, select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 10px;
+  }
+  #game {
+    display: none;
+    padding: 10px;
+  }
+  canvas {
+    background: #222;
+    border: 1px solid #444;
+  }
+</style>
+</head>
+<body>
+
+<div id="overlay">
+  <div id="panel">
+    <h2>Choose Username</h2>
+    <input id="usernameInput" placeholder="username">
+    <button onclick="setUsername()">Continue</button>
+    <div id="msg"></div>
+  </div>
+</div>
+
+<div id="game">
+  <h2>MaxGames Builder</h2>
+  <p>Logged in as: <b id="userLabel"></b></p>
+
+  <select id="blockType">
+    <option value="normal">Normal Block</option>
+    <option value="kill">Kill Block</option>
+    <option value="bounce">Bounce Block</option>
+    <option value="spawn">Spawn Block</option>
+  </select>
+
+  <button onclick="saveGame()">Save Game</button>
+  <br><br>
+  <canvas id="canvas" width="600" height="400"></canvas>
+</div>
+
+<script>
+/* ---------------- USERNAME (NO AUTH) ---------------- */
+
+function setUsername() {
+  const name = usernameInput.value.trim().toLowerCase();
+  if (!name) return;
+
+  localStorage.setItem("username", name);
+  start();
+}
+
+function start() {
+  const name = localStorage.getItem("username");
+  if (!name) return;
+
+  overlay.style.display = "none";
+  game.style.display = "block";
+  userLabel.textContent = name;
+}
+
+start();
+
+/* ---------------- GAME ENGINE ---------------- */
+
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+let blocks = [];
+
+class Block {
+  constructor(type, x, y) {
+    this.type = type;
+    this.x = x;
+    this.y = y;
+    this.size = 30;
+  }
+
+  draw() {
+    if (this.type === "normal") ctx.fillStyle = "#888";
+    if (this.type === "kill") ctx.fillStyle = "red";
+    if (this.type === "bounce") ctx.fillStyle = "lime";
+    if (this.type === "spawn") ctx.fillStyle = "cyan";
+
+    ctx.fillRect(this.x, this.y, this.size, this.size);
+  }
+}
+
+canvas.addEventListener("click", e => {
+  const rect = canvas.getBoundingClientRect();
+  const x = Math.floor((e.clientX - rect.left) / 30) * 30;
+  const y = Math.floor((e.clientY - rect.top) / 30) * 30;
+
+  const type = blockType.value;
+  blocks.push(new Block(type, x, y));
+  render();
+});
+
+function render() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  blocks.forEach(b => b.draw());
+}
+
+render();
+
+/* ---------------- SAVE GAME ---------------- */
+
+function saveGame() {
+  const gameData = {
+    creator: localStorage.getItem("username"),
+    createdAt: Date.now(),
+    blocks: blocks.map(b => ({
+      type: b.type,
+      x: b.x,
+      y: b.y
+    }))
+  };
+
+  console.log("GAME SAVED:", gameData);
+  alert("Game saved (check console). Ready for Firebase upload later.");
+}
+</script>
+
+</body>
+</html>
