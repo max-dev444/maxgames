@@ -26,7 +26,7 @@ input[type=color] { border:2px solid #fff; }
 </head>
 <body>
 
-<h1>Ultimate 2D Platformer Builder v4</h1>
+<h1>Ultimate 2D Platformer Builder v5</h1>
 
 <div id="signinDiv">
   <button onclick="googleSignIn()">Sign in with Google</button>
@@ -80,33 +80,32 @@ const db = getDatabase(app);
 const provider = new GoogleAuthProvider();
 
 // ------------------ AUTH ------------------
-// Redirect sign-in
-window.googleSignIn = () => signInWithRedirect(auth, provider);
-
-// Check redirect result safely
-getRedirectResult(auth).then((result) => {
-  if(result && result.user){
-    window.currentUser = result.user.email.split('@')[0].replace(/\d+/g,'');
-    document.getElementById('currentUser').innerText = "Signed in as: "+window.currentUser;
-    document.getElementById('signinDiv').style.display = 'none';
-    document.getElementById('mainMenu').style.display = 'block';
+// Popup sign-in
+window.googleSignIn = async () => {
+  try {
+    const result = await signInWithPopup(auth, provider);
+    if(result.user){
+      window.currentUser = result.user.email.split('@')[0].replace(/\d+/g,'');
+      document.getElementById('currentUser').innerText = "Signed in as: "+window.currentUser;
+      document.getElementById('signinDiv').style.display = 'none';
+      document.getElementById('mainMenu').style.display = 'block';
+    }
+  } catch(e){
+    console.error(e);
+    alert("Sign-in failed: "+e.message);
   }
-}).catch((e)=>{
-  console.error(e); 
-  // only alert if it's a real error, not just "no redirect"
-  if(e.code !== 'auth/no-auth-event') alert("Sign-in failed: "+e.message);
-});
+};
 
-// Auth state changes
-onAuthStateChanged(auth, user=>{
+// Detect if user already signed in
+onAuthStateChanged(auth, user => {
   if(user){
     window.currentUser = user.email.split('@')[0].replace(/\d+/g,'');
     document.getElementById('currentUser').innerText = "Signed in as: "+window.currentUser;
     document.getElementById('signinDiv').style.display = 'none';
     document.getElementById('mainMenu').style.display = 'block';
   } else {
-    window.currentUser=null; 
-    document.getElementById('currentUser').innerText="Not signed in";
+    window.currentUser = null;
+    document.getElementById('currentUser').innerText = "Not signed in";
   }
 });
 
