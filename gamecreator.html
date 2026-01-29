@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ultimate 2D Platformer Platform v2</title>
+<style>
+body { font-family:sans-serif; background:#222; color:white; display:flex; flex-direction:column; align-items:center; }
+canvas { border:2px solid #fff; background:#333; margin-top:10px; cursor:pointer; }
+#blockMenu { display:flex; overflow-x: scroll; width:420px; border:1px solid #fff; padding:5px; margin-top:5px; display:none; }
+#progress { margin-top:5px; }
+#builder { display:none; flex-direction:column; align-items:center; }
+#levelList { display:none; margin-top:10px; max-height:200px; overflow-y:scroll; width:400px; border:1px solid #fff; padding:5px; }
+#leaderboard { margin-top:10px; max-height:200px; overflow-y:scroll; width:400px; border:1px solid #fff; padding:5px; display:none;}
+button,input { margin:5px; }
+</style>
+</head>
+<body>
+
+<h1>Ultimate 2D Platformer Platform v2</h1>
+
+<div id="signinDiv">
+  <button onclick="googleSignIn()">Sign in with Google</button>
+  <div id="currentUser">Not signed in</div>
+</div>
+
+<div id="mainMenu" style="display:none;">
+  <button onclick="showCreate()">Create New Level</button>
+  <button onclick="loadLevels()">Play Existing Level</button>
+</div>
+
+<div id="createDiv" style="display:none;">
+  <h2>Create Your Game</h2>
+  <input type="text" id="gameName" placeholder="Enter Level Name">
+  <button onclick="startBuilder()">Start Builder</button>
+</div>
+
+<div id="builder">
+  <div id="progress">Completion: 0%</div>
+  <h2>Select Block:</h2>
+  <div id="blockMenu"></div>
+  <input type="color" id="customColor" value="#ff0000" onchange="selectBlock('custom',this.value)">
+  <h2>Map:</h2>
+  <canvas id="mapCanvas" width="600" height="400"></canvas>
+  <button onclick="saveGame()">Save Level</button>
+  <div id="message"></div>
+  <h3>Leaderboard:</h3>
+  <div id="leaderboard"></div>
+</div>
+
+<div id="levelList"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+import { getDatabase, ref, push, set, get, child, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-database.js";
+
+// Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyCjd9QHKpOEHqCGAldVFWC5Su16wWe8MbU",
+  authDomain: "gamebuilderh.firebaseapp.com",
+  databaseURL: "https://gamebuilderh-default-rtdb.firebaseio.com",
+  projectId: "gamebuilderh",
+  storageBucket: "gamebuilderh.appspot.com",
+  messagingSenderId: "202737229483",
+  appId: "1:202737229483:web:c92b7a59cb5af6a1c5a1ee"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+const provider = new GoogleAuthProvider();
+
+// Sign-in
+window.googleSignIn=async()=>{
+  try{
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+    window.currentUser = user.email.split('@')[0].replace(/\d+/g,'');
+    document.getElementById('currentUser').innerText="Signed in as: "+window.currentUser;
+    document.getElementById('signinDiv').style.display='none';
+    document.getElementById('mainMenu').style.display='block';
+  } catch(e){console.error(e); alert("Sign-in failed");}
+};
+onAuthStateChanged(auth,user=>{
+  if(user){
+    window.currentUser=user.email.split('@')[0].replace(/\d+/g,'');
+    document.getElementById('currentUser').innerText="Signed in as: "+window.currentUser;
+    document.getElementById('signinDiv').style.display='none';
+    document.getElementById('mainMenu').style.display='block';
+  } else {window.currentUser=null;document.getElementById('currentUser').innerText="Not signed in";}
+});
+
+// Blocks
+const blocks=[{name:"Grass",symbol:"🌿"},{name:"Stone",symbol:"🪨"},{name:"Tree",symbol:"🌳"},
+{ name:"Conveyor",symbol:"➡️",special:"conveyor"}, {name:"Spike",symbol:"💀",special:"spike"},
+{name:"Bounce",symbol:"🟢",special:"bounce"},{name:"Goal",symbol:"🏁",special:"goal"}];
+for(let i=0;i<45;i++) blocks.push({name:"Block"+i,symbol:"⬛"});
+let selectedBlock=blocks[0]; let customColor="#ff0000";
+function selectBlock(type,color){ selectedBlock={name:"Custom",symbol:"⬛",special:"custom"}; customColor=color; }
+
+// UI references
+const menuDiv=document.getElementById('blockMenu');
+blocks.forEach(b=>{ const btn=document.createElement('button'); btn.innerText=b.symbol; btn.title=b.name; btn.onclick=()=>{selectedBlock=b}; menuDiv.appendChild(btn); });
+
+// Builder variables
+const canvas=document.getElementById('mapCanvas');
+const ctx=canvas.getContext('2d');
+const mapHeight=20;
+let mapWidth=40; // default width but can expand
+const cellSize=canvas.height/mapHeight; 
+let mapData=[]; let levelName="";
+
+// Show create div
+window.showCreate=()=>{document.getElementById('createDiv').style.display='block'; document.getElementById('mainMenu').style.display='none';};
+
+// Start builder
+window.startBuilder=()=>{
+  const name=document.getElementById('gameName').value.trim();
+  if(!name){alert("Enter a level name"); return;}
+  levelName=name;
+  mapData=Array(mapHeight).fill(0).map(()=>Array(mapWidth).fill(null));
+  document.getElementById('createDiv').style.display='none';
+  document.getElementById('builder').style.display='flex';
+  menuDiv.style.display='flex';
+  drawMap(); updateProgress();
+};
+
+// Draw map (with horizontal scrolling)
+let scrollX=0;
+function drawMap(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const visibleCols=Math.floor(canvas.width/cellSize);
+  for(let y=0;y<mapHeight;y++){
+    for(let x=scrollX;x<Math.min(scrollX+visibleCols,mapWidth);x++){
+      let obj=mapData[y][x];
+      if(obj){if(obj.special==="custom"){ctx.fillStyle=obj.color; ctx.fillRect((x-scrollX)*cellSize,y*cellSize,cellSize,cellSize);}
+      else ctx.fillText(obj.symbol,(x-scrollX)*cellSize+cellSize/4,y*cellSize+cellSize*0.75);}
+      ctx.strokeStyle="#555"; ctx.strokeRect((x-scrollX)*cellSize,y*cellSize,cellSize,cellSize);
+    }
+  }
+}
+
+// Drag/place
+let isDragging=false;
+canvas.addEventListener('mousedown',()=>{isDragging=true;});
+canvas.addEventListener('mouseup',()=>{isDragging=false;});
+canvas.addEventListener('mousemove',e=>{if(isDragging) placeBlock(e);});
+canvas.addEventListener('click',placeBlock);
+function placeBlock(e){
+  const rect=canvas.getBoundingClientRect();
+  const x=Math.floor((e.clientX-rect.left)/cellSize)+scrollX;
+  const y=Math.floor((e.clientY-rect.top)/cellSize);
+  if(x>=0 && y>=0 && x<mapWidth && y<mapHeight){
+    if(selectedBlock.special==="custom") mapData[y][x]={...selectedBlock,color:customColor}; else mapData[y][x]=selectedBlock;
+    drawMap(); updateProgress();
+  }
+}
+
+// Progress
+function updateProgress(){
+  // distance from start to goal
+  let goalX=mapWidth-1;
+  for(let y=0;y<mapHeight;y++){
+    for(let x=0;x<mapWidth;x++){
+      if(mapData[y][x] && mapData[y][x].special==="goal") goalX=x;
+    }
+  }
+  let perc=Math.floor(Math.min(player.x/goalX,1)*100);
+  document.getElementById('progress').innerText=`Completion: ${perc}%`;
+}
+
+// Player
+let player={x:0,y:mapHeight-1,vy:0,onGround:true};
+let keys={left:false,right:false,up:false};
+document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft') keys.left=true;if(e.key==='ArrowRight') keys.right=true;if(e.key===' ' && player.onGround){keys.up=true; player.vy=-5; player.onGround=false;}});
+document.addEventListener('keyup',e=>{if(e.key==='ArrowLeft') keys.left=false;if(e.key==='ArrowRight') keys.right=false;if(e.key===' ') keys.up=false;});
+
+function gameLoop(){
+  if(!mapData.length) return;
+  if(keys.left) player.x-=0.2;if(keys.right) player.x+=0.2;
+  player.vy+=0.2; player.y+=player.vy;
+
+  const px=Math.floor(player.x); const py=Math.floor(player.y);
+  if(mapData[py] && mapData[py][px]){
+    const block=mapData[py][px];
+    if(block.special==="spike"){player.x=0;player.y=mapHeight-1;player.vy=0; alert("You died!");}
+    if(block.special==="conveyor"){player.x+=0.2;}
+    if(block.special==="bounce"){player.vy=-5;}
+    if(block.special==="goal"){document.getElementById('message').innerText="Level Beaten!"; saveLeaderboard(player.x);}
+    if(py>=mapHeight-1){player.y=mapHeight-1;player.vy=0;player.onGround=true;}
+  }
+
+  // horizontal scrolling
+  scrollX=Math.max(0,Math.min(mapWidth-Math.floor(canvas.width/cellSize),Math.floor(player.x-5)));
+  drawMap(); updateProgress();
+  requestAnimationFrame(gameLoop);
+}
+gameLoop();
+
+// Save game
+window.saveGame=()=>{
+  if(!window.currentUser){alert("Sign in first!"); return;}
+  if(!levelName){alert("Start a level first!"); return;}
+  const gameRef=push(ref(db,'games'));
+  set(gameRef,{creator:window.currentUser,name:levelName,map:mapData,width:mapWidth}).then(()=>alert("Level saved!")).catch(e=>console.error(e));
+};
+
+// Leaderboard
+function saveLeaderboard(score){
+  const lbRef=push(ref(db,'leaderboard/'+levelName));
+  set(lbRef,{player:window.currentUser,score:score});
+  loadLeaderboard();
+}
+
+async function loadLeaderboard(){
+  const lbDiv=document.getElementById('leaderboard'); lbDiv.style.display='block'; lbDiv.innerHTML="<h4>Leaderboard:</h4>";
+  const snapshot=await get(ref(db,'leaderboard/'+levelName));
+  if(snapshot.exists()){
+    const entries=Object.values(snapshot.val()).sort((a,b)=>b.score-a.score);
+    entries.forEach(e=>{const div=document.createElement('div'); div.innerText=`${e.player} - ${Math.floor(e.score)}`; lbDiv.appendChild(div);});
+  } else lbDiv.innerHTML+="<p>No scores yet</p>";
+}
+
+// Load levels
+window.loadLevels=async()=>{
+  const listDiv=document.getElementById('levelList');
+  listDiv.style.display='block'; listDiv.innerHTML="<h3>Available Levels:</h3>";
+  document.getElementById('mainMenu').style.display='none';
+  const snapshot=await get(ref(db,'games'));
+  if(snapshot.exists()){
+    Object.entries(snapshot.val()).forEach(([id,level])=>{
+      const btn=document.createElement('button');
+      btn.innerText=`${level.name} by ${level.creator}`;
+      btn.onclick=()=>{startLoad(level.map,level.name,level.width);}
+      listDiv.appendChild(btn);
+    });
+  } else {listDiv.innerHTML+="<p>No levels yet!</p>";}
+};
+
+function startLoad(map,name,width){
+  levelName=name; mapData=map; mapWidth=width;
+  document.getElementById('builder').style.display='flex';
+  document.getElementById('levelList').style.display='none';
+  drawMap(); updateProgress(); document.getElementById('message').innerText="";
+  loadLeaderboard();
+}
+
+</script>
+</body>
+</html>
