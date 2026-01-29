@@ -26,7 +26,7 @@ input[type=color] { border:2px solid #fff; }
 </head>
 <body>
 
-<h1>Ultimate 2D Platformer Builder v3</h1>
+<h1>Ultimate 2D Platformer Builder v4</h1>
 
 <div id="signinDiv">
   <button onclick="googleSignIn()">Sign in with Google</button>
@@ -64,7 +64,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/fireba
 import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 import { getDatabase, ref, push, set, get } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-database.js";
 
-// Firebase
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyCjd9QHKpOEHqCGAldVFWC5Su16wWe8MbU",
   authDomain: "gamebuilderh.firebaseapp.com",
@@ -79,28 +79,38 @@ const auth = getAuth(app);
 const db = getDatabase(app);
 const provider = new GoogleAuthProvider();
 
-// REDIRECT SIGN-IN (more reliable on GitHub Pages)
+// ------------------ AUTH ------------------
+// Redirect sign-in
 window.googleSignIn = () => signInWithRedirect(auth, provider);
 
+// Check redirect result safely
 getRedirectResult(auth).then((result) => {
-  if(result.user){
+  if(result && result.user){
     window.currentUser = result.user.email.split('@')[0].replace(/\d+/g,'');
     document.getElementById('currentUser').innerText = "Signed in as: "+window.currentUser;
     document.getElementById('signinDiv').style.display = 'none';
     document.getElementById('mainMenu').style.display = 'block';
   }
-}).catch((e)=>{console.error(e); alert("Sign-in failed: "+e.message);});
+}).catch((e)=>{
+  console.error(e); 
+  // only alert if it's a real error, not just "no redirect"
+  if(e.code !== 'auth/no-auth-event') alert("Sign-in failed: "+e.message);
+});
 
-onAuthStateChanged(auth,user=>{
+// Auth state changes
+onAuthStateChanged(auth, user=>{
   if(user){
     window.currentUser = user.email.split('@')[0].replace(/\d+/g,'');
     document.getElementById('currentUser').innerText = "Signed in as: "+window.currentUser;
     document.getElementById('signinDiv').style.display = 'none';
     document.getElementById('mainMenu').style.display = 'block';
-  } else {window.currentUser=null; document.getElementById('currentUser').innerText="Not signed in";}
+  } else {
+    window.currentUser=null; 
+    document.getElementById('currentUser').innerText="Not signed in";
+  }
 });
 
-// Blocks + deco
+// ------------------ BLOCKS ------------------
 const blocks=[
   {name:"Grass",symbol:"🌿"},{name:"Stone",symbol:"🪨"},{name:"Tree",symbol:"🌳"},
   {name:"Water",symbol:"💧"},{name:"Lava",symbol:"🔥"},{name:"Conveyor",symbol:"➡️",special:"conveyor"},
@@ -110,15 +120,25 @@ for(let i=0;i<45;i++) blocks.push({name:"Block"+i,symbol:"⬛"});
 let selectedBlock=blocks[0]; let customColor="#ff0000";
 function selectBlock(type,color){ selectedBlock={name:"Custom",symbol:"⬛",special:"custom"}; customColor=color; }
 
-// UI
+// ------------------ UI ------------------
 const menuDiv=document.getElementById('blockMenu');
-blocks.forEach(b=>{ const btn=document.createElement('button'); btn.innerText=b.symbol; btn.title=b.name; btn.onclick=()=>{selectedBlock=b}; menuDiv.appendChild(btn); });
+blocks.forEach(b=>{ 
+  const btn=document.createElement('button'); 
+  btn.innerText=b.symbol; 
+  btn.title=b.name; 
+  btn.onclick=()=>{selectedBlock=b}; 
+  menuDiv.appendChild(btn); 
+});
 
-// Builder
+// ------------------ BUILDER ------------------
 const canvas=document.getElementById('mapCanvas');
 const ctx=canvas.getContext('2d');
-const mapHeight=20; let mapWidth=40; const cellSize=canvas.height/mapHeight;
-let mapData=[]; let levelName=""; let scrollX=0;
+const mapHeight=20; 
+let mapWidth=40; 
+const cellSize=canvas.height/mapHeight;
+let mapData=[]; 
+let levelName=""; 
+let scrollX=0;
 
 // Show create
 window.showCreate=()=>{document.getElementById('createDiv').style.display='block'; document.getElementById('mainMenu').style.display='none';};
@@ -135,7 +155,7 @@ window.startBuilder=()=>{
   drawMap(); updateProgress();
 };
 
-// Draw map + decorations
+// Draw map
 function drawMap(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
   ctx.font = cellSize+"px serif";
@@ -144,10 +164,16 @@ function drawMap(){
     for(let x=scrollX;x<Math.min(scrollX+visibleCols,mapWidth);x++){
       let obj=mapData[y][x];
       if(obj){
-        if(obj.special==="custom"){ ctx.fillStyle=obj.color; ctx.fillRect((x-scrollX)*cellSize,y*cellSize,cellSize,cellSize);}
-        else { ctx.fillStyle="#fff"; ctx.fillText(obj.symbol,(x-scrollX)*cellSize+cellSize/4,y*cellSize+cellSize*0.75);}
+        if(obj.special==="custom"){ 
+          ctx.fillStyle=obj.color; 
+          ctx.fillRect((x-scrollX)*cellSize,y*cellSize,cellSize,cellSize);
+        } else { 
+          ctx.fillStyle="#fff"; 
+          ctx.fillText(obj.symbol,(x-scrollX)*cellSize+cellSize/4,y*cellSize+cellSize*0.75);
+        }
       }
-      ctx.strokeStyle="#555"; ctx.strokeRect((x-scrollX)*cellSize,y*cellSize,cellSize,cellSize);
+      ctx.strokeStyle="#555"; 
+      ctx.strokeRect((x-scrollX)*cellSize,y*cellSize,cellSize,cellSize);
     }
   }
 }
@@ -163,30 +189,46 @@ function placeBlock(e){
   const x=Math.floor((e.clientX-rect.left)/cellSize)+scrollX;
   const y=Math.floor((e.clientY-rect.top)/cellSize);
   if(x>=0 && y>=0 && x<mapWidth && y<mapHeight){
-    if(selectedBlock.special==="custom") mapData[y][x]={...selectedBlock,color:customColor}; else mapData[y][x]=selectedBlock;
+    if(selectedBlock.special==="custom") mapData[y][x]={...selectedBlock,color:customColor}; 
+    else mapData[y][x]=selectedBlock;
     drawMap(); updateProgress();
   }
 }
 
-// Player + physics
-let player={x:0,y:mapHeight-1,vy:0,onGround:true}; let keys={left:false,right:false,up:false};
-document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft') keys.left=true;if(e.key==='ArrowRight') keys.right=true;if(e.key===' ' && player.onGround){keys.up=true;player.vy=-5;player.onGround=false;}});
-document.addEventListener('keyup',e=>{if(e.key==='ArrowLeft') keys.left=false;if(e.key==='ArrowRight') keys.right=false;if(e.key===' ') keys.up=false;});
+// ------------------ PLAYER ------------------
+let player={x:0,y:mapHeight-1,vy:0,onGround:true}; 
+let keys={left:false,right:false,up:false};
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowLeft') keys.left=true;
+  if(e.key==='ArrowRight') keys.right=true;
+  if(e.key===' ' && player.onGround){keys.up=true; player.vy=-5; player.onGround=false;}
+});
+document.addEventListener('keyup',e=>{
+  if(e.key==='ArrowLeft') keys.left=false;
+  if(e.key==='ArrowRight') keys.right=false;
+  if(e.key===' ') keys.up=false;
+});
 
 // Game loop
 function gameLoop(){
   if(!mapData.length) return;
-  if(keys.left) player.x-=0.2; if(keys.right) player.x+=0.2;
-  player.vy+=0.2; player.y+=player.vy;
-  const px=Math.floor(player.x); const py=Math.floor(player.y);
+  if(keys.left) player.x-=0.2; 
+  if(keys.right) player.x+=0.2;
+  player.vy+=0.2; 
+  player.y+=player.vy;
+
+  const px=Math.floor(player.x); 
+  const py=Math.floor(player.y);
+
   if(mapData[py] && mapData[py][px]){
     const block=mapData[py][px];
     if(block.special==="spike"){player.x=0;player.y=mapHeight-1;player.vy=0; alert("You died!");}
     if(block.special==="conveyor"){player.x+=0.2;}
     if(block.special==="bounce"){player.vy=-5;}
     if(block.special==="goal"){document.getElementById('message').innerText="Level Beaten!"; saveLeaderboard(player.x);}
-    if(py>=mapHeight-1){player.y=mapHeight-1;player.vy=0;player.onGround=true;}
+    if(py>=mapHeight-1){player.y=mapHeight-1; player.vy=0; player.onGround=true;}
   }
+
   scrollX=Math.max(0,Math.min(mapWidth-Math.floor(canvas.width/cellSize),Math.floor(player.x-5)));
   drawMap(); updateProgress();
   requestAnimationFrame(gameLoop);
@@ -220,7 +262,9 @@ function saveLeaderboard(score){
   loadLeaderboard();
 }
 async function loadLeaderboard(){
-  const lbDiv=document.getElementById('leaderboard'); lbDiv.style.display='block'; lbDiv.innerHTML="<h4>Leaderboard:</h4>";
+  const lbDiv=document.getElementById('leaderboard'); 
+  lbDiv.style.display='block'; 
+  lbDiv.innerHTML="<h4>Leaderboard:</h4>";
   const snapshot=await get(ref(db,'leaderboard/'+levelName));
   if(snapshot.exists()){
     const entries=Object.values(snapshot.val()).sort((a,b)=>b.score-a.score);
@@ -231,7 +275,8 @@ async function loadLeaderboard(){
 // Load levels
 window.loadLevels=async()=>{
   const listDiv=document.getElementById('levelList');
-  listDiv.style.display='block'; listDiv.innerHTML="<h3>Available Levels:</h3>";
+  listDiv.style.display='block'; 
+  listDiv.innerHTML="<h3>Available Levels:</h3>";
   document.getElementById('mainMenu').style.display='none';
   const snapshot=await get(ref(db,'games'));
   if(snapshot.exists()){
