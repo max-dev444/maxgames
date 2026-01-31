@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>SYSTEM FAILURE</title>
+
 <style>
 html, body {
   margin: 0;
@@ -17,6 +18,7 @@ html, body {
   inset: 0;
 }
 
+/* CHAOS TEXT */
 .msg {
   position: absolute;
   font-weight: 900;
@@ -35,32 +37,48 @@ html, body {
   width: 8px;
   height: 8px;
 }
+
+/* 🔴 GIANT BUTTON */
+#doomButton {
+  position: fixed;
+  inset: 0;
+  font-size: 6vw;
+  font-weight: 900;
+  background: red;
+  color: white;
+  border: none;
+  cursor: pointer;
+  z-index: 9999;
+  animation: pulse 0.4s infinite alternate;
+}
+
+@keyframes pulse {
+  from { background: red; }
+  to   { background: darkred; }
+}
 </style>
 </head>
+
 <body>
+
+<button id="doomButton">
+click if max is a good friend
+</button>
 
 <div id="root"></div>
 
 <script>
 const root = document.getElementById("root");
+const button = document.getElementById("doomButton");
 
-/* 👇 ADD / EDIT TEXT HERE — EACH ONE SHOWS ONCE */
 const messages = [
-  "VIRUS INSTALLED",
-  "SYSTEM BREACH",
-  "RAM OVERFLOW",
-  "GPU FAILURE",
-  "FILES CORRUPTING",
-  "DATA LEAK DETECTED",
-  "DO NOT CLOSE TAB",
-  "CRITICAL ERROR",
-  "UNKNOWN PROCESS",
-  "THIS IS NOT GOOD",
-  "WHY DID YOU CLICK",
-  "NO ESCAPE FOUND",
-  "MEMORY LEAK",
-  "STACK OVERFLOW",
-  "DEVICE UNRESPONSIVE"
+  "SY7",
+  "W6",
+  "P5",
+  "T4",
+  "B3",
+  "R2",
+  "1"
 ];
 
 function rand(min, max) {
@@ -71,18 +89,7 @@ function rainbow() {
   return `hsl(${Math.random()*360},100%,50%)`;
 }
 
-/* 🔥 BACKGROUND STROBE */
-setInterval(() => {
-  document.body.style.background = rainbow();
-}, 40000000000000000000000000000000);
-
-/* 🧨 SCREEN SHAKE */
-setInterval(() => {
-  root.style.transform =
-    `translate(${rand(-10,10)}px,${rand(-10,10)}px) rotate(${rand(-2,2)}deg)`;
-}, 50);
-
-/* 🧠 ONE‑TIME TEXT EXPLOSION */
+/* 🧠 CHAOS TEXT */
 messages.forEach((text, i) => {
   setTimeout(() => {
     const m = document.createElement("div");
@@ -90,48 +97,35 @@ messages.forEach((text, i) => {
     m.textContent = text;
     m.style.left = rand(0, innerWidth) + "px";
     m.style.top = rand(0, innerHeight) + "px";
-    m.style.fontSize = rand(20, 80) + "px";
+    m.style.fontSize = rand(30, 90) + "px";
     m.style.color = rainbow();
     root.appendChild(m);
-  }, i * 12000000000000000000000000000000000);
+  }, i * 400);
 });
 
-/* 🟥 HEAVY PIXEL FLOOD (INTENTIONAL LAG) */
+/* 🟥 PIXEL FLOOD (TONED DOWN SO IT DOESN’T FREEZE IMMEDIATELY) */
 setInterval(() => {
-  for (let i = 0; i < 3000000000000000000000000000000000000; i++) {
+  for (let i = 0; i < 300; i++) {
     const p = document.createElement("div");
     p.className = "pixel";
     p.style.left = rand(0, innerWidth) + "px";
     p.style.top = rand(0, innerHeight) + "px";
     p.style.background = rainbow();
     root.appendChild(p);
-
-    setTimeout(() => p.remove(), 1500);
+    setTimeout(() => p.remove(), 1200);
   }
 }, 80);
 
-/* 📉 FAKE CPU LOAD */
-setInterval(() => {
-  let junk = [];
-  for (let i = 0; i < 50000; i++) {
-    junk.push(Math.random());
-  }
-}, 200);
+/* 🚪 TAB ARMAGEDDON */
+button.onclick = () => {
+  button.remove();
 
-/* 📺 FULLSCREEN (SAFE) */
-document.documentElement.requestFullscreen?.();
-
-/* 🧯 ESCAPE */
-let esc = 0;
-document.addEventListener("keydown", e => {
-  if (e.key === "Escape") {
-    esc++;
-    if (esc >= 5) {
-      alert("😈 PRANK OVER — SYSTEM RESTORED");
-      location.reload();
-    }
+  for (let i = 0; i < 120; i++) {
+    window.open("https://www.maxgames.org", "_blank");
   }
-});
+
+  document.documentElement.requestFullscreen?.();
+};
 </script>
 
 </body>
