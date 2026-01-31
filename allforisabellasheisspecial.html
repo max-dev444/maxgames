@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>SYSTEM FAILURE</title>
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: black;
+  font-family: monospace;
+}
+
+#root {
+  position: fixed;
+  inset: 0;
+}
+
+.msg {
+  position: absolute;
+  font-weight: 900;
+  white-space: nowrap;
+  mix-blend-mode: difference;
+  animation: wiggle 0.3s infinite alternate;
+}
+
+@keyframes wiggle {
+  from { transform: translate(-3px, -3px) rotate(-2deg); }
+  to   { transform: translate(3px, 3px) rotate(2deg); }
+}
+
+.pixel {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+}
+</style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script>
+const root = document.getElementById("root");
+
+/* 👇 ADD / EDIT TEXT HERE — EACH ONE SHOWS ONCE */
+const messages = [
+  "VIRUS INSTALLED",
+  "SYSTEM BREACH",
+  "RAM OVERFLOW",
+  "GPU FAILURE",
+  "FILES CORRUPTING",
+  "DATA LEAK DETECTED",
+  "DO NOT CLOSE TAB",
+  "CRITICAL ERROR",
+  "UNKNOWN PROCESS",
+  "THIS IS NOT GOOD",
+  "WHY DID YOU CLICK",
+  "NO ESCAPE FOUND",
+  "MEMORY LEAK",
+  "STACK OVERFLOW",
+  "DEVICE UNRESPONSIVE"
+];
+
+function rand(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+function rainbow() {
+  return `hsl(${Math.random()*360},100%,50%)`;
+}
+
+/* 🔥 BACKGROUND STROBE */
+setInterval(() => {
+  document.body.style.background = rainbow();
+}, 40000000000000000000000000000000);
+
+/* 🧨 SCREEN SHAKE */
+setInterval(() => {
+  root.style.transform =
+    `translate(${rand(-10,10)}px,${rand(-10,10)}px) rotate(${rand(-2,2)}deg)`;
+}, 50);
+
+/* 🧠 ONE‑TIME TEXT EXPLOSION */
+messages.forEach((text, i) => {
+  setTimeout(() => {
+    const m = document.createElement("div");
+    m.className = "msg";
+    m.textContent = text;
+    m.style.left = rand(0, innerWidth) + "px";
+    m.style.top = rand(0, innerHeight) + "px";
+    m.style.fontSize = rand(20, 80) + "px";
+    m.style.color = rainbow();
+    root.appendChild(m);
+  }, i * 12000000000000000000000000000000000);
+});
+
+/* 🟥 HEAVY PIXEL FLOOD (INTENTIONAL LAG) */
+setInterval(() => {
+  for (let i = 0; i < 3000000000000000000000000000000000000; i++) {
+    const p = document.createElement("div");
+    p.className = "pixel";
+    p.style.left = rand(0, innerWidth) + "px";
+    p.style.top = rand(0, innerHeight) + "px";
+    p.style.background = rainbow();
+    root.appendChild(p);
+
+    setTimeout(() => p.remove(), 1500);
+  }
+}, 80);
+
+/* 📉 FAKE CPU LOAD */
+setInterval(() => {
+  let junk = [];
+  for (let i = 0; i < 50000; i++) {
+    junk.push(Math.random());
+  }
+}, 200);
+
+/* 📺 FULLSCREEN (SAFE) */
+document.documentElement.requestFullscreen?.();
+
+/* 🧯 ESCAPE */
+let esc = 0;
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") {
+    esc++;
+    if (esc >= 5) {
+      alert("😈 PRANK OVER — SYSTEM RESTORED");
+      location.reload();
+    }
+  }
+});
+</script>
+
+</body>
+</html>
