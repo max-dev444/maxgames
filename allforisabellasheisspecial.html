@@ -1,131 +1,125 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>SYSTEM FAILURE</title>
+<title>Particle Stress Test</title>
 
 <style>
-html, body {
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  background: black;
-  font-family: monospace;
-}
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: black;
+    color: white;
+    overflow: auto;
+    font-family: monospace;
+  }
 
-#root {
-  position: fixed;
-  inset: 0;
-}
+  #world {
+    position: relative;
+    width: 10000px;
+    height: 10000px;
+    background: #000;
+  }
 
-/* CHAOS TEXT */
-.msg {
-  position: absolute;
-  font-weight: 900;
-  white-space: nowrap;
-  mix-blend-mode: difference;
-  animation: wiggle 0.3s infinite alternate;
-}
+  #ui {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 9999;
+  }
 
-@keyframes wiggle {
-  from { transform: translate(-3px, -3px) rotate(-2deg); }
-  to   { transform: translate(3px, 3px) rotate(2deg); }
-}
+  #spawnBtn {
+    width: 520px;
+    height: 160px;
+    font-size: 42px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    background: linear-gradient(45deg, red, yellow, lime, cyan, magenta);
+    color: black;
+  }
 
-.pixel {
-  position: absolute;
-  width: 8px;
-  height: 8px;
-}
+  #counter {
+    margin-top: 10px;
+    font-size: 22px;
+  }
 
-/* 🔴 GIANT BUTTON */
-#doomButton {
-  position: fixed;
-  inset: 0;
-  font-size: 6vw;
-  font-weight: 900;
-  background: red;
-  color: white;
-  border: none;
-  cursor: pointer;
-  z-index: 9999;
-  animation: pulse 0.4s infinite alternate;
-}
-
-@keyframes pulse {
-  from { background: red; }
-  to   { background: darkred; }
-}
+  .particle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: white;
+    will-change: transform;
+  }
 </style>
 </head>
 
 <body>
 
-<button id="doomButton">
-click if max is a good friend
-</button>
+<div id="ui">
+  <button id="spawnBtn">SPAWN PARTICLES</button>
+  <div id="counter">Particles: 0</div>
+</div>
 
-<div id="root"></div>
+<div id="world"></div>
 
 <script>
-const root = document.getElementById("root");
-const button = document.getElementById("doomButton");
+  // 🔧 EDIT THIS
+  const PARTICLES_PER_CLICK = 9999999999999999999999999; // try 5k, 10k, 30k, 50k+
 
-const messages = [
-  "SY7",
-  "W6",
-  "P5",
-  "T4",
-  "B3",
-  "R2",
-  "1"
-];
+  const world = document.getElementById("world");
+  const counter = document.getElementById("counter");
+  const btn = document.getElementById("spawnBtn");
 
-function rand(min, max) {
-  return Math.random() * (max - min) + min;
-}
+  let totalParticles = 0;
+  const particles = [];
 
-function rainbow() {
-  return `hsl(${Math.random()*360},100%,50%)`;
-}
+  btn.onclick = () => {
+    for (let i = 0; i < PARTICLES_PER_CLICK; i++) {
+      const p = document.createElement("div");
+      p.className = "particle";
 
-/* 🧠 CHAOS TEXT */
-messages.forEach((text, i) => {
-  setTimeout(() => {
-    const m = document.createElement("div");
-    m.className = "msg";
-    m.textContent = text;
-    m.style.left = rand(0, innerWidth) + "px";
-    m.style.top = rand(0, innerHeight) + "px";
-    m.style.fontSize = rand(30, 90) + "px";
-    m.style.color = rainbow();
-    root.appendChild(m);
-  }, i * 400);
-});
+      const x = Math.random() * 10000;
+      const y = Math.random() * 10000;
 
-/* 🟥 PIXEL FLOOD (TONED DOWN SO IT DOESN’T FREEZE IMMEDIATELY) */
-setInterval(() => {
-  for (let i = 0; i < 300; i++) {
-    const p = document.createElement("div");
-    p.className = "pixel";
-    p.style.left = rand(0, innerWidth) + "px";
-    p.style.top = rand(0, innerHeight) + "px";
-    p.style.background = rainbow();
-    root.appendChild(p);
-    setTimeout(() => p.remove(), 1200);
+      p.style.left = x + "px";
+      p.style.top = y + "px";
+      p.style.background = `hsl(${Math.random() * 360},100%,60%)`;
+
+      world.appendChild(p);
+
+      particles.push({
+        el: p,
+        x,
+        y,
+        vx: (Math.random() - 0.5) * 40, // FAST
+        vy: (Math.random() - 0.5) * 40
+      });
+    }
+
+    totalParticles += PARTICLES_PER_CLICK;
+    counter.textContent = "Particles: " + totalParticles;
+  };
+
+  // ⚠️ intentionally heavy animation loop
+  function animate() {
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+
+      p.x += p.vx;
+      p.y += p.vy;
+
+      // bounce in the 10k world
+      if (p.x < 0 || p.x > 10000) p.vx *= -1;
+      if (p.y < 0 || p.y > 10000) p.vy *= -1;
+
+      p.el.style.transform = `translate(${p.x}px, ${p.y}px)`;
+    }
+
+    requestAnimationFrame(animate);
   }
-}, 80);
 
-/* 🚪 TAB ARMAGEDDON */
-button.onclick = () => {
-  button.remove();
-
-  for (let i = 0; i < 120; i++) {
-    window.open("https://www.maxgames.org", "_blank");
-  }
-
-  document.documentElement.requestFullscreen?.();
-};
+  animate();
 </script>
 
 </body>
