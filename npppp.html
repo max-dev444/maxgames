@@ -100,7 +100,7 @@ editor.addEventListener('input', () => {
 async function saveDoc() {
   const content = editor.innerText;
   const choice = prompt("Private or Public? Type 'private' or 'public'");
-  const fileType = prompt("Choose file type: txt, md, jpg, png");
+  const fileType = prompt("Choose file type: txt, md, png");
 
   if(choice.toLowerCase() === 'private') {
     const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
@@ -111,7 +111,6 @@ async function saveDoc() {
     URL.revokeObjectURL(a.href);
     alert("Private file downloaded!");
   } else {
-    // Public mode → call Netlify serverless function
     try {
       const res = await fetch('/.netlify/functions/savePublicFile', {
         method: 'POST',
@@ -119,9 +118,10 @@ async function saveDoc() {
         headers: { 'Content-Type': 'application/json' }
       });
       const data = await res.json();
-      alert(`Public file created! Shareable URL: ${window.location.origin}${data.url}`);
+      alert(`Public file created! Shareable URL: ${window.location.origin}/publicFile.html#${data.id}`);
     } catch(e) {
-      alert("Error: Netlify function not deployed yet.");
+      alert("Error: Could not create public file.");
+      console.error(e);
     }
   }
 }
