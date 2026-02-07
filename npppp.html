@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MaxGames Notepad+++ 📝</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; background: #f0f0f0; }
+  h1 { text-align: center; }
+  #controls { margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 5px; }
+  #editor { width: 100%; height: 400px; border: 2px solid #333; padding: 10px; font-size: 16px; background: #fff; overflow-y: auto; }
+  select, input[type=color], button { padding: 5px; font-size: 14px; }
+  .emoji-btn { font-size: 20px; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<h1>MaxGames Notepad+++ 📝</h1>
+
+<div id="controls">
+  <button onclick="newDoc()">Create Text Document</button>
+
+  <!-- Fonts -->
+  <select id="fontSelect">
+    <option value="Arial">Arial</option>
+    <option value="Courier New">Courier New</option>
+    <option value="Georgia">Georgia</option>
+    <option value="Verdana">Verdana</option>
+    <option value="Times New Roman">Times New Roman</option>
+    <option value="Comic Sans MS">Comic Sans MS</option>
+    <option value="Impact">Impact</option>
+    <option value="Lucida Console">Lucida Console</option>
+  </select>
+
+  <!-- Text color -->
+  <input type="color" id="colorPicker" value="#000000">
+
+  <!-- Text size -->
+  <select id="sizeSelect">
+    <option value="12px">12</option>
+    <option value="14px" selected>14</option>
+    <option value="16px">16</option>
+    <option value="18px">18</option>
+    <option value="20px">20</option>
+    <option value="24px">24</option>
+    <option value="28px">28</option>
+    <option value="32px">32</option>
+  </select>
+
+  <!-- Text formatting -->
+  <button onclick="formatText('bold')">B</button>
+  <button onclick="formatText('italic')">I</button>
+  <button onclick="formatText('underline')">U</button>
+</div>
+
+<!-- Emoji picker -->
+<div id="emojiPicker">
+  😃 😂 😎 😡 😱 😴 🐱 🐶 🎮 ✨ 💥 💡 🍕 🍔 🌈 🌟 ❤️ 🔥
+  <button class="emoji-btn" onclick="addEmoji('😀')">😀</button>
+  <button class="emoji-btn" onclick="addEmoji('🎮')">🎮</button>
+  <button class="emoji-btn" onclick="addEmoji('✨')">✨</button>
+  <button class="emoji-btn" onclick="addEmoji('💡')">💡</button>
+  <button class="emoji-btn" onclick="addEmoji('❤️')">❤️</button>
+  <button class="emoji-btn" onclick="addEmoji('🔥')">🔥</button>
+  <button class="emoji-btn" onclick="addEmoji('🐱')">🐱</button>
+  <button class="emoji-btn" onclick="addEmoji('🐶')">🐶</button>
+  <button class="emoji-btn" onclick="addEmoji('🍕')">🍕</button>
+  <button class="emoji-btn" onclick="addEmoji('🌈')">🌈</button>
+</div>
+
+<div id="editor" contenteditable="true" style="color:black; font-family: Arial; font-size:14px;"></div>
+
+<br>
+<button onclick="saveDoc()">Save Document</button>
+
+<script>
+const editor = document.getElementById('editor');
+const colorPicker = document.getElementById('colorPicker');
+const fontSelect = document.getElementById('fontSelect');
+const sizeSelect = document.getElementById('sizeSelect');
+
+function newDoc() {
+  editor.innerHTML = '';
+}
+
+function addEmoji(e) {
+  editor.innerHTML += e;
+}
+
+function formatText(cmd) {
+  document.execCommand(cmd);
+}
+
+// Update editor style live
+editor.addEventListener('input', () => {
+  editor.style.color = colorPicker.value;
+  editor.style.fontFamily = fontSelect.value;
+  editor.style.fontSize = sizeSelect.value;
+});
+
+async function saveDoc() {
+  const content = editor.innerText;
+  const choice = prompt("Private or Public? Type 'private' or 'public'");
+  const fileType = prompt("Choose file type: txt, md, jpg, png");
+
+  if(choice.toLowerCase() === 'private') {
+    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `document.${fileType || 'txt'}`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    alert("Private file downloaded!");
+  } else {
+    // Public mode → call Netlify serverless function
+    try {
+      const res = await fetch('/.netlify/functions/savePublicFile', {
+        method: 'POST',
+        body: JSON.stringify({ content, fileType }),
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await res.json();
+      alert(`Public file created! Shareable URL: ${window.location.origin}${data.url}`);
+    } catch(e) {
+      alert("Error: Netlify function not deployed yet.");
+    }
+  }
+}
+</script>
+
+</body>
+</html>
