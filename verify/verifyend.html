@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Verification Complete</title>
+
+<style>
+body{
+    font-family:Verdana;
+    background:#111;
+    color:white;
+    text-align:center;
+    padding-top:60px;
+}
+
+input{
+    padding:10px;
+    font-size:16px;
+}
+
+button{
+    padding:12px 24px;
+    font-size:18px;
+    cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Final Step</h1>
+
+<p>Enter your email to become verified.</p>
+
+<p style="color:#ff7777;">
+WARNING: Your email will appear publicly in Verified Members.
+</p>
+
+<input id="emailInput" placeholder="Enter Email">
+<br><br>
+<button onclick="submitEmail()">Done</button>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig={
+  apiKey:"AIzaSyC39mabdSddFKYBfPeFiqXEH3vRuW0hBOg",
+  authDomain:"verify-2f72e.firebaseapp.com",
+  projectId:"verify-2f72e",
+  storageBucket:"verify-2f72e.firebasestorage.app",
+  messagingSenderId:"735887684811",
+  appId:"1:735887684811:web:6d6275b949569d0f07974e"
+};
+
+const app=initializeApp(firebaseConfig);
+const db=getFirestore(app);
+
+function validEmail(email){
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+window.submitEmail=async function(){
+
+    let email=document.getElementById("emailInput").value.trim();
+
+    if(!validEmail(email)){
+        alert("Enter valid email");
+        return;
+    }
+
+    await addDoc(collection(db,"verifiedEmails"),{
+        email:email
+    });
+
+    window.location.href="../index.html";
+}
+</script>
+
+</body>
+</html>
