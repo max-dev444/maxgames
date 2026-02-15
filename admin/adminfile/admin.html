@@ -50,10 +50,54 @@ button {
     <div id="errorMsg"></div>
 </div>
 
+<!-- This replaces the content inside <div id="adminPanel"> in admin.html -->
+
 <div id="adminPanel" class="hidden">
     <h2>Admin Panel</h2>
-    <p>Access granted! You’ll see verified members in Step 3.</p>
+    <p>Access granted! You can view and manage verified members below:</p>
+    <div id="list"></div>
 </div>
+
+<script type="module">
+import { getFirestore, collection, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const db = getFirestore(app);
+
+async function loadVerifiedMembers(){
+    const list = document.getElementById("list");
+    list.innerHTML = "Loading...";
+
+    const querySnapshot = await getDocs(collection(db, "verifiedEmails"));
+
+    list.innerHTML = "";
+    querySnapshot.forEach(d=>{
+        const div = document.createElement("div");
+        div.style.display = "flex";
+        div.style.justifyContent = "space-between";
+        div.style.background = "#222";
+        div.style.padding = "8px";
+        div.style.marginBottom = "6px";
+        div.style.borderRadius = "6px";
+
+        div.innerHTML = `
+            <span>${d.data().email}</span>
+            <button onclick="deleteMember('${d.id}')">Delete</button>
+        `;
+        list.appendChild(div);
+    });
+}
+
+window.deleteMember = async function(id){
+    if(confirm("Delete this verified member?")) {
+        await deleteDoc(doc(db,"verifiedEmails",id));
+        loadVerifiedMembers();
+    }
+}
+
+// Load members when admin panel shows
+loadVerifiedMembers();
+</script>
+ 
 
 <div id="noAccess" class="hidden">
     <h1>404</h1>
