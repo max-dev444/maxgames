@@ -12,20 +12,19 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
     min-height: 100vh;
     text-align: center;
 }
 
-input {
-    padding: 10px;
+input, select {
+    padding: 8px;
     margin: 5px;
-    font-size: 16px;
+    font-size: 14px;
 }
 
 button {
-    padding: 10px 20px;
-    font-size: 16px;
+    padding: 6px 12px;
+    font-size: 14px;
     cursor: pointer;
 }
 
@@ -36,11 +35,12 @@ button {
     margin-top: 10px;
 }
 
-#list {
+#userList {
     margin-top: 20px;
-    width: 320px;
+    width: 400px;
 }
-.emailItem {
+
+.userItem {
     display: flex;
     justify-content: space-between;
     background: #222;
@@ -63,8 +63,8 @@ button {
 
 <div id="adminPanel" class="hidden">
     <h2>Admin Panel</h2>
-    <p>Access granted! Verified members:</p>
-    <div id="list"></div>
+    <p>Access granted! Users and their status:</p>
+    <div id="userList"></div>
 </div>
 
 <div id="noAccess" class="hidden">
@@ -75,9 +75,9 @@ button {
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// ---------------- FIREBASE CONFIG ----------------
+// ---------- CONFIG ----------
 const firebaseConfig = {
   apiKey:"AIzaSyC39mabdSddFKYBfPeFiqXEH3vRuW0hBOg",
   authDomain:"verify-2f72e.firebaseapp.com",
@@ -89,137 +89,125 @@ const firebaseConfig = {
 
 const ADMIN_EMAIL = "maxplays494@gmail.com"; // YOUR EMAIL
 
-let attempts = 0;
-const MAX_ATTEMPTS = 5;
-
+// ---------- INIT FIREBASE ----------
 let app, auth, db;
-
-try {
+try{
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
     db = getFirestore(app);
-} catch(e){
-    document.body.innerHTML = `<h1 style="color:#f44">Firebase failed to initialize</h1><p>${e.message}</p>`;
+}catch(e){
+    document.body.innerHTML = `<h1 style="color:#f44">Firebase init failed</h1><p>${e.message}</p>`;
 }
 
-// ---------------- LOGIN SYSTEM ----------------
-window.login = async function(){
-    if(!auth){
-        alert("Auth not initialized!");
-        return;
-    }
+// ---------- LOGIN ----------
+let attempts = 0;
+const MAX_ATTEMPTS = 5;
 
+window.login = async function(){
     const emailInput = (document.getElementById("email").value || "").trim().toLowerCase();
     const passwordInput = document.getElementById("password").value;
+    const errorDiv = document.getElementById("errorMsg");
 
     if(!emailInput || !passwordInput){
-        document.getElementById("errorMsg").innerText = "Enter both email and password!";
+        errorDiv.textContent = "Enter both email and password!";
         return;
     }
 
-    try {
-        const userCredential = await signInWithEmailAndPassword(auth, emailInput, passwordInput);
+    try{
+        const userCredential = await signInWithEmailAndPassword(auth,emailInput,passwordInput);
         const user = userCredential.user;
 
-        if(!user || !user.email){
-            throw new Error("Invalid Firebase user object");
+        if(!user || user.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()){
+            throw new Error("Not admin");
         }
 
-        if(user.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()){
-            attempts++;
-            handleFailedAttempt();
-            return;
-        }
-
-        // SUCCESS → show admin panel
+        // Success
         document.getElementById("loginBox").classList.add("hidden");
         document.getElementById("adminPanel").classList.remove("hidden");
-        loadVerifiedMembers();
+        loadUsers();
 
-    } catch(err){
+    }catch(err){
         attempts++;
-        handleFailedAttempt(err.message || "Unknown error");
+        const remaining = MAX_ATTEMPTS - attempts;
+        if(remaining<=0){
+            document.body.innerHTML = document.getElementById("noAccess").innerHTML;
+        }else{
+            errorDiv.textContent = `Incorrect login! ${remaining} attempt(s) remaining. (${err.message})`;
+        }
     }
 }
 
-function handleFailedAttempt(msg){
-    const remaining = MAX_ATTEMPTS - attempts;
-    if(remaining <= 0){
-        document.body.innerHTML = document.getElementById("noAccess").innerHTML;
-    } else {
-        document.getElementById("errorMsg").innerText = 
-            `Incorrect login! ${remaining} attempt(s) remaining.${msg ? " ("+msg+")" : ""}`;
+// ---------- LOAD USERS ----------
+async function loadUsers(){
+    const userList = document.getElementById("userList");
+    userList.innerHTML = "Loading...";
+    try{
+        const querySnapshot = await getDocs(collection(db,"users"));
+        userList.innerHTML = "";
+        querySnapshot.forEach(docSnap=>{
+            try{
+                const data = docSnap.data();
+                const div = document.createElement("div");
+                div.className = "userItem";
+                div.innerHTML = `
+                    <span>${data.username} ${data.banned ? "(BANNED)" : ""}</span>
+                    <button onclick="banUser('${docSnap.id}')">Ban</button>
+                `;
+                userList.appendChild(div);
+            }catch(inner){ console.warn("User render error:",inner); }
+        });
+    }catch(e){
+        userList.innerHTML = "<p style='color:#f44'>Failed to load users</p>";
+        console.error(e);
     }
 }
 
-// ---------------- LOAD VERIFIED MEMBERS ----------------
-async function loadVerifiedMembers(){
-    if(!db){
-        document.getElementById("list").innerHTML = "<p style='color:#f44'>Firestore not initialized</p>";
-        return;
-    }
+// ---------- BAN USER ----------
+window.banUser = async function(userId){
+    if(!userId) return;
+    try{
+        const msg = prompt("Enter ban message:");
+        if(msg===null) return; // canceled
 
-    const list = document.getElementById("list");
-    list.innerHTML = "Loading...";
-
-    try {
-        const querySnapshot = await getDocs(collection(db, "verifiedEmails"));
-
-        if(!querySnapshot || querySnapshot.empty){
-            list.innerHTML = "<p>No verified members yet.</p>";
+        const duration = prompt("Ban duration in hours? (e.g., 24)");
+        if(duration===null) return;
+        const hours = parseFloat(duration);
+        if(isNaN(hours) || hours<=0){
+            alert("Invalid duration");
             return;
         }
 
-        list.innerHTML = "";
-        querySnapshot.forEach(d=>{
-            try{
-                const div = document.createElement("div");
-                div.className = "emailItem";
-                div.innerHTML = `
-                    <span>${d.data()?.email || "Unknown"}</span>
-                    <button onclick="deleteMember('${d.id}')">Delete</button>
-                `;
-                list.appendChild(div);
-            } catch(inner){
-                console.warn("Error rendering member:", inner);
-            }
+        const expiry = new Date();
+        expiry.setHours(expiry.getHours()+hours);
+
+        await updateDoc(doc(db,"users",userId),{
+            banned:true,
+            banMessage: msg,
+            banExpiry: expiry
         });
-    } catch(err){
-        list.innerHTML = `<p style="color:#f44">Error loading members: ${err.message}</p>`;
+
+        alert("User banned successfully!");
+        loadUsers();
+    }catch(e){
+        alert("Ban failed: "+(e.message||"Unknown error"));
+        console.error(e);
     }
 }
 
-window.deleteMember = async function(id){
-    if(!db) return;
-    if(!id) return;
-    try {
-        if(confirm("Delete this verified member?")){
-            await deleteDoc(doc(db,"verifiedEmails",id));
-            loadVerifiedMembers();
-        }
-    } catch(e){
-        alert("Delete failed: " + (e.message || "Unknown error"));
-    }
-}
-
-// ---------------- AUTO LOGIN CHECK ----------------
+// ---------- AUTO LOGIN CHECK ----------
 try{
-    onAuthStateChanged(auth, user=>{
+    onAuthStateChanged(auth,user=>{
         if(!user) return;
-
-        if(!user.email || user.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()){
+        if(user.email.toLowerCase()!==ADMIN_EMAIL.toLowerCase()){
             document.body.innerHTML = document.getElementById("noAccess").innerHTML;
             return;
         }
-
         document.getElementById("loginBox").classList.add("hidden");
         document.getElementById("adminPanel").classList.remove("hidden");
-        loadVerifiedMembers();
+        loadUsers();
     });
-} catch(e){
-    console.error("Auth state listener failed:", e);
-}
-</script>
+}catch(e){ console.error("Auth listener failed:",e); }
 
+</script>
 </body>
 </html>
