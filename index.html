@@ -164,6 +164,27 @@ footer {
     overflow: auto;
     width: 250px;
 }
+
+/* USERNAME PROMPT */
+#usernamePrompt {
+    display: none;
+    position: fixed;
+    top:0; left:0; right:0; bottom:0;
+    background: rgba(0,0,0,0.95);
+    color: white;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#usernamePrompt input {
+    padding: 10px;
+    font-size: 16px;
+    margin: 5px;
+    width: 200px;
+}
 </style>
 </head>
 
@@ -201,6 +222,14 @@ See my friend Isabella's site!
 <ul id="verifiedList"></ul>
 </div>
 
+<!-- USERNAME PROMPT -->
+<div id="usernamePrompt">
+    <h2>Enter a Username</h2>
+    <input type="text" id="usernameInput" placeholder="Pick a unique name">
+    <button onclick="submitUsername()">Submit</button>
+    <p id="usernameError" style="color:#f44"></p>
+</div>
+
 <script>
 /* Mobile toggle */
 document.getElementById("mobilebtn").onclick = () => {
@@ -211,21 +240,14 @@ document.getElementById("mobilebtn").onclick = () => {
 for(let i=0;i<60;i++){
     let s=document.createElement('div');
     s.className='sparkle';
-    s.style.cssText=`
-        left:${Math.random()*innerWidth}px;
-        top:${Math.random()*innerHeight}px;
-        width:${3+Math.random()*4}px;
-        height:${3+Math.random()*4}px;
-    `;
+    s.style.cssText=`left:${Math.random()*innerWidth}px;top:${Math.random()*innerHeight}px;width:${3+Math.random()*4}px;height:${3+Math.random()*4}px;`;
     document.body.appendChild(s);
 }
 </script>
 
-<!-- FIREBASE -->
 <script type="module">
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, getDocs, setDoc, doc, query, where, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC39mabdSddFKYBfPeFiqXEH3vRuW0hBOg",
@@ -239,30 +261,86 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// Show verified members popup
 window.toggleVerified = async function(){
+    const panel = document.getElementById("verifiedPanel");
+    if(panel.style.display==="block"){ panel.style.display="none"; return; }
+    panel.style.display="block";
 
-    let panel = document.getElementById("verifiedPanel");
+    const list = document.getElementById("verifiedList");
+    list.innerHTML = "Loading...";
+    try {
+        const querySnapshot = await getDocs(collection(db,"verifiedEmails"));
+        list.innerHTML = "";
+        querySnapshot.forEach(doc=>{
+            const li = document.createElement("li");
+            li.textContent = doc.data()?.email || "null@null.com";
+            list.appendChild(li);
+        });
+    } catch(e){
+        list.innerHTML = "<li>Error loading verified members</li>";
+        console.error(e);
+    }
+}
 
-    if(panel.style.display === "block"){
-        panel.style.display = "none";
+// ---------------- USERNAME + BAN CHECK ----------------
+let currentUserId = localStorage.getItem("userId");
+let username = localStorage.getItem("username");
+
+async function checkUsername(){
+    if(!username){
+        document.getElementById("usernamePrompt").style.display="flex";
         return;
     }
 
-    panel.style.display = "block";
-
-    let list = document.getElementById("verifiedList");
-    list.innerHTML = "Loading...";
-
-    const querySnapshot = await getDocs(collection(db, "verifiedEmails"));
-
-    list.innerHTML = "";
-
-    querySnapshot.forEach((doc)=>{
-        let li = document.createElement("li");
-        li.textContent = doc.data().email;
-        list.appendChild(li);
-    });
+    // check banned status
+    try {
+        const userDoc = await getDoc(doc(db,"users",currentUserId));
+        const data = userDoc.exists() ? userDoc.data() : null;
+        if(data?.banned){
+            alert(`You are banned!\nMessage: ${data.banMessage}\nExpires: ${data.banExpiry?.toDate()}`);
+            document.body.innerHTML = "<h1>404</h1><p>Page not found.</p>";
+        }
+    } catch(e){
+        console.error("Error checking ban:", e);
+    }
 }
+
+window.submitUsername = async function(){
+    const input = document.getElementById("usernameInput").value.trim();
+    const error = document.getElementById("usernameError");
+    if(!input){ error.textContent="Username cannot be empty!"; return; }
+
+    // check uniqueness
+    try {
+        const q = query(collection(db,"users"), where("username","==",input));
+        const snapshot = await getDocs(q);
+        if(!snapshot.empty){
+            error.textContent="Username already taken!";
+            return;
+        }
+
+        // store username in Firestore, email=null if not verified
+        currentUserId = crypto.randomUUID();
+        await setDoc(doc(db,"users",currentUserId),{
+            username: input,
+            email: "null@null.com",
+            banned: false,
+            banMessage: "",
+            banExpiry: null
+        });
+        localStorage.setItem("userId",currentUserId);
+        localStorage.setItem("username",input);
+        document.getElementById("usernamePrompt").style.display="none";
+
+    } catch(e){
+        console.error("Error saving username:", e);
+        error.textContent="Failed to save username, try again.";
+    }
+}
+
+// Run on page load
+checkUsername();
 </script>
 
 </body>
