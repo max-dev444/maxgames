@@ -41,13 +41,18 @@ button {
 </head>
 <body>
 
-<h1 id="title">Checking Access...</h1>
+<h1 id="title">Admin Login</h1>
 
-<div id="loginBox" class="hidden">
+<div id="loginBox">
     <input type="email" id="email" placeholder="Admin Email"><br>
     <input type="password" id="password" placeholder="Password"><br>
     <button onclick="login()">Login</button>
     <div id="errorMsg"></div>
+</div>
+
+<div id="adminPanel" class="hidden">
+    <h2>Admin Panel</h2>
+    <p>Access granted! You’ll see verified members in Step 3.</p>
 </div>
 
 <div id="noAccess" class="hidden">
@@ -55,16 +60,11 @@ button {
     <p>Page not found.</p>
 </div>
 
-<div id="adminPanel" class="hidden">
-    <h2>Admin Panel</h2>
-    <p>Access granted! You’ll see the verified members list here in Step 3.</p>
-</div>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-// YOUR FIREBASE CONFIG
+// Firebase Config
 const firebaseConfig = {
   apiKey:"AIzaSyC39mabdSddFKYBfPeFiqXEH3vRuW0hBOg",
   authDomain:"verify-2f72e.firebaseapp.com",
@@ -74,41 +74,61 @@ const firebaseConfig = {
   appId:"1:735887684811:web:6d6275b949569d0f07974e"
 };
 
-// REPLACE THIS with YOUR ADMIN EMAIL
-const ADMIN_EMAIL = "MAXPLAYS494@GMAIL.COM";
+// Your admin email
+const ADMIN_EMAIL = "maxplays494@gmail.com"; // lowercase
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Show login box
-document.getElementById("title").innerText = "Admin Login";
-document.getElementById("loginBox").classList.remove("hidden");
+let attempts = 0;
+const MAX_ATTEMPTS = 5;
 
 // Login function
 window.login = async function() {
-    const email = document.getElementById("email").value.trim();
+    const email = document.getElementById("email").value.trim().toLowerCase();
     const password = document.getElementById("password").value;
 
     try {
-        await signInWithEmailAndPassword(auth, email, password);
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        if(user.email.toLowerCase() !== ADMIN_EMAIL){
+            attempts++;
+            handleFailedAttempt();
+            return;
+        }
+
+        // success
+        document.getElementById("loginBox").classList.add("hidden");
+        document.getElementById("adminPanel").classList.remove("hidden");
+        document.getElementById("errorMsg").innerText = "";
     } catch(err) {
-        document.getElementById("errorMsg").innerText = "Login failed: " + err.message;
+        attempts++;
+        handleFailedAttempt();
     }
 };
 
-// Check auth state
-onAuthStateChanged(auth, user => {
-    if(!user) return; // not logged in
+function handleFailedAttempt(){
+    const remaining = MAX_ATTEMPTS - attempts;
+    if(remaining <= 0){
+        // permanently show fake 404
+        document.body.innerHTML = document.getElementById("noAccess").innerHTML;
+    } else {
+        document.getElementById("errorMsg").innerText = 
+            `Incorrect login! ${remaining} attempt(s) remaining.`;
+    }
+}
 
-    if(user.email !== ADMIN_EMAIL){
-        // Not admin → fake 404
+// Firebase Auth state check (just in case)
+onAuthStateChanged(auth, user => {
+    if(!user) return;
+
+    if(user.email.toLowerCase() !== ADMIN_EMAIL){
         document.body.innerHTML = document.getElementById("noAccess").innerHTML;
         return;
     }
 
-    // Admin → show panel
     document.getElementById("loginBox").classList.add("hidden");
-    document.getElementById("title").innerText = "Admin Panel";
     document.getElementById("adminPanel").classList.remove("hidden");
 });
 </script>
