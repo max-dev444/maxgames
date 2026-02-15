@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Login</title>
+<title>Admin Panel</title>
 <style>
 body {
     font-family: Verdana, sans-serif;
@@ -29,13 +29,24 @@ button {
     cursor: pointer;
 }
 
-.hidden {
-    display: none;
-}
+.hidden { display: none; }
 
 #errorMsg {
     color: #f44;
     margin-top: 10px;
+}
+
+#list {
+    margin-top: 20px;
+    width: 320px;
+}
+.emailItem {
+    display: flex;
+    justify-content: space-between;
+    background: #222;
+    padding: 8px;
+    margin-bottom: 6px;
+    border-radius: 6px;
 }
 </style>
 </head>
@@ -50,54 +61,11 @@ button {
     <div id="errorMsg"></div>
 </div>
 
-<!-- This replaces the content inside <div id="adminPanel"> in admin.html -->
-
 <div id="adminPanel" class="hidden">
     <h2>Admin Panel</h2>
-    <p>Access granted! You can view and manage verified members below:</p>
+    <p>Access granted! Verified members:</p>
     <div id="list"></div>
 </div>
-
-<script type="module">
-import { getFirestore, collection, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-const db = getFirestore(app);
-
-async function loadVerifiedMembers(){
-    const list = document.getElementById("list");
-    list.innerHTML = "Loading...";
-
-    const querySnapshot = await getDocs(collection(db, "verifiedEmails"));
-
-    list.innerHTML = "";
-    querySnapshot.forEach(d=>{
-        const div = document.createElement("div");
-        div.style.display = "flex";
-        div.style.justifyContent = "space-between";
-        div.style.background = "#222";
-        div.style.padding = "8px";
-        div.style.marginBottom = "6px";
-        div.style.borderRadius = "6px";
-
-        div.innerHTML = `
-            <span>${d.data().email}</span>
-            <button onclick="deleteMember('${d.id}')">Delete</button>
-        `;
-        list.appendChild(div);
-    });
-}
-
-window.deleteMember = async function(id){
-    if(confirm("Delete this verified member?")) {
-        await deleteDoc(doc(db,"verifiedEmails",id));
-        loadVerifiedMembers();
-    }
-}
-
-// Load members when admin panel shows
-loadVerifiedMembers();
-</script>
- 
 
 <div id="noAccess" class="hidden">
     <h1>404</h1>
@@ -107,8 +75,9 @@ loadVerifiedMembers();
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// Firebase Config
+// ---------------- FIREBASE CONFIG ----------------
 const firebaseConfig = {
   apiKey:"AIzaSyC39mabdSddFKYBfPeFiqXEH3vRuW0hBOg",
   authDomain:"verify-2f72e.firebaseapp.com",
@@ -118,63 +87,138 @@ const firebaseConfig = {
   appId:"1:735887684811:web:6d6275b949569d0f07974e"
 };
 
-// Your admin email
-const ADMIN_EMAIL = "maxplays494@gmail.com"; // lowercase
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+const ADMIN_EMAIL = "maxplays494@gmail.com"; // YOUR EMAIL
 
 let attempts = 0;
 const MAX_ATTEMPTS = 5;
 
-// Login function
-window.login = async function() {
-    const email = document.getElementById("email").value.trim().toLowerCase();
-    const password = document.getElementById("password").value;
+let app, auth, db;
+
+try {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+} catch(e){
+    document.body.innerHTML = `<h1 style="color:#f44">Firebase failed to initialize</h1><p>${e.message}</p>`;
+}
+
+// ---------------- LOGIN SYSTEM ----------------
+window.login = async function(){
+    if(!auth){
+        alert("Auth not initialized!");
+        return;
+    }
+
+    const emailInput = (document.getElementById("email").value || "").trim().toLowerCase();
+    const passwordInput = document.getElementById("password").value;
+
+    if(!emailInput || !passwordInput){
+        document.getElementById("errorMsg").innerText = "Enter both email and password!";
+        return;
+    }
 
     try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const userCredential = await signInWithEmailAndPassword(auth, emailInput, passwordInput);
         const user = userCredential.user;
 
-        if(user.email.toLowerCase() !== ADMIN_EMAIL){
+        if(!user || !user.email){
+            throw new Error("Invalid Firebase user object");
+        }
+
+        if(user.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()){
             attempts++;
             handleFailedAttempt();
             return;
         }
 
-        // success
+        // SUCCESS → show admin panel
         document.getElementById("loginBox").classList.add("hidden");
         document.getElementById("adminPanel").classList.remove("hidden");
-        document.getElementById("errorMsg").innerText = "";
-    } catch(err) {
-        attempts++;
-        handleFailedAttempt();
-    }
-};
+        loadVerifiedMembers();
 
-function handleFailedAttempt(){
-    const remaining = MAX_ATTEMPTS - attempts;
-    if(remaining <= 0){
-        // permanently show fake 404
-        document.body.innerHTML = document.getElementById("noAccess").innerHTML;
-    } else {
-        document.getElementById("errorMsg").innerText = 
-            `Incorrect login! ${remaining} attempt(s) remaining.`;
+    } catch(err){
+        attempts++;
+        handleFailedAttempt(err.message || "Unknown error");
     }
 }
 
-// Firebase Auth state check (just in case)
-onAuthStateChanged(auth, user => {
-    if(!user) return;
-
-    if(user.email.toLowerCase() !== ADMIN_EMAIL){
+function handleFailedAttempt(msg){
+    const remaining = MAX_ATTEMPTS - attempts;
+    if(remaining <= 0){
         document.body.innerHTML = document.getElementById("noAccess").innerHTML;
+    } else {
+        document.getElementById("errorMsg").innerText = 
+            `Incorrect login! ${remaining} attempt(s) remaining.${msg ? " ("+msg+")" : ""}`;
+    }
+}
+
+// ---------------- LOAD VERIFIED MEMBERS ----------------
+async function loadVerifiedMembers(){
+    if(!db){
+        document.getElementById("list").innerHTML = "<p style='color:#f44'>Firestore not initialized</p>";
         return;
     }
 
-    document.getElementById("loginBox").classList.add("hidden");
-    document.getElementById("adminPanel").classList.remove("hidden");
-});
+    const list = document.getElementById("list");
+    list.innerHTML = "Loading...";
+
+    try {
+        const querySnapshot = await getDocs(collection(db, "verifiedEmails"));
+
+        if(!querySnapshot || querySnapshot.empty){
+            list.innerHTML = "<p>No verified members yet.</p>";
+            return;
+        }
+
+        list.innerHTML = "";
+        querySnapshot.forEach(d=>{
+            try{
+                const div = document.createElement("div");
+                div.className = "emailItem";
+                div.innerHTML = `
+                    <span>${d.data()?.email || "Unknown"}</span>
+                    <button onclick="deleteMember('${d.id}')">Delete</button>
+                `;
+                list.appendChild(div);
+            } catch(inner){
+                console.warn("Error rendering member:", inner);
+            }
+        });
+    } catch(err){
+        list.innerHTML = `<p style="color:#f44">Error loading members: ${err.message}</p>`;
+    }
+}
+
+window.deleteMember = async function(id){
+    if(!db) return;
+    if(!id) return;
+    try {
+        if(confirm("Delete this verified member?")){
+            await deleteDoc(doc(db,"verifiedEmails",id));
+            loadVerifiedMembers();
+        }
+    } catch(e){
+        alert("Delete failed: " + (e.message || "Unknown error"));
+    }
+}
+
+// ---------------- AUTO LOGIN CHECK ----------------
+try{
+    onAuthStateChanged(auth, user=>{
+        if(!user) return;
+
+        if(!user.email || user.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()){
+            document.body.innerHTML = document.getElementById("noAccess").innerHTML;
+            return;
+        }
+
+        document.getElementById("loginBox").classList.add("hidden");
+        document.getElementById("adminPanel").classList.remove("hidden");
+        loadVerifiedMembers();
+    });
+} catch(e){
+    console.error("Auth state listener failed:", e);
+}
 </script>
 
 </body>
