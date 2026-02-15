@@ -64,14 +64,6 @@ footer { margin-top: auto; margin-bottom: 20px; color: #888; }
 
 /* VERIFIED PANEL */
 #verifiedPanel { display: none; position: fixed; bottom: 40px; right: 20px; background: #222; padding: 15px; border-radius: 10px; max-height: 250px; overflow: auto; width: 250px; }
-
-/* USERNAME PROMPT */
-#usernamePrompt {
-    display: none; position: fixed; top:0; left:0; right:0; bottom:0;
-    background: rgba(0,0,0,0.95); color: white; z-index: 9999;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-}
-#usernamePrompt input { padding: 10px; font-size: 16px; margin: 5px; width: 200px; }
 </style>
 </head>
 
@@ -107,40 +99,55 @@ footer { margin-top: auto; margin-bottom: 20px; color: #888; }
 
 <script>
 document.getElementById("mobilebtn").onclick = () => document.body.classList.toggle("mobile-mode");
-for(let i=0;i<60;i++){let s=document.createElement('div');s.className='sparkle';s.style.cssText=`left:${Math.random()*innerWidth}px;top:${Math.random()*innerHeight}px;width:${3+Math.random()*4}px;height:${3+Math.random()*4}px;`;document.body.appendChild(s);}
+
+// sparkle animation
+for(let i=0;i<60;i++){
+    let s=document.createElement('div');
+    s.className='sparkle';
+    s.style.cssText=`left:${Math.random()*innerWidth}px;top:${Math.random()*innerHeight}px;width:${3+Math.random()*4}px;height:${3+Math.random()*4}px;`;
+    document.body.appendChild(s);
+}
 </script>
 
+<!-- Firebase Verified Members Fix -->
 <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
-window.toggleVerified = async function(){
+window.toggleVerified = async function() {
     const panel = document.getElementById("verifiedPanel");
-    if(panel.style.display==="block"){ panel.style.display="none"; return; }
-    panel.style.display="block";
+    if (panel.style.display === "block") {
+        panel.style.display = "none";
+        return;
+    }
+    panel.style.display = "block";
     const list = document.getElementById("verifiedList");
     list.innerHTML = "Loading...";
 
-    try{
-        // Old Firebase verifiedEmails remains separate
+    try {
         const app2 = initializeApp({
             apiKey: "AIzaSyC39mabdSddFKYBfPeFiqXEH3vRuW0hBOg",
             authDomain: "verify-2f72e.firebaseapp.com",
             projectId: "verify-2f72e",
-            storageBucket: "verify-2f72e.firebasestorage.app",
+            storageBucket: "verify-2f72e.appspot.com",
             messagingSenderId: "735887684811",
-            appId: "1:735887684811:web:6d6275b949569d0f07974e"
-        },"verifiedApp");
+            appId: "1:735887684811:web:6d6275b949569d0f07974"
+        }, "verifiedApp");
+
         const db2 = getFirestore(app2);
-        const snapshot = await getDocs(collection(db2,"verifiedEmails"));
+        const snapshot = await getDocs(collection(db2, "verifiedEmails"));
+
         list.innerHTML = "";
-        snapshot.forEach(doc=>{
+        snapshot.forEach(doc => {
             const li = document.createElement("li");
             li.textContent = doc.data()?.email || "null@null.com";
             list.appendChild(li);
         });
-    } catch(e){ console.error(e); list.innerHTML="<li>Error loading verified members</li>"; }
+    } catch (e) {
+        console.error(e);
+        list.innerHTML = "<li>Error loading verified members</li>";
+    }
 };
-
-checkUsername();
 </script>
 
 </body>
