@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Verification Start</title>
+
+<style>
+body{
+    font-family:Verdana;
+    background:#111;
+    color:white;
+    text-align:center;
+    padding-top:60px;
+}
+
+button{
+    padding:12px 24px;
+    font-size:18px;
+    cursor:pointer;
+}
+
+#captchaBox{
+    font-size:34px;
+    letter-spacing:6px;
+    background:#222;
+    display:inline-block;
+    padding:18px;
+    border-radius:10px;
+    margin-top:20px;
+    user-select:none;
+    font-family:monospace;
+    transform:rotate(-3deg);
+}
+</style>
+</head>
+
+<body>
+
+<h1>Become a Verified Member!</h1>
+
+<div id="step1">
+<button onclick="startCaptcha()">Next</button>
+</div>
+
+<div id="step2" style="display:none;">
+<p>Type the text you see:</p>
+
+<div id="captchaBox"></div>
+
+<br><br>
+<input id="captchaInput">
+<br><br>
+<button onclick="checkCaptcha()">Submit</button>
+</div>
+
+<script>
+let currentCaptcha="";
+
+function randomCaptcha(){
+    const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let result="";
+    for(let i=0;i<6;i++){
+        result+=chars[Math.floor(Math.random()*chars.length)];
+    }
+    return result;
+}
+
+function startCaptcha(){
+    document.getElementById("step1").style.display="none";
+    document.getElementById("step2").style.display="block";
+    generateCaptcha();
+}
+
+function generateCaptcha(){
+    currentCaptcha=randomCaptcha();
+    document.getElementById("captchaBox").textContent=currentCaptcha;
+}
+
+function checkCaptcha(){
+    let input=document.getElementById("captchaInput").value.trim().toUpperCase();
+
+    if(input===currentCaptcha){
+        window.location.href="verifyend.html";
+    } else {
+        alert("Wrong captcha! Try again.");
+        generateCaptcha();
+        document.getElementById("captchaInput").value="";
+    }
+}
+</script>
+
+</body>
+</html>
