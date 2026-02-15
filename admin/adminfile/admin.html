@@ -5,49 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Panel</title>
 <style>
-body {
-    font-family: Verdana, sans-serif;
-    background: #111;
-    color: white;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
-    text-align: center;
-}
-
-input, select {
-    padding: 8px;
-    margin: 5px;
-    font-size: 14px;
-}
-
-button {
-    padding: 6px 12px;
-    font-size: 14px;
-    cursor: pointer;
-}
-
-.hidden { display: none; }
-
-#errorMsg {
-    color: #f44;
-    margin-top: 10px;
-}
-
-#userList {
-    margin-top: 20px;
-    width: 400px;
-}
-
-.userItem {
-    display: flex;
-    justify-content: space-between;
-    background: #222;
-    padding: 8px;
-    margin-bottom: 6px;
-    border-radius: 6px;
-}
+body { font-family: Verdana,sans-serif; background:#111; color:white; display:flex; flex-direction:column; align-items:center; min-height:100vh; text-align:center; }
+input, select { padding:8px; margin:5px; font-size:14px; }
+button { padding:6px 12px; font-size:14px; cursor:pointer; }
+.hidden { display:none; }
+#errorMsg { color:#f44; margin-top:10px; }
+#userList { margin-top:20px; width:400px; }
+.userItem { display:flex; justify-content:space-between; background:#222; padding:8px; margin-bottom:6px; border-radius:6px; }
 </style>
 </head>
 <body>
@@ -75,24 +39,26 @@ button {
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, getDocs, doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// ---------- CONFIG ----------
-const firebaseConfig = {
-  apiKey:"AIzaSyC39mabdSddFKYBfPeFiqXEH3vRuW0hBOg",
-  authDomain:"verify-2f72e.firebaseapp.com",
-  projectId:"verify-2f72e",
-  storageBucket:"verify-2f72e.firebasestorage.app",
-  messagingSenderId:"735887684811",
-  appId:"1:735887684811:web:6d6275b949569d0f07974e"
+// ---------- USERS FIREBASE CONFIG ----------
+const usersFirebaseConfig = {
+  apiKey:"AIzaSyAbeLIiGVBJ0MKNmR1OLdRiffIXQJjnwmY",
+  authDomain:"firestore-maxuser.firebaseapp.com",
+  projectId:"firestore-maxuser",
+  storageBucket:"firestore-maxuser.firebasestorage.app",
+  messagingSenderId:"258896503234",
+  appId:"1:258896503234:web:7f1d9c629a1a450419765b"
 };
 
-const ADMIN_EMAIL = "maxplays494@gmail.com"; // YOUR EMAIL
+const ADMIN_EMAIL = "maxplays494@gmail.com";
+const MAX_ATTEMPTS = 5;
+let attempts = 0;
 
 // ---------- INIT FIREBASE ----------
 let app, auth, db;
 try{
-    app = initializeApp(firebaseConfig);
+    app = initializeApp(usersFirebaseConfig,"usersApp");
     auth = getAuth(app);
     db = getFirestore(app);
 }catch(e){
@@ -100,26 +66,17 @@ try{
 }
 
 // ---------- LOGIN ----------
-let attempts = 0;
-const MAX_ATTEMPTS = 5;
-
 window.login = async function(){
     const emailInput = (document.getElementById("email").value || "").trim().toLowerCase();
     const passwordInput = document.getElementById("password").value;
     const errorDiv = document.getElementById("errorMsg");
 
-    if(!emailInput || !passwordInput){
-        errorDiv.textContent = "Enter both email and password!";
-        return;
-    }
+    if(!emailInput || !passwordInput){ errorDiv.textContent = "Enter both email and password!"; return; }
 
     try{
         const userCredential = await signInWithEmailAndPassword(auth,emailInput,passwordInput);
         const user = userCredential.user;
-
-        if(!user || user.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()){
-            throw new Error("Not admin");
-        }
+        if(!user || user.email.toLowerCase()!==ADMIN_EMAIL.toLowerCase()) throw new Error("Not admin");
 
         // Success
         document.getElementById("loginBox").classList.add("hidden");
@@ -129,11 +86,8 @@ window.login = async function(){
     }catch(err){
         attempts++;
         const remaining = MAX_ATTEMPTS - attempts;
-        if(remaining<=0){
-            document.body.innerHTML = document.getElementById("noAccess").innerHTML;
-        }else{
-            errorDiv.textContent = `Incorrect login! ${remaining} attempt(s) remaining. (${err.message})`;
-        }
+        if(remaining<=0){ document.body.innerHTML = document.getElementById("noAccess").innerHTML; }
+        else { errorDiv.textContent = `Incorrect login! ${remaining} attempt(s) remaining. (${err.message})`; }
     }
 }
 
@@ -141,6 +95,7 @@ window.login = async function(){
 async function loadUsers(){
     const userList = document.getElementById("userList");
     userList.innerHTML = "Loading...";
+
     try{
         const querySnapshot = await getDocs(collection(db,"users"));
         userList.innerHTML = "";
@@ -149,10 +104,8 @@ async function loadUsers(){
                 const data = docSnap.data();
                 const div = document.createElement("div");
                 div.className = "userItem";
-                div.innerHTML = `
-                    <span>${data.username} ${data.banned ? "(BANNED)" : ""}</span>
-                    <button onclick="banUser('${docSnap.id}')">Ban</button>
-                `;
+                const status = data.banned ? "(BANNED)" : "";
+                div.innerHTML = `<span>${data.username} ${status}</span><button onclick="banUser('${docSnap.id}')">Ban</button>`;
                 userList.appendChild(div);
             }catch(inner){ console.warn("User render error:",inner); }
         });
@@ -166,16 +119,10 @@ async function loadUsers(){
 window.banUser = async function(userId){
     if(!userId) return;
     try{
-        const msg = prompt("Enter ban message:");
-        if(msg===null) return; // canceled
-
-        const duration = prompt("Ban duration in hours? (e.g., 24)");
-        if(duration===null) return;
+        const msg = prompt("Enter ban message:") || "";
+        const duration = prompt("Ban duration in hours? (e.g., 24)") || "0";
         const hours = parseFloat(duration);
-        if(isNaN(hours) || hours<=0){
-            alert("Invalid duration");
-            return;
-        }
+        if(isNaN(hours) || hours<=0){ alert("Invalid duration"); return; }
 
         const expiry = new Date();
         expiry.setHours(expiry.getHours()+hours);
@@ -185,23 +132,16 @@ window.banUser = async function(userId){
             banMessage: msg,
             banExpiry: expiry
         });
-
         alert("User banned successfully!");
         loadUsers();
-    }catch(e){
-        alert("Ban failed: "+(e.message||"Unknown error"));
-        console.error(e);
-    }
+    }catch(e){ alert("Ban failed: "+(e.message||"Unknown error")); console.error(e); }
 }
 
 // ---------- AUTO LOGIN CHECK ----------
 try{
     onAuthStateChanged(auth,user=>{
         if(!user) return;
-        if(user.email.toLowerCase()!==ADMIN_EMAIL.toLowerCase()){
-            document.body.innerHTML = document.getElementById("noAccess").innerHTML;
-            return;
-        }
+        if(user.email.toLowerCase()!==ADMIN_EMAIL.toLowerCase()){ document.body.innerHTML = document.getElementById("noAccess").innerHTML; return; }
         document.getElementById("loginBox").classList.add("hidden");
         document.getElementById("adminPanel").classList.remove("hidden");
         loadUsers();
