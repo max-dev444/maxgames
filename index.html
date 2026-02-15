@@ -105,82 +105,13 @@ footer { margin-top: auto; margin-bottom: 20px; color: #888; }
 <ul id="verifiedList"></ul>
 </div>
 
-<div id="usernamePrompt">
-    <h2>Enter a Username</h2>
-    <input type="text" id="usernameInput" placeholder="Pick a unique name">
-    <button onclick="submitUsername()">Submit</button>
-    <p id="usernameError" style="color:#f44"></p>
-</div>
-
 <script>
 document.getElementById("mobilebtn").onclick = () => document.body.classList.toggle("mobile-mode");
 for(let i=0;i<60;i++){let s=document.createElement('div');s.className='sparkle';s.style.cssText=`left:${Math.random()*innerWidth}px;top:${Math.random()*innerHeight}px;width:${3+Math.random()*4}px;height:${3+Math.random()*4}px;`;document.body.appendChild(s);}
 </script>
 
 <script type="module">
-// NEW USERS FIREBASE (firestore-maxuser)
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, getDocs, setDoc, doc, query, where, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// USERS FIREBASE CONFIG
-const usersFirebaseConfig = {
-  apiKey: "AIzaSyAbeLIiGVBJ0MKNmR1OLdRiffIXQJjnwmY",
-  authDomain: "firestore-maxuser.firebaseapp.com",
-  projectId: "firestore-maxuser",
-  storageBucket: "firestore-maxuser.firebasestorage.app",
-  messagingSenderId: "258896503234",
-  appId: "1:258896503234:web:7f1d9c629a1a450419765b"
-};
-
-const usersApp = initializeApp(usersFirebaseConfig,"usersApp");
-const usersDB = getFirestore(usersApp);
-
-let currentUserId = localStorage.getItem("userId");
-let username = localStorage.getItem("username");
-
-// ---------------- USERNAME CHECK + BAN ----------------
-async function checkUsername(){
-    if(!username){ document.getElementById("usernamePrompt").style.display="flex"; return; }
-
-    try{
-        const userDoc = await getDoc(doc(usersDB,"users",currentUserId));
-        const data = userDoc.exists() ? userDoc.data() : null;
-        if(data?.banned){
-            alert(`You are banned!\nMessage: ${data.banMessage}\nExpires: ${data.banExpiry?.toDate()}`);
-            document.body.innerHTML = "<h1>404</h1><p>Page not found.</p>";
-        }
-    } catch(e){ console.error("Ban check error:",e); }
-}
-
-window.submitUsername = async function(){
-    const input = document.getElementById("usernameInput").value.trim();
-    const error = document.getElementById("usernameError");
-    if(!input){ error.textContent="Username cannot be empty!"; return; }
-
-    try{
-        // Check uniqueness
-        const q = query(collection(usersDB,"users"),where("username","==",input));
-        const snapshot = await getDocs(q);
-        if(!snapshot.empty){ error.textContent="Username already taken!"; return; }
-
-        // Save username
-        currentUserId = crypto.randomUUID();
-        await setDoc(doc(usersDB,"users",currentUserId),{
-            username: input,
-            email: "null@null.com",
-            banned: false,
-            banMessage: "",
-            banExpiry: null
-        });
-        localStorage.setItem("userId",currentUserId);
-        localStorage.setItem("username",input);
-        username = input;
-        document.getElementById("usernamePrompt").style.display="none";
-
-    } catch(e){ console.error("Save username error:",e); error.textContent="Failed to save username, try again."; }
-};
-
-// ---------------- VERIFIED MEMBERS POPUP ----------------
 window.toggleVerified = async function(){
     const panel = document.getElementById("verifiedPanel");
     if(panel.style.display==="block"){ panel.style.display="none"; return; }
