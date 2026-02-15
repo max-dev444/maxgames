@@ -121,9 +121,7 @@ footer {
     opacity: .7;
 }
 
-#subbtn:hover { opacity: 1; }
-
-/* NEW Mobile Support Button */
+/* Mobile Support Button */
 #mobilebtn {
     position: fixed;
     top: 6px;
@@ -138,8 +136,34 @@ footer {
     opacity: .7;
 }
 
-#mobilebtn:hover { opacity: 1; }
+/* VERIFIED MEMBERS BUTTON */
+#verifiedBtn {
+    position: fixed;
+    bottom: 6px;
+    right: 220px;
+    font-size: 10px;
+    padding: 2px 6px;
+    background: transparent;
+    color: #44f;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+    opacity: .7;
+}
 
+/* VERIFIED POPUP */
+#verifiedPanel {
+    display: none;
+    position: fixed;
+    bottom: 40px;
+    right: 20px;
+    background: #222;
+    padding: 15px;
+    border-radius: 10px;
+    max-height: 250px;
+    overflow: auto;
+    width: 250px;
+}
 </style>
 </head>
 
@@ -161,8 +185,7 @@ Created by MAX — play TMS, Element OS, Gamers Hub, and more.
     <button onclick="window.open('https://xenon-explorer-b17f42ea.base44.app')">Talk to MaxGPT!</button>
     <button onclick="window.open('animalhomepage.html')">SAVE EARTH'S ANIMALS!</button>
     <button onclick="window.open('npppp.html')">NotePad+++</button>
-  <button onclick="window.open('verify/verifystart.html')">Verify</button>
-
+    <button onclick="window.open('verify/verifystart.html')">Verify</button>
 </div>
 
 <footer>© 2025 Max — 67!!</footer>
@@ -170,6 +193,13 @@ Created by MAX — play TMS, Element OS, Gamers Hub, and more.
 <button id="subbtn" onclick="window.open('https://isabellalovesit.github.io/isabellalovesit.github.io')">
 See my friend Isabella's site!
 </button>
+
+<button id="verifiedBtn" onclick="toggleVerified()">Verified Members</button>
+
+<div id="verifiedPanel">
+<h3>Verified Members</h3>
+<ul id="verifiedList"></ul>
+</div>
 
 <script>
 /* Mobile toggle */
@@ -188,6 +218,50 @@ for(let i=0;i<60;i++){
         height:${3+Math.random()*4}px;
     `;
     document.body.appendChild(s);
+}
+</script>
+
+<!-- FIREBASE -->
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC39mabdSddFKYBfPeFiqXEH3vRuW0hBOg",
+  authDomain: "verify-2f72e.firebaseapp.com",
+  projectId: "verify-2f72e",
+  storageBucket: "verify-2f72e.firebasestorage.app",
+  messagingSenderId: "735887684811",
+  appId: "1:735887684811:web:6d6275b949569d0f07974e"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+window.toggleVerified = async function(){
+
+    let panel = document.getElementById("verifiedPanel");
+
+    if(panel.style.display === "block"){
+        panel.style.display = "none";
+        return;
+    }
+
+    panel.style.display = "block";
+
+    let list = document.getElementById("verifiedList");
+    list.innerHTML = "Loading...";
+
+    const querySnapshot = await getDocs(collection(db, "verifiedEmails"));
+
+    list.innerHTML = "";
+
+    querySnapshot.forEach((doc)=>{
+        let li = document.createElement("li");
+        li.textContent = doc.data().email;
+        list.appendChild(li);
+    });
 }
 </script>
 
