@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Login</title>
+<style>
+body {
+    font-family: Verdana, sans-serif;
+    background: #111;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    text-align: center;
+}
+
+input {
+    padding: 10px;
+    margin: 5px;
+    font-size: 16px;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.hidden {
+    display: none;
+}
+
+#errorMsg {
+    color: #f44;
+    margin-top: 10px;
+}
+</style>
+</head>
+<body>
+
+<h1 id="title">Checking Access...</h1>
+
+<div id="loginBox" class="hidden">
+    <input type="email" id="email" placeholder="Admin Email"><br>
+    <input type="password" id="password" placeholder="Password"><br>
+    <button onclick="login()">Login</button>
+    <div id="errorMsg"></div>
+</div>
+
+<div id="noAccess" class="hidden">
+    <h1>404</h1>
+    <p>Page not found.</p>
+</div>
+
+<div id="adminPanel" class="hidden">
+    <h2>Admin Panel</h2>
+    <p>Access granted! You’ll see the verified members list here in Step 3.</p>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+// YOUR FIREBASE CONFIG
+const firebaseConfig = {
+  apiKey:"AIzaSyC39mabdSddFKYBfPeFiqXEH3vRuW0hBOg",
+  authDomain:"verify-2f72e.firebaseapp.com",
+  projectId:"verify-2f72e",
+  storageBucket:"verify-2f72e.firebasestorage.app",
+  messagingSenderId:"735887684811",
+  appId:"1:735887684811:web:6d6275b949569d0f07974e"
+};
+
+// REPLACE THIS with YOUR ADMIN EMAIL
+const ADMIN_EMAIL = "MAXPLAYS494@GMAIL.COM";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+// Show login box
+document.getElementById("title").innerText = "Admin Login";
+document.getElementById("loginBox").classList.remove("hidden");
+
+// Login function
+window.login = async function() {
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+
+    try {
+        await signInWithEmailAndPassword(auth, email, password);
+    } catch(err) {
+        document.getElementById("errorMsg").innerText = "Login failed: " + err.message;
+    }
+};
+
+// Check auth state
+onAuthStateChanged(auth, user => {
+    if(!user) return; // not logged in
+
+    if(user.email !== ADMIN_EMAIL){
+        // Not admin → fake 404
+        document.body.innerHTML = document.getElementById("noAccess").innerHTML;
+        return;
+    }
+
+    // Admin → show panel
+    document.getElementById("loginBox").classList.add("hidden");
+    document.getElementById("title").innerText = "Admin Panel";
+    document.getElementById("adminPanel").classList.remove("hidden");
+});
+</script>
+
+</body>
+</html>
