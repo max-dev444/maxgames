@@ -21,20 +21,9 @@ body {
 }
 
 /* MOBILE MODE */
-body.mobile-mode h1 {
-    font-size: 2em;
-    text-align: center;
-}
-
-body.mobile-mode .buttons {
-    grid-template-columns: 1fr;
-}
-
-body.mobile-mode button {
-    width: 85vw;
-    height: 80px;
-    font-size: 1.3em;
-}
+body.mobile-mode h1 { font-size: 2em; text-align: center; }
+body.mobile-mode .buttons { grid-template-columns: 1fr; }
+body.mobile-mode button { width: 85vw; height: 80px; font-size: 1.3em; }
 
 h1 {
     margin-top: 50px;
@@ -43,148 +32,46 @@ h1 {
     text-shadow: 3px 3px #000;
     animation: pulse 2s infinite;
 }
-
 @keyframes pulse {
     0% { text-shadow: 2px 2px #000; }
     50% { text-shadow: 5px 5px #f00; }
     100% { text-shadow: 2px 2px #000; }
 }
 
-.subtitle {
-    font-size: 1.4em;
-    color: #f77;
-    margin-bottom: 40px;
-    text-align: center;
-    max-width: 650px;
-}
+.subtitle { font-size: 1.4em; color: #f77; margin-bottom: 40px; text-align: center; max-width: 650px; }
 
-.buttons {
-    display: grid;
-    grid-template-columns: repeat(3,1fr);
-    gap: 10px;
-    justify-content: center;
-}
+.buttons { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; justify-content: center; }
 
 button {
-    width: 220px;
-    height: 90px;
-    font-size: 1.6em;
-    background: #222;
-    color: #fff;
-    border: 3px solid #f44;
-    border-radius: 15px;
-    cursor: pointer;
-    transition: all .25s;
-    box-shadow: 0 0 12px #f44;
+    width: 220px; height: 90px; font-size: 1.6em;
+    background: #222; color: #fff; border: 3px solid #f44; border-radius: 15px;
+    cursor: pointer; transition: all .25s; box-shadow: 0 0 12px #f44;
 }
+button:hover { background: #f44; color: #000; transform: scale(1.07); box-shadow: 0 0 25px #f44; }
 
-button:hover {
-    background: #f44;
-    color: #000;
-    transform: scale(1.07);
-    box-shadow: 0 0 25px #f44;
-}
-
-footer {
-    margin-top: auto;
-    margin-bottom: 20px;
-    color: #888;
-}
+footer { margin-top: auto; margin-bottom: 20px; color: #888; }
 
 .sparkle {
-    position: absolute;
-    width: 4px;
-    height: 4px;
-    background: #f33;
-    border-radius: 50%;
+    position: absolute; width: 4px; height: 4px; background: #f33; border-radius: 50%;
     animation: sparkle 3s infinite ease-in-out;
 }
+@keyframes sparkle { 0% { opacity:1; transform:translateY(0px); } 50% { opacity:.4; transform:translateY(-15px); } 100% { opacity:1; transform:translateY(0px); } }
 
-@keyframes sparkle {
-    0% { opacity:1; transform:translateY(0px); }
-    50% { opacity:.4; transform:translateY(-15px); }
-    100% { opacity:1; transform:translateY(0px); }
-}
+/* Buttons */
+#subbtn { position: fixed; bottom: 6px; right: 85px; font-size: 10px; padding: 2px 6px; background: transparent; color: #f44; border: none; cursor: pointer; text-decoration: underline; opacity: .7; }
+#mobilebtn { position: fixed; top: 6px; right: 85px; font-size: 11px; padding: 3px 7px; background: transparent; color: #f44; border: none; cursor: pointer; text-decoration: underline; opacity: .7; }
+#verifiedBtn { position: fixed; bottom: 6px; right: 220px; font-size: 10px; padding: 2px 6px; background: transparent; color: #44f; border: none; cursor: pointer; text-decoration: underline; opacity: .7; }
 
-/* Isabella Button */
-#subbtn {
-    position: fixed;
-    bottom: 6px;
-    right: 85px;
-    font-size: 10px;
-    padding: 2px 6px;
-    background: transparent;
-    color: #f44;
-    border: none;
-    cursor: pointer;
-    text-decoration: underline;
-    opacity: .7;
-}
-
-/* Mobile Support Button */
-#mobilebtn {
-    position: fixed;
-    top: 6px;
-    right: 85px;
-    font-size: 11px;
-    padding: 3px 7px;
-    background: transparent;
-    color: #f44;
-    border: none;
-    cursor: pointer;
-    text-decoration: underline;
-    opacity: .7;
-}
-
-/* VERIFIED MEMBERS BUTTON */
-#verifiedBtn {
-    position: fixed;
-    bottom: 6px;
-    right: 220px;
-    font-size: 10px;
-    padding: 2px 6px;
-    background: transparent;
-    color: #44f;
-    border: none;
-    cursor: pointer;
-    text-decoration: underline;
-    opacity: .7;
-}
-
-/* VERIFIED POPUP */
-#verifiedPanel {
-    display: none;
-    position: fixed;
-    bottom: 40px;
-    right: 20px;
-    background: #222;
-    padding: 15px;
-    border-radius: 10px;
-    max-height: 250px;
-    overflow: auto;
-    width: 250px;
-}
+/* VERIFIED PANEL */
+#verifiedPanel { display: none; position: fixed; bottom: 40px; right: 20px; background: #222; padding: 15px; border-radius: 10px; max-height: 250px; overflow: auto; width: 250px; }
 
 /* USERNAME PROMPT */
 #usernamePrompt {
-    display: none;
-    position: fixed;
-    top:0; left:0; right:0; bottom:0;
-    background: rgba(0,0,0,0.95);
-    color: white;
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    display: none; position: fixed; top:0; left:0; right:0; bottom:0;
+    background: rgba(0,0,0,0.95); color: white; z-index: 9999;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
-
-#usernamePrompt input {
-    padding: 10px;
-    font-size: 16px;
-    margin: 5px;
-    width: 200px;
-}
+#usernamePrompt input { padding: 10px; font-size: 16px; margin: 5px; width: 200px; }
 </style>
 </head>
 
@@ -194,9 +81,7 @@ footer {
 
 <h1>Maxgames.org - FUN GAMES - V3.1</h1>
 
-<div class="subtitle">
-Created by MAX — play TMS, Element OS, Gamers Hub, and more.
-</div>
+<div class="subtitle">Created by MAX — play TMS, Element OS, Gamers Hub, and more.</div>
 
 <div class="buttons" id="mainButtons">
     <button onclick="window.open('play.html','_blank')">Play</button>
@@ -211,9 +96,7 @@ Created by MAX — play TMS, Element OS, Gamers Hub, and more.
 
 <footer>© 2025 Max — 67!!</footer>
 
-<button id="subbtn" onclick="window.open('https://isabellalovesit.github.io/isabellalovesit.github.io')">
-See my friend Isabella's site!
-</button>
+<button id="subbtn" onclick="window.open('https://isabellalovesit.github.io/isabellalovesit.github.io')">See my friend Isabella's site!</button>
 
 <button id="verifiedBtn" onclick="toggleVerified()">Verified Members</button>
 
@@ -222,7 +105,6 @@ See my friend Isabella's site!
 <ul id="verifiedList"></ul>
 </div>
 
-<!-- USERNAME PROMPT -->
 <div id="usernamePrompt">
     <h2>Enter a Username</h2>
     <input type="text" id="usernameInput" placeholder="Pick a unique name">
@@ -231,79 +113,43 @@ See my friend Isabella's site!
 </div>
 
 <script>
-/* Mobile toggle */
-document.getElementById("mobilebtn").onclick = () => {
-    document.body.classList.toggle("mobile-mode");
-};
-
-/* Sparkles */
-for(let i=0;i<60;i++){
-    let s=document.createElement('div');
-    s.className='sparkle';
-    s.style.cssText=`left:${Math.random()*innerWidth}px;top:${Math.random()*innerHeight}px;width:${3+Math.random()*4}px;height:${3+Math.random()*4}px;`;
-    document.body.appendChild(s);
-}
+document.getElementById("mobilebtn").onclick = () => document.body.classList.toggle("mobile-mode");
+for(let i=0;i<60;i++){let s=document.createElement('div');s.className='sparkle';s.style.cssText=`left:${Math.random()*innerWidth}px;top:${Math.random()*innerHeight}px;width:${3+Math.random()*4}px;height:${3+Math.random()*4}px;`;document.body.appendChild(s);}
 </script>
 
 <script type="module">
+// NEW USERS FIREBASE (firestore-maxuser)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, getDocs, setDoc, doc, query, where, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyC39mabdSddFKYBfPeFiqXEH3vRuW0hBOg",
-  authDomain: "verify-2f72e.firebaseapp.com",
-  projectId: "verify-2f72e",
-  storageBucket: "verify-2f72e.firebasestorage.app",
-  messagingSenderId: "735887684811",
-  appId: "1:735887684811:web:6d6275b949569d0f07974e"
+// USERS FIREBASE CONFIG
+const usersFirebaseConfig = {
+  apiKey: "AIzaSyAbeLIiGVBJ0MKNmR1OLdRiffIXQJjnwmY",
+  authDomain: "firestore-maxuser.firebaseapp.com",
+  projectId: "firestore-maxuser",
+  storageBucket: "firestore-maxuser.firebasestorage.app",
+  messagingSenderId: "258896503234",
+  appId: "1:258896503234:web:7f1d9c629a1a450419765b"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const usersApp = initializeApp(usersFirebaseConfig,"usersApp");
+const usersDB = getFirestore(usersApp);
 
-// Show verified members popup
-window.toggleVerified = async function(){
-    const panel = document.getElementById("verifiedPanel");
-    if(panel.style.display==="block"){ panel.style.display="none"; return; }
-    panel.style.display="block";
-
-    const list = document.getElementById("verifiedList");
-    list.innerHTML = "Loading...";
-    try {
-        const querySnapshot = await getDocs(collection(db,"verifiedEmails"));
-        list.innerHTML = "";
-        querySnapshot.forEach(doc=>{
-            const li = document.createElement("li");
-            li.textContent = doc.data()?.email || "null@null.com";
-            list.appendChild(li);
-        });
-    } catch(e){
-        list.innerHTML = "<li>Error loading verified members</li>";
-        console.error(e);
-    }
-}
-
-// ---------------- USERNAME + BAN CHECK ----------------
 let currentUserId = localStorage.getItem("userId");
 let username = localStorage.getItem("username");
 
+// ---------------- USERNAME CHECK + BAN ----------------
 async function checkUsername(){
-    if(!username){
-        document.getElementById("usernamePrompt").style.display="flex";
-        return;
-    }
+    if(!username){ document.getElementById("usernamePrompt").style.display="flex"; return; }
 
-    // check banned status
-    try {
-        const userDoc = await getDoc(doc(db,"users",currentUserId));
+    try{
+        const userDoc = await getDoc(doc(usersDB,"users",currentUserId));
         const data = userDoc.exists() ? userDoc.data() : null;
         if(data?.banned){
             alert(`You are banned!\nMessage: ${data.banMessage}\nExpires: ${data.banExpiry?.toDate()}`);
             document.body.innerHTML = "<h1>404</h1><p>Page not found.</p>";
         }
-    } catch(e){
-        console.error("Error checking ban:", e);
-    }
+    } catch(e){ console.error("Ban check error:",e); }
 }
 
 window.submitUsername = async function(){
@@ -311,18 +157,15 @@ window.submitUsername = async function(){
     const error = document.getElementById("usernameError");
     if(!input){ error.textContent="Username cannot be empty!"; return; }
 
-    // check uniqueness
-    try {
-        const q = query(collection(db,"users"), where("username","==",input));
+    try{
+        // Check uniqueness
+        const q = query(collection(usersDB,"users"),where("username","==",input));
         const snapshot = await getDocs(q);
-        if(!snapshot.empty){
-            error.textContent="Username already taken!";
-            return;
-        }
+        if(!snapshot.empty){ error.textContent="Username already taken!"; return; }
 
-        // store username in Firestore, email=null if not verified
+        // Save username
         currentUserId = crypto.randomUUID();
-        await setDoc(doc(db,"users",currentUserId),{
+        await setDoc(doc(usersDB,"users",currentUserId),{
             username: input,
             email: "null@null.com",
             banned: false,
@@ -331,15 +174,41 @@ window.submitUsername = async function(){
         });
         localStorage.setItem("userId",currentUserId);
         localStorage.setItem("username",input);
+        username = input;
         document.getElementById("usernamePrompt").style.display="none";
 
-    } catch(e){
-        console.error("Error saving username:", e);
-        error.textContent="Failed to save username, try again.";
-    }
-}
+    } catch(e){ console.error("Save username error:",e); error.textContent="Failed to save username, try again."; }
+};
 
-// Run on page load
+// ---------------- VERIFIED MEMBERS POPUP ----------------
+window.toggleVerified = async function(){
+    const panel = document.getElementById("verifiedPanel");
+    if(panel.style.display==="block"){ panel.style.display="none"; return; }
+    panel.style.display="block";
+    const list = document.getElementById("verifiedList");
+    list.innerHTML = "Loading...";
+
+    try{
+        // Old Firebase verifiedEmails remains separate
+        const app2 = initializeApp({
+            apiKey: "AIzaSyC39mabdSddFKYBfPeFiqXEH3vRuW0hBOg",
+            authDomain: "verify-2f72e.firebaseapp.com",
+            projectId: "verify-2f72e",
+            storageBucket: "verify-2f72e.firebasestorage.app",
+            messagingSenderId: "735887684811",
+            appId: "1:735887684811:web:6d6275b949569d0f07974e"
+        },"verifiedApp");
+        const db2 = getFirestore(app2);
+        const snapshot = await getDocs(collection(db2,"verifiedEmails"));
+        list.innerHTML = "";
+        snapshot.forEach(doc=>{
+            const li = document.createElement("li");
+            li.textContent = doc.data()?.email || "null@null.com";
+            list.appendChild(li);
+        });
+    } catch(e){ console.error(e); list.innerHTML="<li>Error loading verified members</li>"; }
+};
+
 checkUsername();
 </script>
 
