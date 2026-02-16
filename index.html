@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>maxgames.org</title>
+<title>💎 Maxgames.org - FUN GAMES - V3.1</title>
 <link rel="icon" href="Maxgames.orgfav.png" />
 
 <style>
@@ -17,50 +17,79 @@ body {
     flex-direction: column;
     align-items: center;
     overflow-x: hidden;
-    position: relative;
 }
 
 /* MOBILE MODE */
 body.mobile-mode h1 { font-size: 2em; text-align: center; }
 body.mobile-mode .buttons { grid-template-columns: 1fr; }
-body.mobile-mode button { width: 85vw; height: 80px; font-size: 1.3em; }
+body.mobile-mode button { width: 85vw; height: 60px; font-size: 1.1em; }
 
 h1 {
-    margin-top: 50px;
+    margin-top: 40px;
     font-size: 3em;
     color: #f44;
-    text-shadow: 3px 3px #000;
+    text-shadow: 0 0 10px #ff77aa, 0 0 20px #ff44ff;
     animation: pulse 2s infinite;
 }
 @keyframes pulse {
-    0% { text-shadow: 2px 2px #000; }
-    50% { text-shadow: 5px 5px #f00; }
-    100% { text-shadow: 2px 2px #000; }
+    0%,100% { text-shadow: 0 0 10px #ff77aa, 0 0 20px #ff44ff; }
+    50% { text-shadow: 0 0 20px #ff44ff, 0 0 40px #ff00ff; }
+}
+.subtitle { 
+    font-size: 1.2em; color: #f77; margin-bottom: 30px; text-align: center; max-width: 700px;
+    text-shadow: 0 0 8px #ff77aa;
 }
 
-.subtitle { font-size: 1.4em; color: #f77; margin-bottom: 40px; text-align: center; max-width: 650px; }
+/* TAB STYLING */
+.tabs {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+.tab {
+    padding: 10px 20px;
+    margin: 0 5px;
+    background: #222;
+    border: 2px solid #f44;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 0 8px #f44;
+    transition: all 0.2s ease;
+}
+.tab:hover, .tab.active {
+    background: #f44;
+    color: #000;
+    box-shadow: 0 0 20px #ff77aa;
+}
 
-.buttons { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; justify-content: center; }
-
+/* BUTTON GRID */
+.buttons {
+    display: grid; 
+    grid-template-columns: repeat(5, 1fr); 
+    gap: 8px; 
+    justify-content: center; 
+    margin-bottom: 50px;
+}
 button {
-    width: 220px; height: 90px; font-size: 1.6em;
-    background: #222; color: #fff; border: 3px solid #f44; border-radius: 15px;
-    cursor: pointer; transition: all .25s; box-shadow: 0 0 12px #f44;
+    padding: 10px;
+    font-size: 1em;
+    background: #222;
+    color: #fff;
+    border: 2px solid #f44;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 0 10px #f44;
+    transition: all 0.2s ease;
 }
-button:hover { background: #f44; color: #000; transform: scale(1.07); box-shadow: 0 0 25px #f44; }
-
-footer { margin-top: auto; margin-bottom: 20px; color: #888; }
-
-.sparkle {
-    position: absolute; width: 4px; height: 4px; background: #f33; border-radius: 50%;
-    animation: sparkle 3s infinite ease-in-out;
+button:hover {
+    background: #f44;
+    color: #000;
+    transform: scale(1.05);
+    box-shadow: 0 0 20px #ff77aa;
 }
-@keyframes sparkle { 0% { opacity:1; transform:translateY(0px); } 50% { opacity:.4; transform:translateY(-15px); } 100% { opacity:1; transform:translateY(0px); } }
 
-/* Buttons */
-#subbtn { position: fixed; bottom: 6px; right: 85px; font-size: 10px; padding: 2px 6px; background: transparent; color: #f44; border: none; cursor: pointer; text-decoration: underline; opacity: .7; }
-#mobilebtn { position: fixed; top: 6px; right: 85px; font-size: 11px; padding: 3px 7px; background: transparent; color: #f44; border: none; cursor: pointer; text-decoration: underline; opacity: .7; }
-#verifiedBtn { position: fixed; bottom: 6px; right: 220px; font-size: 10px; padding: 2px 6px; background: transparent; color: #44f; border: none; cursor: pointer; text-decoration: underline; opacity: .7; }
+/* FOOTER */
+footer { margin-top: auto; margin-bottom: 20px; color: #888; text-shadow: 0 0 5px #ff77aa; }
 
 /* VERIFIED PANEL */
 #verifiedPanel { display: none; position: fixed; bottom: 40px; right: 20px; background: #222; padding: 15px; border-radius: 10px; max-height: 250px; overflow: auto; width: 250px; }
@@ -69,82 +98,143 @@ footer { margin-top: auto; margin-bottom: 20px; color: #888; }
 
 <body>
 
-<button id="mobilebtn">Mobile Support</button>
-
-<h1>Maxgames.org - FUN GAMES - V3.1</h1>
-
+<h1>💎 Maxgames.org - FUN GAMES - V3.1</h1>
 <div class="subtitle">Created by MAX — play TMS, Element OS, Gamers Hub, and more.</div>
 
-<div class="buttons" id="mainButtons">
-    <button onclick="window.open('play.html','_blank')">Play</button>
-    <button onclick="window.open('Read.html')">Read</button>
-    <button onclick="window.open('Blockworld.html')">World of Blocks!</button>
-    <button onclick="window.open('verify/verifystart.html')">Verify</button>
-        <button onclick="window.open('shoutout/index1.html')">SHOUT-OUT APPLICATIONS!!!</button>
+<!-- TABS -->
+<div class="tabs">
+    <div class="tab active" data-tab="main">Main</div>
+    <div class="tab" data-tab="play">Play</div>
+    <div class="tab" data-tab="read">Read</div>
+    <div class="tab" data-tab="new">New</div>
 </div>
+
+<!-- BUTTON CONTAINERS -->
+<div id="main" class="buttons-container">
+    <div class="buttons">
+        <button onclick="window.open('Blockworld.html')">World of Blocks!</button>
+        <button onclick="window.open('verify/verifystart.html')">Verify</button>
+        <button onclick="window.open('shoutout/index1.html')">SHOUT-OUT APPLICATIONS!!!</button>
+    </div>
+</div>
+
+<div id="play" class="buttons-container" style="display:none;">
+    <div class="buttons">
+        <button onclick="window.open('Element OS.html')">Element OS</button>
+        <button onclick="window.open('Gamers Hub V4.html')">Gamer's Hub</button>
+        <button onclick="window.open('TMSswitcherv2.html')">The Maximumonical Switch (TMS)</button>
+        <button onclick="window.open('boredbutton.html')">Bored Button</button>
+        <button onclick="window.open('minicraft.html')">Minicraft</button>
+        <button onclick="window.open('Blockworld.html')">Block World</button>
+        <button onclick="window.open('new.html')">Play Fun, New Experimental Games!</button>
+        <button onclick="window.open('snazz.html')">Talk to Random People!</button>
+        <button onclick="window.open('astatinedownload.html')">Astatine .EXE</button>
+        <button onclick="window.open('https://xenon-explorer-b17f42ea.base44.app')">Talk to MaxGPT!</button>
+        <button onclick="window.open('animalhomepage.html')">SAVE EARTH'S ANIMALS!</button>
+        <button onclick="window.open('npppp.html')">NotePad+++</button>
+        <button onclick="window.open('https://www.youtube.com/@Maxplaysalot')">Subscribe to Me!</button>
+        <button onclick="window.open('https://secret-calc-a365ec12.base44.app')">Achievement Fun!</button>
+        <button onclick="window.open('https://learn-sphere-bb0ffdd9.base44.app')">Create Your Own Courses!</button>
+    </div>
+</div>
+
+<div id="read" class="buttons-container" style="display:none;">
+    <div class="buttons">
+        <button onclick="window.open('updatelog.html')">Update Log</button>
+        <button onclick="window.open('info.html')">Information</button>
+        <button onclick="window.open('security.html')">You Are Very Safe</button>
+        <button onclick="window.open('specialthanks.html')">Special People</button>
+    </div>
+</div>
+
+<div id="new" class="buttons-container" style="display:none;">
+    <div class="buttons">
+                <button onclick="window.open('play.html','_blank')">Old Play Page</button>
+        <button onclick="window.open('Read.html')">Old Read Page</button>
+        <button onclick="window.open('websitepage.html')">Website Page</button>
+        <button onclick="window.open('virus.html')">IDK opens 10000 pages</button>
+        <button onclick="window.open('sneakpeek.html')">Sneakpeek</button>
+        <button onclick="window.open('phpconnecterindex.html')">PHP Broken Crap</button>
+        <button onclick="window.open('note.html')">A Note</button>
+        <button onclick="window.open('nanoconsole.html')">Nano Console Game</button>
+        <button onclick="window.open('maxsearch.html')">Broken Search Engine</button>
+        <button onclick="window.open('a.html')">More Crap</button>
+        <button onclick="window.open('Palledium.html')">Element OS Forgotten</button>
+        <button onclick="window.open('Big Alchemy (1).html')">Big Alchemy 1</button>
+        <button onclick="window.open('Big Alchemy (2).html')">Big Alchemy 2</button>
+        <button onclick="window.open('Big Alchemy.html')">Big Alchemy Original</button>
+        <button onclick="window.open('Blockworld (1).html')">Old Sussy Blockworld</button>
+        <button onclick="window.open('Function Playground.html')">Function Playground</button>
+        <button onclick="window.open('Hub.html')">First Website Hub</button>
+        <button onclick="window.open('Labtest.html')">Lab Test</button>
+        <button onclick="window.open('MARK1.html')">MARK1</button>
+        <button onclick="window.open('MineWorld 0.67.html')">Mineworld 0.67</button>
+        <button onclick="window.open('Mlooket (1).html')">mlooket 1</button>
+        <button onclick="window.open('Mlooket (2).html')">mlooket 2</button>
+        <button onclick="window.open('Mlooket.html')">mlooket</button>
+        <button onclick="window.open('SongSmith 1 (1).html')">songsmith 1 (1)</button>
+        <button onclick="window.open('SongSmith 1.html')">songsmith 1</button>
+        <button onclick="window.open('boba (1).html')">boba1</button>
+        <button onclick="window.open('boba (2).html')">boba2</button>
+        <button onclick="window.open('boba (3).html')">boba3</button>
+        <button onclick="window.open('boba (4).html')">boba4</button>
+        <button onclick="window.open('boba (5).html')">boba5</button>
+        <button onclick="window.open('boba (6).html')">boba newest</button>
+        <button onclick="window.open('boba.html')">FIRST BOBA</button>
+        <button onclick="window.open('brainrot (1).html')">brainrot 2</button>
+        <button onclick="window.open('brainrot.html')">brainrot</button>
+        <button onclick="window.open('broke.html')">broken clicker</button>
+        <button onclick="window.open('codefun_.html')">codefun_</button>
+        <button onclick="window.open('cooltext (1).html')">cooltext1</button>
+        <button onclick="window.open('cooltext (2).html')">cooltext2</button>
+        <button onclick="window.open('cooltext (3).html')">cooltext3</button>
+        <button onclick="window.open('cooltext.html')">cooltext old</button>
+        <button onclick="window.open('crosh_helper.html')">crosh helper!</button>
+        <button onclick="window.open('csstest (1).html')">css test 2</button>
+        <button onclick="window.open('csstest.html')">css test old</button>
+        <button onclick="window.open('csstestnew.html')">newest css test</button>
+        <button onclick="window.open('df.html')">defualt poop</button>
+        <button onclick="window.open('galleryweb.html')">gallery web</button>
+        <button onclick="window.open('html (1).html')">some html file</button>
+        <button onclick="window.open('jsonclean.html')">clean json files</button>
+        <button onclick="window.open('linkswitcher.html')">random link switcher</button>
+        <button onclick="window.open('try1 (1).html')">try2</button>
+        <button onclick="window.open('try1 (2).html')">try3</button>
+        <button onclick="window.open('try1 (3).html')">try4</button>
+        <button onclick="window.open('try1 (4).html')">try5</button>
+        <button onclick="window.open('try1 (5).html')">try6</button>
+        <button onclick="window.open('try1 (6).html')">try7</button>
+        <button onclick="window.open('try1 (7).html')">try8</button>
+        <button onclick="window.open('try1 (8).html')">try9</button>
+        <button onclick="window.open('try1 (9).html')">try10</button>
+        <button onclick="window.open('try1.html')">try1</button>
+        <button onclick="window.open('websitehub.html')">old website hub</button>
+        <button onclick="window.open('websitehubv2.html')">hub 2</button>
+        <button onclick="window.open('websitehubv3.html')">hub 3</button>
+        <button onclick="window.open('websitehubv5.html')">hub 4</button>
+        <button onclick="window.open('websitehubv6.html')">hub 5</button>
+        <button onclick="window.open('websitehubv8.html')">hub 6</button>
+        <button onclick="window.open('xenon x.html')">xenon but BETTER!!!!</button>
+        <button onclick="window.open('secretisabellagirl.html')">dont tell isabella hehe</button>
+    </div>
+</div>
+
 
 <footer>© 2025 Max — 67!!</footer>
 
-<button id="subbtn" onclick="window.open('https://isabellalovesit.github.io/isabellalovesit.github.io')">See my friend Isabella's site!</button>
-
-<button id="verifiedBtn" onclick="toggleVerified()">Verified Members</button>
-
-<div id="verifiedPanel">
-<h3>Verified Members</h3>
-<ul id="verifiedList"></ul>
-</div>
-
 <script>
-document.getElementById("mobilebtn").onclick = () => document.body.classList.toggle("mobile-mode");
+// TAB FUNCTIONALITY
+const tabs = document.querySelectorAll('.tab');
+const containers = document.querySelectorAll('.buttons-container');
 
-// sparkle animation
-for(let i=0;i<60;i++){
-    let s=document.createElement('div');
-    s.className='sparkle';
-    s.style.cssText=`left:${Math.random()*innerWidth}px;top:${Math.random()*innerHeight}px;width:${3+Math.random()*4}px;height:${3+Math.random()*4}px;`;
-    document.body.appendChild(s);
-}
-</script>
-
-<!-- Firebase Verified Members Fix -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-
-window.toggleVerified = async function() {
-    const panel = document.getElementById("verifiedPanel");
-    if (panel.style.display === "block") {
-        panel.style.display = "none";
-        return;
-    }
-    panel.style.display = "block";
-    const list = document.getElementById("verifiedList");
-    list.innerHTML = "Loading...";
-
-    try {
-        const app2 = initializeApp({
-            apiKey: "AIzaSyC39mabdSddFKYBfPeFiqXEH3vRuW0hBOg",
-            authDomain: "verify-2f72e.firebaseapp.com",
-            projectId: "verify-2f72e",
-            storageBucket: "verify-2f72e.appspot.com",
-            messagingSenderId: "735887684811",
-            appId: "1:735887684811:web:6d6275b949569d0f07974"
-        }, "verifiedApp");
-
-        const db2 = getFirestore(app2);
-        const snapshot = await getDocs(collection(db2, "verifiedEmails"));
-
-        list.innerHTML = "";
-        snapshot.forEach(doc => {
-            const li = document.createElement("li");
-            li.textContent = doc.data()?.email || "null@null.com";
-            list.appendChild(li);
-        });
-    } catch (e) {
-        console.error(e);
-        list.innerHTML = "<li>Error loading verified members</li>";
-    }
-};
+tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const tabName = tab.getAttribute('data-tab');
+        containers.forEach(c => c.style.display = (c.id === tabName) ? 'grid' : 'none');
+    });
+});
 </script>
 
 </body>
