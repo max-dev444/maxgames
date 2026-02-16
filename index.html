@@ -492,6 +492,138 @@ function closeGalleryPopup(){
 
 </script>
 
+    <!-- ROTATING FEATURED GAMES -->
+<section id="featuredGamesFooter">
+  <h2 class="game-title">🎮 Featured Games</h2>
+
+  <div class="game-box">
+    <iframe id="gameFrameFooter" src="https://maxgames.org/Arcane%200.6"></iframe>
+  </div>
+
+  <button class="game-next" onclick="nextFeaturedGameFooter()">Next Game</button>
+</section>
+
+<style>
+<!-- ROTATING FEATURED GAMES — BIG VERSION -->
+<section id="featuredGamesFooter">
+  <h2 class="game-title">🎮 Featured Games</h2>
+
+  <div class="game-box">
+    <iframe id="gameFrameFooter" src="https://maxgames.org/index.html"></iframe>
+  </div>
+
+  <button class="game-next" onclick="nextFeaturedGameFooter()">Next Game</button>
+</section>
+
+<style>
+#featuredGamesFooter{
+    width:100%;
+    max-width:1400px; /* bigger width */
+    text-align:center;
+    margin-top:60px;
+    margin-bottom:60px;
+}
+
+#featuredGamesFooter .game-title{
+    font-size:2.5em; /* bigger title */
+    color:#ff77aa;
+    text-shadow:0 0 12px #ff44ff;
+    margin-bottom:25px;
+}
+
+#featuredGamesFooter .game-box{
+    width:100%;
+    height:700px; /* BIG height for the iframe */
+    border:3px solid #ff44ff;
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:0 0 35px #ff44ff55;
+}
+
+#featuredGamesFooter .game-box iframe{
+    width:100%;
+    height:100%;
+    border:none;
+}
+
+#featuredGamesFooter .game-next{
+    margin-top:25px;
+    padding:15px 30px;
+    font-size:1.3em;
+    border-radius:14px;
+    border:3px solid #ff44ff;
+    background:#222;
+    color:white;
+    cursor:pointer;
+    box-shadow:0 0 20px #ff44ff;
+    transition:0.25s;
+}
+
+#featuredGamesFooter .game-next:hover{
+    background:#ff44ff;
+    color:black;
+}
+</style>
+
+<script>
+const featuredGames = [
+"https://maxgames.org/Arcane%200.6",
+"https://maxgames.org/Arcane%202",
+"https://maxgames.org/Arsenic",
+"https://maxgames.org/Chromium",
+"https://maxgames.org/Element%20OS",
+"https://maxgames.org/Fluorine",
+"https://maxgames.org/Gamers%20Hub%20V4",
+"https://maxgames.org/Hafnium",
+"https://maxgames.org/Index",
+"https://maxgames.org/Iridium",
+"https://maxgames.org/LuckSimulator",
+"https://maxgames.org/Nickel",
+"https://maxgames.org/Osmium%20V1",
+"https://maxgames.org/Palledium",
+"https://maxgames.org/Platinum",
+"https://maxgames.org/Polonium",
+"https://maxgames.org/Read",
+"https://maxgames.org/TMS%201.2",
+"https://maxgames.org/TMSswitcherv2",
+"https://maxgames.org/Xenon",
+"https://maxgames.org/a",
+"https://maxgames.org/accountcreation",
+"https://maxgames.org/accountdeletion",
+"https://maxgames.org/argon",
+"https://maxgames.org/astatinedownload",
+"https://maxgames.org/boredbutton",
+"https://maxgames.org/boron",
+"https://maxgames.org/cobalt",
+"https://maxgames.org/index",
+"https://maxgames.org/info",
+"https://maxgames.org/lithium_single_file_html_coder",
+"https://maxgames.org/maxsearch",
+"https://maxgames.org/minicraft",
+"https://maxgames.org/nanoconsole",
+"https://maxgames.org/note",
+"https://maxgames.org/phpconnecterindex",
+"https://maxgames.org/play",
+"https://maxgames.org/secret",
+"https://maxgames.org/security",
+"https://maxgames.org/snazz",
+"https://maxgames.org/sneakpeek",
+"https://maxgames.org/specialthanks",
+"https://maxgames.org/supersecret",
+"https://maxgames.org/updatelog",
+"https://maxgames.org/websitehubv8",
+"https://maxgames.org/websitepage",
+"https://maxgames.org/Blockworld"
+];
+
+let currentIndex = 0;
+
+function nextFeaturedGameFooter(){
+  currentIndex = (currentIndex + 1) % featuredGames.length;
+  document.getElementById("gameFrameFooter").src = featuredGames[currentIndex];
+}
+</script>
+
     © 2025 Max — 67!!
 </footer>
 
