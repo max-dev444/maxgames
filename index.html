@@ -18,8 +18,6 @@ body {
     align-items: center;
     overflow-x: hidden;
 }
-
-/* MOBILE MODE */
 body.mobile-mode h1 { font-size: 2em; text-align: center; }
 body.mobile-mode .buttons { grid-template-columns: 1fr; }
 body.mobile-mode button { width: 85vw; height: 60px; font-size: 1.1em; }
@@ -40,15 +38,16 @@ h1 {
     text-shadow: 0 0 8px #ff77aa;
 }
 
-/* TAB STYLING */
+/* TABS */
 .tabs {
     display: flex;
     justify-content: center;
     margin-bottom: 20px;
+    flex-wrap: wrap;
 }
 .tab {
     padding: 10px 20px;
-    margin: 0 5px;
+    margin: 5px;
     background: #222;
     border: 2px solid #f44;
     border-radius: 8px;
@@ -107,11 +106,14 @@ footer { margin-top: auto; margin-bottom: 20px; color: #888; text-shadow: 0 0 5p
     <div class="tab" data-tab="play">Play</div>
     <div class="tab" data-tab="read">Read</div>
     <div class="tab" data-tab="new">New</div>
+    <div class="tab" data-tab="other">Other</div>
 </div>
 
 <!-- BUTTON CONTAINERS -->
 <div id="main" class="buttons-container">
     <div class="buttons">
+        <button onclick="window.open('play.html','_blank')">Play</button>
+        <button onclick="window.open('Read.html')">Read</button>
         <button onclick="window.open('Blockworld.html')">World of Blocks!</button>
         <button onclick="window.open('verify/verifystart.html')">Verify</button>
         <button onclick="window.open('shoutout/index1.html')">SHOUT-OUT APPLICATIONS!!!</button>
@@ -149,8 +151,7 @@ footer { margin-top: auto; margin-bottom: 20px; color: #888; text-shadow: 0 0 5p
 
 <div id="new" class="buttons-container" style="display:none;">
     <div class="buttons">
-                <button onclick="window.open('play.html','_blank')">Old Play Page</button>
-        <button onclick="window.open('Read.html')">Old Read Page</button>
+        <!-- All New tab buttons go here (copied from your list) -->
         <button onclick="window.open('websitepage.html')">Website Page</button>
         <button onclick="window.open('virus.html')">IDK opens 10000 pages</button>
         <button onclick="window.open('sneakpeek.html')">Sneakpeek</button>
@@ -219,14 +220,27 @@ footer { margin-top: auto; margin-bottom: 20px; color: #888; text-shadow: 0 0 5p
     </div>
 </div>
 
+<div id="other" class="buttons-container" style="display:none;">
+    <div class="buttons">
+        <button onclick="window.open('https://isabellalovesit.github.io/isabellalovesit.github.io')">See My Friend Isabella's Site!</button>
+        <button id="verifiedBtn">Verified Members</button>
+    </div>
+</div>
 
 <footer>© 2025 Max — 67!!</footer>
+<div id="verifiedPanel">
+    <h3>Verified Members</h3>
+    <ul id="verifiedList"></ul>
+</div>
+
+<!-- FIREBASE SDK v8 -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 <script>
 // TAB FUNCTIONALITY
 const tabs = document.querySelectorAll('.tab');
 const containers = document.querySelectorAll('.buttons-container');
-
 tabs.forEach(tab => {
     tab.addEventListener('click', () => {
         tabs.forEach(t => t.classList.remove('active'));
@@ -235,7 +249,38 @@ tabs.forEach(tab => {
         containers.forEach(c => c.style.display = (c.id === tabName) ? 'grid' : 'none');
     });
 });
-</script>
 
+// VERIFIED MEMBERS FUNCTION
+const firebaseConfig = {
+    apiKey: "AIzaSyC39mabdSddFKYBfPeFiqXEH3vRuW0hBOg",
+    authDomain: "verify-2f72e.firebaseapp.com",
+    projectId: "verify-2f72e",
+    storageBucket: "verify-2f72e.appspot.com",
+    messagingSenderId: "735887684811",
+    appId: "1:735887684811:web:6d6275b949569d0f07974"
+};
+const verifiedApp = firebase.initializeApp(firebaseConfig,'verifiedApp');
+const db = firebase.firestore(verifiedApp);
+
+document.getElementById('verifiedBtn').onclick = async () => {
+    const panel = document.getElementById("verifiedPanel");
+    if(panel.style.display === 'block'){ panel.style.display='none'; return; }
+    panel.style.display = 'block';
+    const list = document.getElementById("verifiedList");
+    list.innerHTML = "Loading...";
+    try{
+        const snapshot = await db.collection("verifiedEmails").get();
+        list.innerHTML = "";
+        snapshot.forEach(doc => {
+            const li = document.createElement("li");
+            li.textContent = doc.data()?.email || "null@null.com";
+            list.appendChild(li);
+        });
+    }catch(e){
+        console.error(e);
+        list.innerHTML = "<li>Error loading verified members</li>";
+    }
+};
+</script>
 </body>
 </html>
