@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>MaxGames Shoutout</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin-top: 80px;
+}
+
+.step {
+    display: none;
+}
+
+.active {
+    display: block;
+}
+
+#captchaBox {
+    font-size: 28px;
+    letter-spacing: 5px;
+    background: black;
+    color: lime;
+    padding: 20px;
+    display: inline-block;
+    user-select: none;
+}
+
+input, textarea {
+    width: 260px;
+    margin: 8px;
+}
+</style>
+</head>
+<body>
+
+<h1>Submit a Shoutout!!!</h1>
+
+<!-- STEP 1: CAPTCHA -->
+<div id="step1" class="step active">
+<h2>Step 1 - Prove You Are Human</h2>
+
+<div id="captchaBox"></div>
+
+<br><br>
+
+<input id="captchaInput" placeholder="Type captcha here">
+
+<br><br>
+
+<button onclick="checkCaptcha()">Next</button>
+</div>
+
+<!-- STEP 2: CONSENT -->
+<div id="step2" class="step">
+<h2>Step 2 - Permission</h2>
+
+<label>
+<input type="checkbox" id="agreeBox">
+I am OK with my Email and Chosen shoutout to be showed off on the front page of maxgames.org.
+</label>
+
+<br><br>
+
+<button onclick="goStep3()">Next</button>
+</div>
+
+<!-- STEP 3: FINAL FORM -->
+<div id="step3" class="step">
+<h2>LAST STEP!!!</h2>
+
+<input id="name" placeholder="First Name"><br>
+<input id="age" placeholder="Age"><br>
+<textarea id="shoutout" placeholder="What is the shoutout?"></textarea><br>
+<textarea id="why" placeholder="Why?"></textarea><br>
+
+<button onclick="sendEmail()">LAST STEP!!!</button>
+</div>
+
+<script>
+// -------- CAPTCHA --------
+let captcha = Math.random().toString(36).substring(2,10);
+document.getElementById("captchaBox").innerText = captcha;
+
+// Block paste
+document.getElementById("captchaInput").addEventListener("paste", e => e.preventDefault());
+
+function checkCaptcha(){
+    let input = document.getElementById("captchaInput").value;
+    if(input === captcha){
+        showStep(2);
+    } else {
+        alert("Wrong captcha!");
+    }
+}
+
+// -------- CONSENT --------
+function goStep3(){
+    let checked = document.getElementById("agreeBox").checked;
+    if(checked){
+        showStep(3);
+    } else {
+        alert("You must agree first!");
+    }
+}
+
+// -------- EMAIL --------
+function sendEmail(){
+    let name = document.getElementById("name").value;
+    let age = document.getElementById("age").value;
+    let shoutout = document.getElementById("shoutout").value;
+    let why = document.getElementById("why").value;
+
+    if(!name || !age || !shoutout || !why){
+        alert("Please fill out all fields!");
+        return;
+    }
+
+    let subject = encodeURIComponent("New Shoutout Submission");
+    let body = encodeURIComponent(
+`First Name: ${name}
+Age: ${age}
+Shoutout: ${shoutout}
+Why: ${why}`
+    );
+
+    window.location.href = `mailto:maxplays494@gmail.com?subject=${subject}&body=${body}`;
+}
+
+// -------- STEP SWITCHING --------
+function showStep(num){
+    document.querySelectorAll(".step").forEach(s => s.classList.remove("active"));
+    document.getElementById("step" + num).classList.add("active");
+}
+</script>
+
+</body>
+</html>
