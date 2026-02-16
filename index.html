@@ -7,6 +7,91 @@
 <link rel="icon" href="Maxgames.orgfav.png" />
 
 <style>
+
+/* BRAND / LOGO SECTION */
+.brand-section{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    margin-top:40px;
+    margin-bottom:40px;
+    text-align:center;
+}
+
+.big-favicon{
+    width:220px;
+    height:220px;
+    object-fit:contain;
+    filter: drop-shadow(0 0 20px #ff44ff)
+            drop-shadow(0 0 40px #ff77aa)
+            drop-shadow(0 0 60px #ff00ff);
+    animation: logoGlow 3s infinite alternate ease-in-out;
+}
+
+@keyframes logoGlow{
+    from{ transform:scale(1); }
+    to{ transform:scale(1.05); }
+}
+
+.brand-text{
+    margin-top:15px;
+    font-size:2em;
+    color:#ff77aa;
+    text-shadow:0 0 10px #ff44ff, 0 0 25px #ff00ff;
+}
+
+/* BUTTON ROW UNDER LOGO */
+.bottom-buttons{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    justify-content:center;
+    margin-top:15px;
+}
+
+.bottom-buttons button{
+    padding:12px 22px;
+    font-size:1.05em;
+    border-radius:12px;
+    border:2px solid #ff44ff;
+    background:#222;
+    color:white;
+    cursor:pointer;
+    box-shadow:0 0 15px #ff44ff;
+    transition:0.25s;
+}
+
+.bottom-buttons button:hover{
+    background:#ff44ff;
+    color:black;
+    transform:scale(1.08);
+}
+
+/* OUR SITES SECTION */
+.our-sites{
+    margin-top:40px;
+    text-align:center;
+    max-width:800px;
+}
+
+.our-sites h3{
+    color:#ff77aa;
+    text-shadow:0 0 10px #ff44ff;
+}
+
+.our-sites a{
+    display:block;
+    color:#ccc;
+    margin:4px 0;
+    text-decoration:none;
+    transition:0.2s;
+}
+
+.our-sites a:hover{
+    color:#ff77aa;
+    text-shadow:0 0 8px #ff44ff;
+}
+
 body {
     margin: 0;
     font-family: Verdana, sans-serif;
@@ -16,11 +101,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    overflow-x: hidden;
 }
-body.mobile-mode h1 { font-size: 2em; text-align: center; }
-body.mobile-mode .buttons { grid-template-columns: 1fr; }
-body.mobile-mode button { width: 85vw; height: 60px; font-size: 1.1em; }
 
 h1 {
     margin-top: 40px;
@@ -33,65 +114,71 @@ h1 {
     0%,100% { text-shadow: 0 0 10px #ff77aa, 0 0 20px #ff44ff; }
     50% { text-shadow: 0 0 20px #ff44ff, 0 0 40px #ff00ff; }
 }
+
 .subtitle { 
-    font-size: 1.2em; color: #f77; margin-bottom: 30px; text-align: center; max-width: 700px;
+    font-size: 1.2em; color: #f77; margin-bottom: 30px;
     text-shadow: 0 0 8px #ff77aa;
 }
 
 /* TABS */
-.tabs {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-}
+.tabs { display:flex; flex-wrap:wrap; justify-content:center; }
 .tab {
-    padding: 10px 20px;
-    margin: 5px;
-    background: #222;
-    border: 2px solid #f44;
-    border-radius: 8px;
-    cursor: pointer;
-    box-shadow: 0 0 8px #f44;
-    transition: all 0.2s ease;
+    padding:10px 20px;
+    margin:5px;
+    background:#222;
+    border:2px solid #f44;
+    border-radius:8px;
+    cursor:pointer;
+    box-shadow:0 0 8px #f44;
 }
-.tab:hover, .tab.active {
-    background: #f44;
-    color: #000;
-    box-shadow: 0 0 20px #ff77aa;
+.tab:hover,.tab.active{
+    background:#f44;
+    color:#000;
 }
 
 /* BUTTON GRID */
 .buttons {
-    display: grid; 
-    grid-template-columns: repeat(5, 1fr); 
-    gap: 8px; 
-    justify-content: center; 
-    margin-bottom: 50px;
-}
-button {
-    padding: 10px;
-    font-size: 1em;
-    background: #222;
-    color: #fff;
-    border: 2px solid #f44;
-    border-radius: 10px;
-    cursor: pointer;
-    box-shadow: 0 0 10px #f44;
-    transition: all 0.2s ease;
-}
-button:hover {
-    background: #f44;
-    color: #000;
-    transform: scale(1.05);
-    box-shadow: 0 0 20px #ff77aa;
+    display:grid;
+    grid-template-columns: repeat(5,1fr);
+    gap:8px;
+    margin-bottom:50px;
 }
 
-/* FOOTER */
-footer { margin-top: auto; margin-bottom: 20px; color: #888; text-shadow: 0 0 5px #ff77aa; }
+button{
+    padding:10px;
+    background:#222;
+    color:#fff;
+    border:2px solid #f44;
+    border-radius:10px;
+    cursor:pointer;
+    box-shadow:0 0 10px #f44;
+}
+button:hover{
+    background:#f44;
+    color:#000;
+    transform:scale(1.05);
+}
 
 /* VERIFIED PANEL */
-#verifiedPanel { display: none; position: fixed; bottom: 40px; right: 20px; background: #222; padding: 15px; border-radius: 10px; max-height: 250px; overflow: auto; width: 250px; }
+#verifiedPanel {
+    display:none;
+    position:fixed;
+    bottom:40px;
+    right:20px;
+    background:#222;
+    padding:15px;
+    border-radius:10px;
+    max-height:250px;
+    overflow:auto;
+    width:250px;
+}
+
+footer{
+    margin-top:auto;
+    margin-bottom:20px;
+    color:#888;
+}
+
 </style>
 </head>
 
@@ -102,185 +189,182 @@ footer { margin-top: auto; margin-bottom: 20px; color: #888; text-shadow: 0 0 5p
 
 <!-- TABS -->
 <div class="tabs">
-    <div class="tab active" data-tab="main">Main</div>
-    <div class="tab" data-tab="play">Play</div>
-    <div class="tab" data-tab="read">Read</div>
-    <div class="tab" data-tab="new">New</div>
-    <div class="tab" data-tab="other">Other</div>
+<div class="tab active" data-tab="main">Main</div>
+<div class="tab" data-tab="play">Play</div>
+<div class="tab" data-tab="read">Read</div>
+<div class="tab" data-tab="new">New</div>
+<div class="tab" data-tab="other">Other</div>
 </div>
 
-<!-- BUTTON CONTAINERS -->
+<!-- MAIN -->
 <div id="main" class="buttons-container">
-    <div class="buttons">
-        <button onclick="window.open('play.html','_blank')">Play</button>
-        <button onclick="window.open('Read.html')">Read</button>
-        <button onclick="window.open('Blockworld.html')">World of Blocks!</button>
-        <button onclick="window.open('verify/verifystart.html')">Verify</button>
-        <button onclick="window.open('shoutout/index1.html')">SHOUT-OUT APPLICATIONS!!!</button>
-    </div>
+<div class="buttons">
+<button onclick="window.open('play.html')">Play</button>
+<button onclick="window.open('Read.html')">Read</button>
+<button onclick="window.open('Blockworld.html')">World of Blocks!</button>
+<button onclick="window.open('verify/verifystart.html')">Verify</button>
+<button onclick="window.open('shoutout/index1.html')">SHOUT-OUT APPLICATIONS!!!</button>
+</div>
 </div>
 
+<!-- PLAY -->
 <div id="play" class="buttons-container" style="display:none;">
-    <div class="buttons">
-        <button onclick="window.open('Element OS.html')">Element OS</button>
-        <button onclick="window.open('Gamers Hub V4.html')">Gamer's Hub</button>
-        <button onclick="window.open('TMSswitcherv2.html')">The Maximumonical Switch (TMS)</button>
-        <button onclick="window.open('boredbutton.html')">Bored Button</button>
-        <button onclick="window.open('minicraft.html')">Minicraft</button>
-        <button onclick="window.open('Blockworld.html')">Block World</button>
-        <button onclick="window.open('new.html')">Play Fun, New Experimental Games!</button>
-        <button onclick="window.open('snazz.html')">Talk to Random People!</button>
-        <button onclick="window.open('astatinedownload.html')">Astatine .EXE</button>
-        <button onclick="window.open('https://xenon-explorer-b17f42ea.base44.app')">Talk to MaxGPT!</button>
-        <button onclick="window.open('animalhomepage.html')">SAVE EARTH'S ANIMALS!</button>
-        <button onclick="window.open('npppp.html')">NotePad+++</button>
-        <button onclick="window.open('https://www.youtube.com/@Maxplaysalot')">Subscribe to Me!</button>
-        <button onclick="window.open('https://secret-calc-a365ec12.base44.app')">Achievement Fun!</button>
-        <button onclick="window.open('https://learn-sphere-bb0ffdd9.base44.app')">Create Your Own Courses!</button>
-    </div>
+<div class="buttons">
+<button onclick="window.open('Element OS.html')">Element OS</button>
+<button onclick="window.open('Gamers Hub V4.html')">Gamer's Hub</button>
+<button onclick="window.open('TMSswitcherv2.html')">TMS</button>
+<button onclick="window.open('minicraft.html')">Minicraft</button>
+<button onclick="window.open('Blockworld.html')">Block World</button>
+</div>
 </div>
 
+<!-- READ -->
 <div id="read" class="buttons-container" style="display:none;">
-    <div class="buttons">
-        <button onclick="window.open('updatelog.html')">Update Log</button>
-        <button onclick="window.open('info.html')">Information</button>
-        <button onclick="window.open('security.html')">You Are Very Safe</button>
-        <button onclick="window.open('specialthanks.html')">Special People</button>
-    </div>
+<div class="buttons">
+<button onclick="window.open('updatelog.html')">Update Log</button>
+<button onclick="window.open('info.html')">Information</button>
+<button onclick="window.open('security.html')">You Are Very Safe</button>
+<button onclick="window.open('specialthanks.html')">Special People</button>
+</div>
 </div>
 
-<div id="new" class="buttons-container" style="display:none;">
-    <div class="buttons">
-        <!-- All New tab buttons go here (copied from your list) -->
-        <button onclick="window.open('websitepage.html')">Website Page</button>
-        <button onclick="window.open('virus.html')">IDK opens 10000 pages</button>
-        <button onclick="window.open('sneakpeek.html')">Sneakpeek</button>
-        <button onclick="window.open('phpconnecterindex.html')">PHP Broken Crap</button>
-        <button onclick="window.open('note.html')">A Note</button>
-        <button onclick="window.open('nanoconsole.html')">Nano Console Game</button>
-        <button onclick="window.open('maxsearch.html')">Broken Search Engine</button>
-        <button onclick="window.open('a.html')">More Crap</button>
-        <button onclick="window.open('Palledium.html')">Element OS Forgotten</button>
-        <button onclick="window.open('Big Alchemy (1).html')">Big Alchemy 1</button>
-        <button onclick="window.open('Big Alchemy (2).html')">Big Alchemy 2</button>
-        <button onclick="window.open('Big Alchemy.html')">Big Alchemy Original</button>
-        <button onclick="window.open('Blockworld (1).html')">Old Sussy Blockworld</button>
-        <button onclick="window.open('Function Playground.html')">Function Playground</button>
-        <button onclick="window.open('Hub.html')">First Website Hub</button>
-        <button onclick="window.open('Labtest.html')">Lab Test</button>
-        <button onclick="window.open('MARK1.html')">MARK1</button>
-        <button onclick="window.open('MineWorld 0.67.html')">Mineworld 0.67</button>
-        <button onclick="window.open('Mlooket (1).html')">mlooket 1</button>
-        <button onclick="window.open('Mlooket (2).html')">mlooket 2</button>
-        <button onclick="window.open('Mlooket.html')">mlooket</button>
-        <button onclick="window.open('SongSmith 1 (1).html')">songsmith 1 (1)</button>
-        <button onclick="window.open('SongSmith 1.html')">songsmith 1</button>
-        <button onclick="window.open('boba (1).html')">boba1</button>
-        <button onclick="window.open('boba (2).html')">boba2</button>
-        <button onclick="window.open('boba (3).html')">boba3</button>
-        <button onclick="window.open('boba (4).html')">boba4</button>
-        <button onclick="window.open('boba (5).html')">boba5</button>
-        <button onclick="window.open('boba (6).html')">boba newest</button>
-        <button onclick="window.open('boba.html')">FIRST BOBA</button>
-        <button onclick="window.open('brainrot (1).html')">brainrot 2</button>
-        <button onclick="window.open('brainrot.html')">brainrot</button>
-        <button onclick="window.open('broke.html')">broken clicker</button>
-        <button onclick="window.open('codefun_.html')">codefun_</button>
-        <button onclick="window.open('cooltext (1).html')">cooltext1</button>
-        <button onclick="window.open('cooltext (2).html')">cooltext2</button>
-        <button onclick="window.open('cooltext (3).html')">cooltext3</button>
-        <button onclick="window.open('cooltext.html')">cooltext old</button>
-        <button onclick="window.open('crosh_helper.html')">crosh helper!</button>
-        <button onclick="window.open('csstest (1).html')">css test 2</button>
-        <button onclick="window.open('csstest.html')">css test old</button>
-        <button onclick="window.open('csstestnew.html')">newest css test</button>
-        <button onclick="window.open('df.html')">defualt poop</button>
-        <button onclick="window.open('galleryweb.html')">gallery web</button>
-        <button onclick="window.open('html (1).html')">some html file</button>
-        <button onclick="window.open('jsonclean.html')">clean json files</button>
-        <button onclick="window.open('linkswitcher.html')">random link switcher</button>
-        <button onclick="window.open('try1 (1).html')">try2</button>
-        <button onclick="window.open('try1 (2).html')">try3</button>
-        <button onclick="window.open('try1 (3).html')">try4</button>
-        <button onclick="window.open('try1 (4).html')">try5</button>
-        <button onclick="window.open('try1 (5).html')">try6</button>
-        <button onclick="window.open('try1 (6).html')">try7</button>
-        <button onclick="window.open('try1 (7).html')">try8</button>
-        <button onclick="window.open('try1 (8).html')">try9</button>
-        <button onclick="window.open('try1 (9).html')">try10</button>
-        <button onclick="window.open('try1.html')">try1</button>
-        <button onclick="window.open('websitehub.html')">old website hub</button>
-        <button onclick="window.open('websitehubv2.html')">hub 2</button>
-        <button onclick="window.open('websitehubv3.html')">hub 3</button>
-        <button onclick="window.open('websitehubv5.html')">hub 4</button>
-        <button onclick="window.open('websitehubv6.html')">hub 5</button>
-        <button onclick="window.open('websitehubv8.html')">hub 6</button>
-        <button onclick="window.open('xenon x.html')">xenon but BETTER!!!!</button>
-        <button onclick="window.open('secretisabellagirl.html')">dont tell isabella hehe</button>
-    </div>
-</div>
-
+<!-- OTHER -->
 <div id="other" class="buttons-container" style="display:none;">
-    <div class="buttons">
-        <button onclick="window.open('https://isabellalovesit.github.io/isabellalovesit.github.io')">See My Friend Isabella's Site!</button>
-        <button id="verifiedBtn">Verified Members</button>
-    </div>
+<div class="buttons">
+<button onclick="window.open('https://isabellalovesit.github.io/isabellalovesit.github.io')">Isabella's Site</button>
+<button id="verifiedBtn">Verified Members</button>
+</div>
+</div>
+
+<!-- BRAND SECTION -->
+<div class="brand-section">
+<img src="Maxgames.orgfav.png" class="big-favicon">
+
+<h2 class="brand-text">MAX'S GAMES!</h2>
+
+<div class="bottom-buttons">
+<button onclick="window.open('mailto:maxplays494@gmail.com')">Contact Us!</button>
+<button onclick="window.open('play.html')">PLAY</button>
+<button onclick="window.open('Read.html')">READ</button>
+<button onclick="window.open('new.html')">NEW</button>
+</div>
+
+<!-- OUR SITES -->
+<div class="our-sites">
+<h3>OUR SITES!</h3>
+
+<a href="https://maxgames.org/" target="_blank">https://maxgames.org/</a>
+<a href="https://www.maxgames.org/" target="_blank">https://www.maxgames.org/</a>
+<a href="http://maxgames.org/" target="_blank">http://maxgames.org/</a>
+<a href="http://www.maxgames.org/" target="_blank">http://www.maxgames.org/</a>
+
+<a href="https://max-dev444.github.io/maxgames" target="_blank">https://max-dev444.github.io/maxgames</a>
+<a href="https://max-dev444.github.io/" target="_blank">https://max-dev444.github.io/</a>
+<a href="https://max-dev444.github.io/games" target="_blank">https://max-dev444.github.io/games</a>
+<a href="https://max-dev444.github.io/game" target="_blank">https://max-dev444.github.io/game</a>
+<a href="https://max-dev444.github.io/play" target="_blank">https://max-dev444.github.io/play</a>
+<a href="https://max-dev444.github.io/max-games" target="_blank">https://max-dev444.github.io/max-games</a>
+
+<a href="http://max-dev444.github.io/maxgames" target="_blank">http://max-dev444.github.io/maxgames</a>
+<a href="http://max-dev444.github.io/" target="_blank">http://max-dev444.github.io/</a>
+<a href="http://max-dev444.github.io/games" target="_blank">http://max-dev444.github.io/games</a>
+<a href="http://max-dev444.github.io/game" target="_blank">http://max-dev444.github.io/game</a>
+<a href="http://max-dev444.github.io/play" target="_blank">http://max-dev444.github.io/play</a>
+<a href="http://max-dev444.github.io/max-games" target="_blank">http://max-dev444.github.io/max-games</a>
+
+<a href="https://play-ivory-ten.vercel.app/" target="_blank">https://play-ivory-ten.vercel.app/</a>
+<a href="http://play-ivory-ten.vercel.app/" target="_blank">http://play-ivory-ten.vercel.app/</a>
+
+<a href="https://resonant-profiterole-d04172.netlify.app/" target="_blank">https://resonant-profiterole-d04172.netlify.app/</a>
+<a href="http://resonant-profiterole-d04172.netlify.app/" target="_blank">http://resonant-profiterole-d04172.netlify.app/</a>
+
+<a href="https://222.base44.app/" target="_blank">https://222.base44.app/</a>
+<a href="http://222.base44.app/" target="_blank">http://222.base44.app/</a>
+
+<a href="https://dgf.base44.app/" target="_blank">https://dgf.base44.app/</a>
+<a href="http://dgf.base44.app/" target="_blank">http://dgf.base44.app/</a>
+
+<a href="https://124.base44.app/" target="_blank">https://124.base44.app/</a>
+<a href="http://124.base44.app/" target="_blank">http://124.base44.app/</a>
+
+<a href="https://990.base44.app/" target="_blank">https://990.base44.app/</a>
+<a href="http://990.base44.app/" target="_blank">http://990.base44.app/</a>
+
+<a href="https://max-dev444.github.io/max-dev444.github.io" target="_blank">https://max-dev444.github.io/max-dev444.github.io</a>
+<a href="http://max-dev444.github.io/max-dev444.github.io" target="_blank">http://max-dev444.github.io/max-dev444.github.io</a>
+
+<a href="https://maxgames.vercel.app/" target="_blank">https://maxgames.vercel.app/</a>
+<a href="http://maxgames.vercel.app/" target="_blank">http://maxgames.vercel.app/</a>
+
+<a href="https://maxga.netlify.app/" target="_blank">https://maxga.netlify.app/</a>
+<a href="http://maxga.netlify.app/" target="_blank">http://maxga.netlify.app/</a>
+
+<a href="https://maxgames.onrender.com/" target="_blank">https://maxgames.onrender.com/</a>
+<a href="http://maxgames.onrender.com/" target="_blank">http://maxgames.onrender.com/</a>
+
+
+</div>
 </div>
 
 <footer>© 2025 Max — 67!!</footer>
+
 <div id="verifiedPanel">
-    <h3>Verified Members</h3>
-    <ul id="verifiedList"></ul>
+<h3>Verified Members</h3>
+<ul id="verifiedList"></ul>
 </div>
 
-<!-- FIREBASE SDK v8 -->
+<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 <script>
-// TAB FUNCTIONALITY
-const tabs = document.querySelectorAll('.tab');
-const containers = document.querySelectorAll('.buttons-container');
-tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-        tabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        const tabName = tab.getAttribute('data-tab');
-        containers.forEach(c => c.style.display = (c.id === tabName) ? 'grid' : 'none');
-    });
+
+// Tabs
+const tabs=document.querySelectorAll('.tab');
+const containers=document.querySelectorAll('.buttons-container');
+
+tabs.forEach(tab=>{
+tab.onclick=()=>{
+tabs.forEach(t=>t.classList.remove('active'));
+tab.classList.add('active');
+containers.forEach(c=>{
+c.style.display=(c.id===tab.dataset.tab)?'grid':'none';
+});
+};
 });
 
-// VERIFIED MEMBERS FUNCTION
-const firebaseConfig = {
-    apiKey: "AIzaSyC39mabdSddFKYBfPeFiqXEH3vRuW0hBOg",
-    authDomain: "verify-2f72e.firebaseapp.com",
-    projectId: "verify-2f72e",
-    storageBucket: "verify-2f72e.appspot.com",
-    messagingSenderId: "735887684811",
-    appId: "1:735887684811:web:6d6275b949569d0f07974"
+// Firebase verified list
+const firebaseConfig={
+apiKey:"AIzaSyC39mabdSddFKYBfPeFiqXEH3vRuW0hBOg",
+authDomain:"verify-2f72e.firebaseapp.com",
+projectId:"verify-2f72e"
 };
-const verifiedApp = firebase.initializeApp(firebaseConfig,'verifiedApp');
-const db = firebase.firestore(verifiedApp);
 
-document.getElementById('verifiedBtn').onclick = async () => {
-    const panel = document.getElementById("verifiedPanel");
-    if(panel.style.display === 'block'){ panel.style.display='none'; return; }
-    panel.style.display = 'block';
-    const list = document.getElementById("verifiedList");
-    list.innerHTML = "Loading...";
-    try{
-        const snapshot = await db.collection("verifiedEmails").get();
-        list.innerHTML = "";
-        snapshot.forEach(doc => {
-            const li = document.createElement("li");
-            li.textContent = doc.data()?.email || "null@null.com";
-            list.appendChild(li);
-        });
-    }catch(e){
-        console.error(e);
-        list.innerHTML = "<li>Error loading verified members</li>";
-    }
+const app=firebase.initializeApp(firebaseConfig,'verifiedApp');
+const db=firebase.firestore(app);
+
+document.getElementById('verifiedBtn').onclick=async()=>{
+const panel=document.getElementById("verifiedPanel");
+if(panel.style.display==='block'){panel.style.display='none';return;}
+
+panel.style.display='block';
+const list=document.getElementById("verifiedList");
+list.innerHTML="Loading...";
+
+try{
+const snap=await db.collection("verifiedEmails").get();
+list.innerHTML="";
+snap.forEach(doc=>{
+const li=document.createElement("li");
+li.textContent=doc.data()?.email||"null";
+list.appendChild(li);
+});
+}catch(e){
+list.innerHTML="<li>Error loading verified</li>";
+}
 };
+
 </script>
+
 </body>
 </html>
