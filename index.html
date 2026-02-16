@@ -388,7 +388,112 @@ footer{
 </div>
 </div>
 
-<footer>© 2025 Max — 67!!</footer>
+<footer>
+    <!-- GALLERY SECTION -->
+<section id="gallerySection">
+
+<h2 class="gallery-title">🖼️ Maxgames Gallery</h2>
+
+<div class="gallery-grid">
+
+<img src="gallery/img1.png" loading="lazy">
+<img src="gallery/img2.png" loading="lazy">
+<img src="gallery/img3.png" loading="lazy">
+<img src="gallery/img4.png" loading="lazy">
+<img src="gallery/img5.png" loading="lazy">
+<img src="gallery/img6.png" loading="lazy">
+
+</div>
+
+</section>
+
+<style>
+
+#gallerySection{
+    width:100%;
+    max-width:1100px;
+    margin-top:60px;
+    text-align:center;
+}
+
+.gallery-title{
+    font-size:2em;
+    color:#ff77aa;
+    text-shadow:0 0 10px #ff44ff;
+    margin-bottom:25px;
+}
+
+.gallery-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:18px;
+    padding:20px;
+}
+
+.gallery-grid img{
+    width:100%;
+    border-radius:14px;
+    border:2px solid #ff44ff;
+    box-shadow:0 0 15px #ff44ff55;
+    transition:0.3s;
+    cursor:pointer;
+}
+
+.gallery-grid img:hover{
+    transform:scale(1.06);
+    box-shadow:0 0 25px #ff44ff;
+}
+
+/* FULLSCREEN POPUP */
+#galleryPopup{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.85);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:9999;
+}
+
+#galleryPopup img{
+    max-width:90%;
+    max-height:90%;
+    border-radius:15px;
+    box-shadow:0 0 40px #ff44ff;
+    animation:popupFade 0.3s ease;
+}
+
+@keyframes popupFade{
+    from{ transform:scale(0.85); opacity:0; }
+    to{ transform:scale(1); opacity:1; }
+}
+
+</style>
+
+<div id="galleryPopup" onclick="closeGalleryPopup()">
+<img id="popupImage">
+</div>
+
+<script>
+
+document.querySelectorAll(".gallery-grid img").forEach(img=>{
+    img.onclick=()=>{
+        document.getElementById("popupImage").src=img.src;
+        document.getElementById("galleryPopup").style.display="flex";
+    };
+});
+
+function closeGalleryPopup(){
+    document.getElementById("galleryPopup").style.display="none";
+}
+
+</script>
+
+    © 2025 Max — 67!!
+</footer>
 
 <div id="verifiedPanel">
 <h3>Verified Members</h3>
