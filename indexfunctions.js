@@ -91,3 +91,34 @@ window.addEventListener("DOMContentLoaded", () => {
   loadPartial("newButtons.html", "newButtons");
 });
 
+const cursorRed = document.querySelector('.cursor-red');
+const cursorBlue = document.querySelector('.cursor-blue');
+
+let mouseX = 0, mouseY = 0;
+let redX = 0, redY = 0;
+let blueX = 0, blueY = 0;
+
+document.addEventListener('mousemove', e => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+});
+
+function animate() {
+    // Red cursor lags behind
+    redX += (mouseX - redX) * 0.15;
+    redY += (mouseY - redY) * 0.15;
+    cursorRed.style.left = redX + 'px';
+    cursorRed.style.top = redY + 'px';
+
+    // Blue cursor follows faster
+    blueX += (mouseX - blueX) * 0.25;
+    blueY += (mouseY - blueY) * 0.25;
+    cursorBlue.style.left = blueX + 'px';
+    cursorBlue.style.top = blueY + 'px';
+
+    requestAnimationFrame(animate);
+}
+
+animate();
+
+
