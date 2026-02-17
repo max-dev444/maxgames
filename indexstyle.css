@@ -325,14 +325,14 @@ footer{
     color:#ccc;
 }
 
-/* Hide default cursor */
-body {
-    cursor: none;
+/* Hide default cursor everywhere */
+* {
+    cursor: none !important;
 }
 
 /* Custom cursors */
 .cursor-red, .cursor-blue {
-    position: absolute;
+    position: fixed; /* fixed so it follows the viewport */
     border-radius: 50%;
     pointer-events: none;
     transform: translate(-50%, -50%);
