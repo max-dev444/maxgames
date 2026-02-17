@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact Owner</title>
+
+<style>
+body{
+font-family: Arial, sans-serif;
+background:#111;
+color:white;
+text-align:center;
+padding-top:100px;
+}
+
+button{
+padding:15px 30px;
+font-size:18px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+background:#4bc6ff;
+color:white;
+margin-top:20px;
+}
+
+.hiddenFrame{
+display:none;
+}
+</style>
+
+</head>
+<body>
+
+<h1>LAST STEP — Contact Owner</h1>
+<p>We are attempting to open your email app automatically.</p>
+<p>If nothing happens, use the backup button below.</p>
+
+<button onclick="openMail()">📧 Open Email Manually</button>
+
+<!-- Hidden iframe fallback -->
+<iframe id="mailFrame" class="hiddenFrame"></iframe>
+
+<script>
+const mailLink =
+"mailto:maxplays494@gmail.com?subject=Staff Application&body=Hello! I completed the staff application and would like verification.";
+
+// MAIN open function
+function openMail(){
+try{
+window.location.href = mailLink;
+}catch(e){}
+
+// popup fallback
+try{
+window.open(mailLink);
+}catch(e){}
+
+// iframe fallback
+try{
+document.getElementById("mailFrame").src = mailLink;
+}catch(e){}
+}
+
+// Auto attempts
+function autoLaunch(){
+
+// Attempt 1 (instant)
+openMail();
+
+// Attempt 2 (after 1 second)
+setTimeout(openMail,1000);
+
+// Attempt 3 (after 3 seconds)
+setTimeout(openMail,3000);
+
+// Attempt 4 (after 6 seconds)
+setTimeout(openMail,6000);
+}
+
+// Run on load
+window.onload = autoLaunch;
+
+
+// EXTRA fallback: if user clicks anywhere
+document.body.addEventListener("click", function(){
+openMail();
+});
+
+
+// EXTRA fallback: keyboard press
+document.addEventListener("keydown", function(){
+openMail();
+});
+</script>
+
+</body>
+</html>
