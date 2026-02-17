@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apply For Staff</title>
+
+<style>
+body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, Helvetica, sans-serif;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: white;
+}
+
+.container {
+    text-align: center;
+    padding: 50px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 20px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 0 40px rgba(0,0,0,0.6);
+    max-width: 600px;
+}
+
+h1 {
+    margin-bottom: 15px;
+    font-size: 32px;
+}
+
+p {
+    opacity: 0.8;
+    margin-bottom: 35px;
+}
+
+.button-panel {
+    display: flex;
+    gap: 35px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.apply-btn {
+    padding: 20px 50px;
+    font-size: 20px;
+    font-weight: bold;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    color: white;
+    transition: 0.3s ease;
+}
+
+/* Admin */
+.admin-btn {
+    background: linear-gradient(45deg, #ff4b4b, #ff7b7b);
+    box-shadow: 0 0 20px rgba(255,75,75,0.6);
+}
+
+.admin-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 35px rgba(255,75,75,1);
+}
+
+/* Tester */
+.tester-btn {
+    background: linear-gradient(45deg, #4bc6ff, #7bdcff);
+    box-shadow: 0 0 20px rgba(75,198,255,0.6);
+}
+
+.tester-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 35px rgba(75,198,255,1);
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>Apply For Staff</h1>
+    <p>Select which role you want to apply for.</p>
+
+    <div class="button-panel">
+        <button class="apply-btn admin-btn" onclick="location.href='admin.html'">
+            👑 Apply For Admin
+        </button>
+
+        <button class="apply-btn tester-btn" onclick="location.href='tester.html'">
+            🧪 Apply For Tester
+        </button>
+    </div>
+</div>
+
+</body>
+</html>
