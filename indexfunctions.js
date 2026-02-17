@@ -78,3 +78,16 @@ function nextFeaturedGameFooter(){
 currentIndex = (currentIndex + 1) % featuredGames.length;
 document.getElementById("gameFrameFooter").src = featuredGames[currentIndex];
 }
+
+function loadPartial(file, elementId) {
+  fetch(file)
+    .then(res => res.text())
+    .then(data => {
+      document.getElementById(elementId).innerHTML = data;
+    });
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  loadPartial("newButtons.html", "newButtons");
+});
+
