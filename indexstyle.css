@@ -324,3 +324,33 @@ footer{
     margin-bottom:10px;
     color:#ccc;
 }
+
+/* Hide default cursor */
+body {
+    cursor: none;
+}
+
+/* Custom cursors */
+.cursor-red, .cursor-blue {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    mix-blend-mode: difference;
+    z-index: 9999;
+}
+
+/* Red cursor */
+.cursor-red {
+    width: 20px;
+    height: 20px;
+    background: #ff3c78;
+}
+
+/* Blue cursor */
+.cursor-blue {
+    width: 14px;
+    height: 14px;
+    background: #00d4ff;
+}
+
