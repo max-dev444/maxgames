@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Contact Owner</title>
+<title>Final Step — Contact Owner</title>
 
 <style>
 body{
@@ -11,7 +11,15 @@ font-family: Arial, sans-serif;
 background:#111;
 color:white;
 text-align:center;
-padding-top:100px;
+padding:60px;
+}
+
+.box{
+max-width:600px;
+margin:auto;
+background:rgba(255,255,255,0.08);
+padding:30px;
+border-radius:15px;
 }
 
 button{
@@ -25,7 +33,15 @@ color:white;
 margin-top:20px;
 }
 
-.hiddenFrame{
+pre{
+background:#000;
+padding:15px;
+border-radius:10px;
+text-align:left;
+overflow:auto;
+}
+
+iframe{
 display:none;
 }
 </style>
@@ -33,66 +49,123 @@ display:none;
 </head>
 <body>
 
-<h1>LAST STEP — Contact Owner</h1>
-<p>We are attempting to open your email app automatically.</p>
-<p>If nothing happens, use the backup button below.</p>
+<div class="box">
 
-<button onclick="openMail()">📧 Open Email Manually</button>
+<h1>✅ LAST STEP</h1>
+<p>Your application info will be sent to the owner.</p>
 
-<!-- Hidden iframe fallback -->
-<iframe id="mailFrame" class="hiddenFrame"></iframe>
+<h3>Preview Of Data Being Sent:</h3>
+<pre id="preview"></pre>
+
+<button onclick="openMail()">📧 Send Application Email</button>
+
+<p>If your email app does not open, click the button again.</p>
+
+</div>
+
+<iframe id="mailFrame"></iframe>
 
 <script>
-const mailLink =
-"mailto:maxplays494@gmail.com?subject=Staff Application&body=Hello! I completed the staff application and would like verification.";
 
-// MAIN open function
+// ===== GET SAVED DATA =====
+function getData(){
+
+return {
+type: localStorage.getItem("applyType") || "Unknown",
+first: localStorage.getItem("first") || "",
+last: localStorage.getItem("last") || "",
+email: localStorage.getItem("email") || "",
+reason: localStorage.getItem("reason") || ""
+};
+
+}
+
+
+// ===== BUILD EMAIL =====
+function buildEmail(){
+
+let d = getData();
+
+let body = 
+`STAFF APPLICATION
+
+Application Type: ${d.type}
+
+First Name: ${d.first}
+Last Name: ${d.last}
+Applicant Email: ${d.email}
+
+Reason:
+${d.reason}
+`;
+
+return {
+mailto:
+"mailto:maxplays494@gmail.com" +
+"?subject=" + encodeURIComponent("Staff Application - " + d.type) +
+"&body=" + encodeURIComponent(body),
+
+preview: body
+};
+
+}
+
+
+// ===== SHOW PREVIEW =====
+function showPreview(){
+let email = buildEmail();
+document.getElementById("preview").textContent = email.preview;
+}
+
+
+// ===== OPEN EMAIL WITH FALLBACKS =====
 function openMail(){
+
+let email = buildEmail();
+let link = email.mailto;
+
+// Method 1
 try{
-window.location.href = mailLink;
+window.location.href = link;
 }catch(e){}
 
-// popup fallback
+// Method 2
 try{
-window.open(mailLink);
+window.open(link);
 }catch(e){}
 
-// iframe fallback
+// Method 3 iframe fallback
 try{
-document.getElementById("mailFrame").src = mailLink;
+document.getElementById("mailFrame").src = link;
 }catch(e){}
 }
 
-// Auto attempts
-function autoLaunch(){
 
-// Attempt 1 (instant)
+// ===== AUTO ATTEMPTS =====
+function autoSend(){
+
 openMail();
 
-// Attempt 2 (after 1 second)
-setTimeout(openMail,1000);
-
-// Attempt 3 (after 3 seconds)
-setTimeout(openMail,3000);
-
-// Attempt 4 (after 6 seconds)
+setTimeout(openMail,1500);
+setTimeout(openMail,3500);
 setTimeout(openMail,6000);
+
 }
 
-// Run on load
-window.onload = autoLaunch;
+
+// ===== EXTRA FALLBACKS =====
+
+// user click anywhere
+document.body.addEventListener("click", openMail);
+
+// keyboard press
+document.addEventListener("keydown", openMail);
 
 
-// EXTRA fallback: if user clicks anywhere
-document.body.addEventListener("click", function(){
-openMail();
-});
+// ===== INIT =====
+showPreview();
+window.onload = autoSend;
 
-
-// EXTRA fallback: keyboard press
-document.addEventListener("keydown", function(){
-openMail();
-});
 </script>
 
 </body>
