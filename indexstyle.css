@@ -1,0 +1,326 @@
+body {
+    margin: 0;
+    font-family: Verdana, sans-serif;
+    background: linear-gradient(135deg,#0f0f0f,#1a1a1a);
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+h1 {
+    margin-top: 40px;
+    font-size: 3em;
+    color: #f44;
+    text-shadow: 0 0 10px #ff77aa, 0 0 20px #ff44ff;
+    animation: pulse 2s infinite;
+}
+@keyframes pulse {
+    0%,100% { text-shadow: 0 0 10px #ff77aa, 0 0 20px #ff44ff; }
+    50% { text-shadow: 0 0 20px #ff44ff, 0 0 40px #ff00ff; }
+}
+
+.subtitle { 
+    font-size: 1.2em; color: #f77; margin-bottom: 30px;
+    text-shadow: 0 0 8px #ff77aa;
+}
+
+.tabs { display:flex; flex-wrap:wrap; justify-content:center; }
+.tab {
+    padding:10px 20px;
+    margin:5px;
+    background:#222;
+    border:2px solid #f44;
+    border-radius:8px;
+    cursor:pointer;
+    box-shadow:0 0 8px #f44;
+}
+.tab:hover,.tab.active{
+    background:#f44;
+    color:#000;
+}
+
+.buttons {
+    display:grid;
+    grid-template-columns: repeat(5,1fr);
+    gap:8px;
+    margin-bottom:50px;
+}
+
+button{
+    padding:10px;
+    background:#222;
+    color:#fff;
+    border:2px solid #f44;
+    border-radius:10px;
+    cursor:pointer;
+    box-shadow:0 0 10px #f44;
+}
+button:hover{
+    background:#f44;
+    color:#000;
+    transform:scale(1.05);
+}
+
+.brand-section{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    margin-top:40px;
+    margin-bottom:40px;
+    text-align:center;
+}
+
+.big-favicon{
+    width:220px;
+    height:220px;
+    object-fit:contain;
+    filter: drop-shadow(0 0 20px #ff44ff)
+            drop-shadow(0 0 40px #ff77aa)
+            drop-shadow(0 0 60px #ff00ff);
+    animation: logoGlow 3s infinite alternate ease-in-out;
+}
+@keyframes logoGlow{
+    from{ transform:scale(1); }
+    to{ transform:scale(1.05); }
+}
+
+.brand-text{
+    margin-top:15px;
+    font-size:2em;
+    color:#ff77aa;
+    text-shadow:0 0 10px #ff44ff, 0 0 25px #ff00ff;
+}
+
+.bottom-buttons{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    justify-content:center;
+    margin-top:15px;
+}
+
+.bottom-buttons button{
+    padding:12px 22px;
+    font-size:1.05em;
+    border-radius:12px;
+    border:2px solid #ff44ff;
+    background:#222;
+    color:white;
+    cursor:pointer;
+    box-shadow:0 0 15px #ff44ff;
+    transition:0.25s;
+}
+
+.bottom-buttons button:hover{
+    background:#ff44ff;
+    color:black;
+    transform:scale(1.08);
+}
+
+.our-sites{
+    margin-top:40px;
+    text-align:center;
+    max-width:800px;
+}
+
+.our-sites h3{
+    color:#ff77aa;
+    text-shadow:0 0 10px #ff44ff;
+}
+
+.our-sites a{
+    display:block;
+    color:#ccc;
+    margin:4px 0;
+    text-decoration:none;
+    transition:0.2s;
+}
+
+.our-sites a:hover{
+    color:#ff77aa;
+    text-shadow:0 0 8px #ff44ff;
+}
+
+#verifiedPanel {
+    display:none;
+    position:fixed;
+    bottom:40px;
+    right:20px;
+    background:#222;
+    padding:15px;
+    border-radius:10px;
+    max-height:250px;
+    overflow:auto;
+    width:250px;
+}
+
+footer{
+    margin-top:auto;
+    margin-bottom:20px;
+    color:#888;
+}
+
+/* Gallery Section */
+#gallerySection{
+    width:100%;
+    max-width:1100px;
+    margin-top:60px;
+    text-align:center;
+}
+
+.gallery-title{
+    font-size:2em;
+    color:#ff77aa;
+    text-shadow:0 0 10px #ff44ff;
+    margin-bottom:25px;
+}
+
+.gallery-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:18px;
+    padding:20px;
+}
+
+.gallery-grid img{
+    width:100%;
+    border-radius:14px;
+    border:2px solid #ff44ff;
+    box-shadow:0 0 15px #ff44ff55;
+    transition:0.3s;
+    cursor:pointer;
+}
+
+.gallery-grid img:hover{
+    transform:scale(1.06);
+    box-shadow:0 0 25px #ff44ff;
+}
+
+#galleryPopup{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.85);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:9999;
+}
+
+#galleryPopup img{
+    max-width:90%;
+    max-height:90%;
+    border-radius:15px;
+    box-shadow:0 0 40px #ff44ff;
+    animation:popupFade 0.3s ease;
+}
+
+@keyframes popupFade{
+    from{ transform:scale(0.85); opacity:0; }
+    to{ transform:scale(1); opacity:1; }
+}
+
+/* Featured Games */
+#featuredGamesFooter{
+    width:100%;
+    max-width:1400px;
+    text-align:center;
+    margin-top:60px;
+    margin-bottom:60px;
+}
+
+#featuredGamesFooter .game-title{
+    font-size:2.5em;
+    color:#ff77aa;
+    text-shadow:0 0 12px #ff44ff;
+    margin-bottom:25px;
+}
+
+#featuredGamesFooter .game-box{
+    width:100%;
+    height:700px;
+    border:3px solid #ff44ff;
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:0 0 35px #ff44ff55;
+}
+
+#featuredGamesFooter .game-box iframe{
+    width:100%;
+    height:100%;
+    border:none;
+}
+
+#featuredGamesFooter .game-next{
+    margin-top:25px;
+    padding:15px 30px;
+    font-size:1.3em;
+    border-radius:14px;
+    border:3px solid #ff44ff;
+    background:#222;
+    color:white;
+    cursor:pointer;
+    box-shadow:0 0 20px #ff44ff;
+    transition:0.25s;
+}
+
+#featuredGamesFooter .game-next:hover{
+    background:#ff44ff;
+    color:black;
+}
+
+/* Learn Cards */
+#learnCardsFooter{
+    width:100%;
+    max-width:1200px;
+    margin:50px auto;
+    text-align:center;
+}
+
+.learn-title{
+    font-size:2.5em;
+    color:#ff77aa;
+    text-shadow:0 0 12px #ff44ff;
+    margin-bottom:30px;
+}
+
+.learn-cards{
+    display:flex;
+    gap:25px;
+    flex-wrap:wrap;
+    justify-content:center;
+}
+
+.learn-cards .card{
+    background:#222;
+    border:2px solid #ff44ff;
+    border-radius:16px;
+    padding:25px;
+    width:350px;
+    box-shadow:0 0 25px #ff44ff55;
+    transition:0.3s;
+    text-align:left;
+}
+
+.learn-cards .card:hover{
+    transform:translateY(-5px);
+    box-shadow:0 0 40px #ff44ff;
+}
+
+.learn-cards .card h3{
+    color:#ff77aa;
+    margin-bottom:15px;
+    text-shadow:0 0 10px #ff44ff;
+    font-size:1.3em;
+}
+
+.learn-cards .card p{
+    font-size:0.95em;
+    line-height:1.5em;
+    margin-bottom:10px;
+    color:#ccc;
+}
