@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Tester Application</title>
+
+<style>
+body{
+font-family: Arial;
+background:#1e3c72;
+color:white;
+text-align:center;
+padding:40px;
+}
+
+.container{
+background:rgba(255,255,255,0.1);
+padding:30px;
+border-radius:15px;
+max-width:600px;
+margin:auto;
+}
+
+input{
+padding:10px;
+margin:10px;
+width:80%;
+border-radius:8px;
+border:none;
+}
+
+canvas{
+background:white;
+border-radius:8px;
+margin:15px;
+}
+
+button{
+padding:15px 30px;
+border:none;
+border-radius:10px;
+font-size:18px;
+cursor:pointer;
+background:#4bc6ff;
+color:white;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h1>Tester Application</h1>
+
+<input placeholder="First Name" id="first">
+<input placeholder="Last Name" id="last">
+<input placeholder="Email" id="email">
+
+<h3>Captcha</h3>
+<canvas id="captchaCanvas" width="200" height="80"></canvas>
+<br>
+<input placeholder="Enter captcha" id="captchaInput">
+
+<br>
+<button onclick="checkCaptcha()">Finish</button>
+
+<div id="final" style="display:none;">
+<h2>LAST STEP!</h2>
+<button onclick="location.href='contact-for-staff.html'">
+Send Email To Verify Application
+</button>
+</div>
+
+</div>
+
+<script>
+let captchaText="";
+
+function generateCaptcha(){
+const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789abcdefghijklmnopqrstuvwxyz`~@#$%^&*()-_=+{[}]";
+captchaText="";
+for(let i=0;i<6;i++){
+captchaText+=chars[Math.floor(Math.random()*chars.length)];
+}
+
+const canvas=document.getElementById("captchaCanvas");
+const ctx=canvas.getContext("2d");
+
+ctx.clearRect(0,0,200,80);
+ctx.fillStyle="white";
+ctx.fillRect(0,0,200,80);
+
+// random lines
+for(let i=0;i<8;i++){
+ctx.strokeStyle="rgba(0,0,0,0.2)";
+ctx.beginPath();
+ctx.moveTo(Math.random()*200,Math.random()*80);
+ctx.lineTo(Math.random()*200,Math.random()*80);
+ctx.stroke();
+}
+
+// draw text distorted
+for(let i=0;i<captchaText.length;i++){
+ctx.font="30px Arial";
+ctx.fillStyle="black";
+
+let x=30*i+15;
+let y=40+Math.random()*20;
+
+ctx.save();
+ctx.translate(x,y);
+ctx.rotate((Math.random()-0.5)*0.6);
+ctx.fillText(captchaText[i],0,0);
+ctx.restore();
+}
+}
+
+function checkCaptcha(){
+let val=document.getElementById("captchaInput").value.toUpperCase();
+
+if(val===captchaText){
+document.getElementById("final").style.display="block";
+}else{
+alert("Captcha wrong!");
+generateCaptcha();
+}
+}
+
+generateCaptcha();
+</script>
+
+</body>
+</html>
