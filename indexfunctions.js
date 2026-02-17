@@ -91,38 +91,4 @@ window.addEventListener("DOMContentLoaded", () => {
   loadPartial("newButtons.html", "newButtons");
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-    const cursorRed = document.querySelector('.cursor-red');
-    const cursorBlue = document.querySelector('.cursor-blue');
-
-    if (!cursorRed || !cursorBlue) return; // safety check
-
-    let mouseX = window.innerWidth / 2;
-    let mouseY = window.innerHeight / 2;
-    let redX = mouseX, redY = mouseY;
-    let blueX = mouseX, blueY = mouseY;
-
-    document.addEventListener('mousemove', e => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-    });
-
-    function animate() {
-        // Smooth lag for red
-        redX += (mouseX - redX) * 0.15;
-        redY += (mouseY - redY) * 0.15;
-        cursorRed.style.left = redX + 'px';
-        cursorRed.style.top = redY + 'px';
-
-        // Blue slightly faster
-        blueX += (mouseX - blueX) * 0.25;
-        blueY += (mouseY - blueY) * 0.25;
-        cursorBlue.style.left = blueX + 'px';
-        cursorBlue.style.top = blueY + 'px';
-
-        requestAnimationFrame(animate);
-    }
-
-    animate();
-});
 
