@@ -324,3 +324,21 @@ footer{
     margin-bottom:10px;
     color:#ccc;
 }
+
+.mobile-mode .tabs {
+  flex-direction: column;
+}
+
+.mobile-mode button {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.mobile-mode iframe {
+  width: 100% !important;
+  height: auto !important;
+}
+
+.mobile-mode .footer-links {
+  flex-direction: column;
+}
