@@ -91,4 +91,16 @@ window.addEventListener("DOMContentLoaded", () => {
   loadPartial("newButtons.html", "newButtons");
 });
 
+<script>
+function toggleMobileMode() {
+  document.body.classList.toggle("mobile-mode");
+  localStorage.setItem("mobileMode", document.body.classList.contains("mobile-mode"));
+}
+
+window.onload = function() {
+  if (localStorage.getItem("mobileMode") === "true") {
+    document.body.classList.add("mobile-mode");
+  }
+}
+</script>
 
