@@ -119,28 +119,57 @@ button:hover{
     transform:scale(1.08);
 }
 
+/* =========================
+   SITES SECTION (SIDE BY SIDE)
+========================= */
+
+.sites-wrapper{
+    width:100%;
+    max-width:1400px;
+    margin:60px auto;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:40px;
+    padding:0 20px;
+}
+
 .our-sites{
-    margin-top:40px;
+    background:#111;
+    padding:30px;
+    border-radius:16px;
+    border:2px solid #ff44ff33;
+    box-shadow:0 0 25px #ff44ff22;
     text-align:center;
-    max-width:800px;
+    align-self:start;
+    max-height:700px;
+    overflow:auto;
 }
 
 .our-sites h3{
     color:#ff77aa;
-    text-shadow:0 0 10px #ff44ff;
+    margin-bottom:20px;
+    font-size:1.6em;
+    text-shadow:0 0 12px #ff44ff;
 }
 
 .our-sites a{
     display:block;
+    margin:6px 0;
     color:#ccc;
-    margin:4px 0;
     text-decoration:none;
+    font-size:0.95em;
     transition:0.2s;
 }
 
 .our-sites a:hover{
     color:#ff77aa;
     text-shadow:0 0 8px #ff44ff;
+}
+
+@media (max-width:900px){
+    .sites-wrapper{
+        grid-template-columns:1fr;
+    }
 }
 
 #verifiedPanel {
