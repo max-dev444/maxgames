@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maxman Comics</title>
+  <style>
+    :root{--ink:#17152b;--paper:#fff8e9;--yellow:#ffd43b;--red:#ed3d35;--blue:#2364dc}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Trebuchet MS",Arial,sans-serif}
+    .top-strip{padding:8px 16px;text-align:center;background:var(--yellow);border-bottom:3px solid var(--ink);font-size:.78rem;font-weight:900;letter-spacing:2px;text-transform:uppercase}
+    header{background:var(--red);color:white;border-bottom:5px solid var(--ink);padding:20px clamp(18px,5vw,70px)}
+    .nav{max-width:1100px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+    .logo{font-size:clamp(1.7rem,4vw,2.7rem);font-weight:1000;letter-spacing:-2px;line-height:.9;text-transform:uppercase;text-shadow:3px 3px 0 var(--ink)}.logo span{color:var(--yellow)}
+    .nav-links{display:flex;gap:10px;flex-wrap:wrap}button,.comic-link{border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink);padding:11px 17px;font:inherit;font-weight:900;text-transform:uppercase;text-decoration:none;display:inline-block;transition:transform .12s,box-shadow .12s}
+    button{cursor:pointer;background:white;color:var(--ink)}button:hover,.comic-link:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink)}.nav-links button.active{background:var(--yellow)}
+    main{max-width:1100px;margin:auto;padding:34px 20px 60px}.page{display:none}.page.active{display:block;animation:pop .2s ease-out}@keyframes pop{from{opacity:.5;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+    .hero{padding:clamp(28px,6vw,64px);background:var(--blue);color:white;border:4px solid var(--ink);box-shadow:8px 8px 0 var(--ink);position:relative;overflow:hidden}.hero:after{content:"";position:absolute;right:-40px;top:-40px;width:200px;height:200px;background:radial-gradient(var(--yellow) 2px,transparent 3px);background-size:18px 18px;transform:rotate(10deg)}
+    h1{position:relative;z-index:1;font-size:clamp(2.8rem,8vw,6rem);line-height:.92;letter-spacing:-3px;text-transform:uppercase;margin:0;text-shadow:5px 5px 0 var(--ink)}h1 span{color:var(--yellow)}.hero p{position:relative;z-index:1;font-size:1.1rem;line-height:1.6;max-width:550px}
+    .section-head{margin:0 0 22px}.tag{color:var(--red);font-size:.8rem;font-weight:1000;letter-spacing:1px;text-transform:uppercase}h2{font-size:clamp(2rem,5vw,3rem);text-transform:uppercase;letter-spacing:-1px;margin:8px 0 0}
+    .news-item,.comic-card{background:white;border:3px solid var(--ink);box-shadow:5px 5px 0 var(--ink);padding:24px}.date{color:var(--red);font-size:.8rem;font-weight:1000;letter-spacing:1px}.news-item h3,.comic-card h3{font-size:1.5rem;text-transform:uppercase;margin:10px 0}.news-item p,.comic-card p{line-height:1.5;margin-bottom:0}
+    .comic-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+    .characters-tools{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;align-items:center}
+    .character-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+    .character-card{background:white;border:3px solid var(--ink);box-shadow:5px 5px 0 var(--ink);padding:20px;display:flex;flex-direction:column;gap:12px}
+    .character-card label{font-size:.8rem;font-weight:1000;text-transform:uppercase;letter-spacing:.6px}
+    .character-card input,.character-card textarea{width:100%;border:2px solid var(--ink);padding:10px;font:inherit;color:var(--ink);background:#fffdf7}
+    .character-card textarea{min-height:100px;resize:vertical}
+    .character-card input:focus,.character-card textarea:focus{outline:3px solid var(--yellow);outline-offset:1px}
+    .character-card .character-title{margin:0;text-transform:uppercase;font-size:1.2rem}
+    .secondary-button{background:#a7e8d3}
+    .save-note{font-size:.9rem;font-weight:bold;align-self:center}
+    @media(max-width:650px){.character-list{grid-template-columns:1fr}}.comic-card{min-height:240px;display:flex;flex-direction:column;justify-content:space-between}.comic-art{display:grid;place-items:center;min-height:105px;margin:-24px -24px 20px;border-bottom:3px solid var(--ink);background:var(--yellow);font-size:clamp(1.8rem,4vw,3rem);font-weight:1000;text-align:center;text-shadow:2px 2px 0 white}.comic-card:nth-child(2) .comic-art{background:#a7e8d3}.comic-card h3{margin-top:0}.comic-link{align-self:flex-start;margin-top:20px;background:var(--yellow);color:var(--ink)}.wip{cursor:default}.wip:hover{transform:none;box-shadow:5px 5px 0 var(--ink)}
+    footer{background:var(--ink);color:white;text-align:center;padding:26px 18px;font-weight:bold}footer span{color:var(--yellow)}
+    @media(max-width:650px){.comic-grid{grid-template-columns:1fr}.nav{align-items:flex-start}.nav-links{width:100%}.nav-links button{flex:1}}
+  </style>
+</head>
+<body>
+  <div class="top-strip">Pow! Bam! Welcome to the Maxman universe!</div>
+  <header><nav class="nav" aria-label="Main navigation">
+    <div class="logo">MAXMAN <span>COMICS</span></div>
+    <div class="nav-links">
+      <button class="active" data-page="home">Home</button>
+      <button data-page="news">News</button>
+      <button data-page="comics">Comics</button>
+      <button data-page="characters">Characters</button>
+    </div>
+  </nav></header>
+  <main>
+    <section id="home" class="page active">
+      <div class="hero"><h1>MAXMAN<br><span>COMICS!</span></h1><p>Welcome to Maxman Comics. Choose News for the latest update or Comics to explore the collection.</p></div>
+    </section>
+    <section id="news" class="page">
+      <div class="section-head"><span class="tag">Maxman Comics HQ</span><h2>News</h2></div>
+      <article class="news-item"><div class="date">OCTOBER 28, 2026</div><h3>Work in Progress</h3><p>The Maxman Comics website is a work in progress.</p></article>
+    </section>
+    <section id="comics" class="page">
+      <div class="section-head"><span class="tag">The collection</span><h2>Comics</h2></div>
+      <div class="comic-grid">
+        <article class="comic-card" aria-label="Secret Stories number 1, work in progress">
+          <div><div class="comic-art">SECRET<br>STORIES #1</div><h3>Secret Stories #1 - W.I.P.</h3></div>
+          <span class="comic-link wip" aria-disabled="true">Work in Progress</span>
+        </article>
+        <article class="comic-card">
+          <div><div class="comic-art">OLD<br>MAXMAN!</div><h3>Old Maxman Comic Run</h3></div>
+          <a class="comic-link" href="oc.html">Open Old Maxman Comic Run →</a>
+        </article>
+      </div>
+    </section>
+    <section id="characters" class="page">
+      <div class="section-head"><span class="tag">Meet the cast</span><h2>Characters</h2></div>
+      <p>CHARECTERS FROM THE MAXMAN STRIPS, ANTHOLOGIES, AND MORE!</p>
+      <div class="character-list">
+      
+        <article class="character-card">
+          <h3 class="character-title">Maxman</h3>
+          <p><strong>Name:</strong><  maxman!!!</p>
+          <p><strong>Description:</strong> A superhero who might not be the most intimidating but has the best powers!</p>
+        </article>
+
+        <article class="character-card">
+          <h3 class="character-title">Cosmotron!</h3>
+          <p><strong>Name:</strong> Cosmotron!</p>
+          <p><strong>Description:</strong> He's a evil, malicious giant from the planet X-98!!!</p>
+        </article>
+        
+        <article class="character-card">
+          <h3 class="character-title">Mr. Morgan</h3>
+          <p><strong>Name:</strong> Mr. Morgan</p>
+          <p><strong>Description:</strong> A secret agent and detective who always wears full black!</p>
+        </article>
+
+               <article class="character-card">
+          <h3 class="character-title">Puberman</h3>
+          <p><strong>Name:</strong> PUBERMAN!</p>
+          <p><strong>Description:</strong> A pink-skinned creature who can use his stretchy arms to sqeeze through doors! He can also form acid portals with his mind!</p>
+        </article>
+      </div>
+    </section>
+  </main>
+  <footer>Made for comic fans · <span>MAXMAN COMICS</span></footer>
+  <script>
+    const pages = document.querySelectorAll('.page');
+    function showPage(id){
+      pages.forEach(page=>page.classList.toggle('active',page.id===id));
+      document.querySelectorAll('.nav-links button').forEach(button=>button.classList.toggle('active',button.dataset.page===id));
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+    document.querySelectorAll('[data-page]').forEach(button=>button.addEventListener('click',()=>showPage(button.dataset.page)));
+
+
+  </script>
+</body>
+</html>
